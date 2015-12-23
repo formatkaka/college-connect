@@ -1,0 +1,19 @@
+from marshmallow import fields, Schema
+
+class UserInfoSchema(Schema):
+	# rollno = fields.Str()
+	name = fields.Str()
+	email = fields.Email()
+	dob = fields.DateTime()
+	mobno = fields.Int()
+
+
+info_schema = UserInfoSchema()
+
+# class UserSchema(Schema):
+# name = fields.Str()
+# email = fields.Email()
+# created_at = fields.DateTime()
+# @post_load
+# def make_user(self, data):
+# return User(**data)
