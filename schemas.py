@@ -1,7 +1,7 @@
 from marshmallow import fields, Schema
 
 
-class UserInfoSchema(Schema):
+class UserInfoSchema_Request(Schema):
 	rollno = fields.Str()
 	name = fields.Str()
 	email = fields.Email()
@@ -9,12 +9,21 @@ class UserInfoSchema(Schema):
 	mobno = fields.Int()
 
 
-class ClubRegSchema(Schema):
+class ClubRegSchema_Request(Schema):
 	name = fields.Str()
 	about = fields.Str()
 
+class ContactSchema_Request(Schema):
+	contactname = fields.Str()
+	contactnumber = fields.Int()
 
-class EventRegSchema(Schema):
+class OrganisedBySchema_Request(Schema):
+	club_by_id = fields.Int()
+
+class OrganisedForSchema_Request(Schema):
+	clubs_for_id = fields.Int()
+
+class EventRegSchema_Request(Schema):
 	name = fields.Str()
 	about = fields.Str()
 	sdate = fields.DateTime()
@@ -23,22 +32,21 @@ class EventRegSchema(Schema):
 	etime = fields.DateTime()
 	seats = fields.Int()
 	venue = fields.Str()
-	contacts = fields.Nested(ContactSchema, many=True)
+	organised_by = fields.Nested(OrganisedBySchema_Request, many=True)
+	organised_for = fields.Nested(OrganisedForSchema_Request, many=True)
+	contacts = fields.Nested(ContactSchema_Request, many=True)
 
-class ContactSchema(Schema):
-	contactname = fields.Str()
-	contactnumber = fields.Int()
 
-class AdminSchema(Schema):
+class AdminSchema_Request(Schema):
 	rollno = fields.Str()
 	clubname = fields.Str()
 	club_id = fields.Int()
 
 
 
-event_schema = EventRegSchema()
-club_schema = ClubRegSchema()
-info_schema = UserInfoSchema()
+event_schema = EventRegSchema_Request()
+club_schema = ClubRegSchema_Request()
+info_schema = UserInfoSchema_Request()
 # class UserSchema(Schema):
 # name = fields.Str()
 # email = fields.Email()

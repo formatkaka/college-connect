@@ -3,6 +3,8 @@ from config import *
 from models import *
 
 from schemas import *
+from opschemas import *
+
 
 class UserRegistration(Resource):
 	""" API to register a new user or obtain token for a user"""
@@ -23,7 +25,12 @@ class UserRegistration(Resource):
 		if UserReg.if_username_unique(username):							# Check if the username is unique.If unique , register the user
 			user = UserReg.register_user(username,password_hash)			# and return the auth token generated fot the user with its id
 			token = user.gen_auth_token()
-			return jsonify({"token":token})
+			
+			op = UserReg_class(200,user.userName,token)
+			result = userreg_schema.dump(op)
+
+
+			return result.data
 
 		elif not UserReg.if_username_unique(username) :					# Return error if username not unique
 			return jsonify({"Status":"Username not unique"})
@@ -36,6 +43,9 @@ class UserRegistration(Resource):
 
 		if user.check_password_hash(user.password_hash):
 			return jsonify({"Token":user.gen_auth_token()})
+
+
+arr = ["info","clubs","events"]
 
 class UserInformation(Resource):
 	""" API to POST and GET user info """
@@ -65,13 +75,35 @@ class UserInformation(Resource):
 	def get(self):
 		user = get_current_user()
 		if user:
-			info = get_user_info(user)
-			return jsonify({"name":info.fullName,"rollno":info.rollNo,"mobno":info.mobNo,"email":info.emailId})
+			# if s in arr:
+			# 	if s == arr[0]:
+
+			# 		info = get_user_info(user)
+			# 		op = UserInfo_P_class(200,info.fullName,info.rollNo,info.emailId,info.mobNo)
+			# 		result = userinfo_p_schema.dump(op)
+			# 		return result.data
+
+			# 	elif s == arr[1]:
+					
+				myclubs = get_user_club(user)
+				op = Nested_Output(200,myclubs)
+				result = userinfo_c_schema.dump(op)
+				return result.data
+					# for item in myclubs:
+					# 	op.my_arr.append(item)
+
+
+				# elif s == arr[2]:
+				# 	pass
+
+			# else :
+			# 	return jsonify({"Status":'Invalid request'})
 		else :
 			return jsonify({"Status":"Invalid"})
 
 
-
+class UserClub:
+	pass
 
 
 class EventRegistration(Resource):
@@ -83,16 +115,32 @@ class EventRegistration(Resource):
 			if errors :
 				return jsonify(errors)
 			else :
+				event = EventsReg.register_one(data['name'],data['about'],
+											   data['sdate'],
+											   data['edate'],
+											   data['stime'],
+											   data['etime'],
+											   data['seats'])
+				if user_is_admin(user):
+					event.verified = True
+				elif not user_is_admin(admin):
+					event.verified = False
+				else :
+					return jsonify({"Status":"Some error occured"})
 
-
+				event.add_contacts(data['contacts'])
+					
 
 		else :
 			return jsonify({"Status":"Unauthorized access"})
-	
 
-api.add_resource(UserRegistration,'/')
-api.add_resource(UserInformation,'/info')
+
+
+api.add_resource(UserRegistration,'/api/user/reg')
+api.add_resource(UserInformation,'/api/user/info')
+# api.add_resource()
 
 if __name__ == "__main__":
 	db.create_all()
-	app.run(port=6080,debug=True)
+	app.run(port=5080,debug=True)
+

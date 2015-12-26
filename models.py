@@ -1,6 +1,10 @@
 from config import *
 from impf import *
 
+													#################
+													#### MODELS #####
+													#################
+
 class UserReg(db.Model):
 	__tablename__ = "users"
 
@@ -78,7 +82,8 @@ class UserInfo(db.Model):
 		return err_stat(a,b,c)
 
 	@staticmethod
-	def update_info()
+	def update_info():
+		pass
 
 	def __repr__(self):
 		return "<id> {0} <rollNo> {1} <fullName> {2} <emailId> {3} <mobNo> {4} ".format(self.id,self.rollNo,self.fullName,self.emailId
@@ -93,6 +98,7 @@ class Admins(db.Model):
 	club_id = db.Column(db.Integer, db.ForeignKey('clubs.id'))
 	student_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
+
 	@staticmethod
 	def register_admin(s_id,c_id):
 		admin = Admins(club_id=c_id,student_id=s_id)
@@ -100,7 +106,7 @@ class Admins(db.Model):
 
 
 class ClubInfo(db.Model):
-	""" A list of all the clubs ,their admins and its Events"""
+	""" A list of all the clubs ,their admins and its EventsReg"""
 
 	__tablename__ = "clubs"
 
@@ -108,7 +114,6 @@ class ClubInfo(db.Model):
 	clubName = db.Column(db.String, nullable=False)
 	aboutClub = db.Column(db.Text)
 	adminsList = db.relationship('Admins', backref='clubs', lazy='dynamic')
-	eventsList = db.relationship('Events', backref='clubs', lazy='dynamic')
 
 	@staticmethod
 	def reg_club(name,about):
@@ -118,12 +123,13 @@ class ClubInfo(db.Model):
 		return True
 
 
-class Events(db.Model):
+
+class EventsReg(db.Model):
 	""" List of events """
 
 	__tablename__ = "events"
 	id = db.Column(db.Integer, primary_key=True)
-	eventName = db.Column(db.String, nullable=False)
+	eventName = db.Column(db.String, nullable=False, unique=True)
 	eventInfo = db.Column(db.Text, nullable=False)
 	startDate = db.Column(db.DateTime,nullable=False)
 	endDate = db.Column(db.DateTime, nullable=False)
@@ -135,8 +141,46 @@ class Events(db.Model):
 	eventVenue = db.Column(db.String)
 	verified = db.Column(db.Boolean, default=False)	#If the event is verified
 	createdBy = db.Column(db.Integer, db.ForeignKey('users.id')) # The id of the admin it was created by.
-	orgClub = db.Column(db.Integer, db.ForeignKey('clubs.id'))   # The club ,the admin belongs to!
+	orgBy = db.relationship('OrgBy', backref='event', lazy='dynamic')
+	orgFor = db.relationship('OrgFor', backref='event', lazy='dynamic')   # The club ,the admin belongs to!
 	contacts = db.relationship('ContactsForEvent',backref='event',lazy='dynamic')	# List of contacts for the event
+
+	@staticmethod
+	def register_one(name,about,sdate,edate,stime,etime,seats,venue):
+		eve = EventsReg(eventName=name,
+						about=eventInfo,
+						startDate=sdate,
+						endDate = edate,
+						startTime = stime,
+						endTime = etime,
+						totalSeats = seats,
+						venue = eventVenue)
+		return eve
+
+	def add_contacts(self,contacts):
+		for item in contacts:
+			ContactsForEvent.register_con(item['contactname'],item['contactnumber'],self.id)
+
+	def __repr__(self):
+		return "<Name> {0} <Info> {1} <Seats> {2} <Venue> {3} <Verified> {4} <createdBy> {5} ".format(self.eventName,self.eventInfo,self.eventVenue,self.verified,self.createdBy)
+
+
+
+class OrgBy(db.Model):
+	""" Table containing Club ids which have organised an event (One club or more than one club combined) """
+	__tablename__="orgby"
+
+	id = db.Column(db.Integer, primary_key=True)
+	orgBy = db.Column(db.Integer, db.ForeignKey('clubs.id'))
+	event_id = db.Column(db.Integer, db.ForeignKey('events.id'))
+
+class OrgFor(db.Model):
+	""" Table containing Club ids for which a given event is organised """
+	__tablename__="orgfor"
+	
+	id = db.Column(db.Integer, primary_key=True)
+	orgFor = db.Column(db.Integer,db.ForeignKey('clubs.id'))
+	event_id = db.Column(db.Integer, db.ForeignKey('events.id'))
 
 
 class ContactsForEvent(db.Model):
@@ -146,10 +190,31 @@ class ContactsForEvent(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	contactName = db.Column(db.String)
 	contactNumber = db.Column(db.Integer)
-	event_id = db.Column(db.Integer,db.ForeignKey('event.id'))
+	event_id = db.Column(db.Integer,db.ForeignKey('events.id'))
 
+	def register_con(name,number,eve_id):
+		contact = ContactsForEvent()
+		contact.contactName = name
+		contact.contactNumber = number
+		contact.event_id = eve_id
+		db.session.add(contact)
+		db.session.commit()
 
-# FUNCTIONS
+												####################################
+												######## HELPER FUNCTIONS ##########
+												####################################
+
+def get_user_club(user):
+	""" Returns a list of clubs of which the user is admin """
+
+	admin = Admins.query.filter_by(student_id=user.id).all()
+	clubs = []
+	for i in range(0,len(admin)):
+		club = ClubInfo.query.filter_by(id = admin[i].club_id).first()
+		clubs.append(club)	
+
+	return clubs
+
 
 def get_current_user():
 	""" Find user object if it has valid token or username-password. """
@@ -198,3 +263,13 @@ def user_is_admin(user):
 		return True
 	else :
 		return False
+
+
+# def gen_output():
+# 	use = UserReg_class()
+# 	i = a.__dict__['declared_fields']
+# 	for key_o in i:
+# 		for key_i in use:
+# 			if key_o == key_i:
+# 				setattr(userreg_schema,key_o,getattr(use,key_i))
+# 	return userreg_schema
