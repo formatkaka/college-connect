@@ -3,7 +3,7 @@ from config import *
 from models import *
 
 from schemas import *
-
+from opschemas import *
 class ClubRegistration(Resource):
 	""" Register New Clubs """
 	
@@ -18,12 +18,14 @@ class ClubRegistration(Resource):
 			else :
 				return jsonify({"Status":"Some error occured"})
 
-	# def get(self):
-	# 	user = get_current_user()
-	# 	if user:
-	# 		return [json.dumps({"ClubName":item.clubName,"about":item.aboutClub}) for item in clubs]
-	# 	else :
-	# 		return jsonify({"Status":"Unauthorized access"})
+	def get(self):
+		user = get_current_user()
+		if user:
+			clubs = ClubInfo.query.all()
+			result = userinfo_c_schema.dump(clubs)
+			return result.data
+		else :
+			return jsonify({"Status":"Unauthorized access"})
 
 
 class AdminRegistration(Resource):

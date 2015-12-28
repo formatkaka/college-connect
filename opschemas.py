@@ -40,16 +40,15 @@ class UserInfo_P_Response(Schema):
 # 2 - Clubs/Events
 	
 class Nested_output():
-	def __init__(self,status_code):
+	def __init__(self,status_code,my_arr):
 		self.status_code = status_code
-		self.my_arr = []
+		self.my_arr = my_arr
 
 
 
 class Nested_response(Schema):
-	status_code = fields.Int()
-	clubname = fields.Str()
-	aboutclub = fields.Str()
+	clubName = fields.Str()
+	aboutClub = fields.Str()
 
 class Error_Response(Schema):
 	status_code = fields.Int()

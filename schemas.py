@@ -34,7 +34,7 @@ class EventRegSchema_Request(Schema):
 	venue = fields.Str()
 	organised_by = fields.Nested(OrganisedBySchema_Request, many=True)
 	organised_for = fields.Nested(OrganisedForSchema_Request, many=True)
-	contacts = fields.Nested(ContactSchema_Request, many=True)
+
 
 
 class AdminSchema_Request(Schema):
@@ -43,7 +43,7 @@ class AdminSchema_Request(Schema):
 	club_id = fields.Int()
 
 
-
+contact_schema = ContactSchema_Request(many=True)
 event_schema = EventRegSchema_Request()
 club_schema = ClubRegSchema_Request()
 info_schema = UserInfoSchema_Request()

@@ -1,9 +1,9 @@
 from config import *
 from impf import *
 
-													#################
-													#### MODELS #####
-													#################
+#################
+#### MODELS #####
+#################
 
 class UserReg(db.Model):
 	__tablename__ = "users"
@@ -57,7 +57,7 @@ class UserInfo(db.Model):
 
 	id = db.Column(db.Integer, primary_key=True)
 	fullName = db.Column(db.String, nullable=False)
-	rollNo = db.Column(db.Integer, nullable=False, unique=True)
+	rollNo = db.Column(db.String, nullable=False, unique=True)
 	emailId = db.Column(db.String, unique=True)
 	# dob = db.Column(db.DateTime)
 	mobNo = db.Column(db.Integer, unique=True)
@@ -129,32 +129,31 @@ class EventsReg(db.Model):
 
 	__tablename__ = "events"
 	id = db.Column(db.Integer, primary_key=True)
-	eventName = db.Column(db.String, nullable=False, unique=True)
-	eventInfo = db.Column(db.Text, nullable=False)
-	startDate = db.Column(db.DateTime,nullable=False)
-	endDate = db.Column(db.DateTime, nullable=False)
-	startTime = db.Column(db.DateTime, nullable=False)
-	endTime = db.Column(db.DateTime)
+	eventName = db.Column(db.String, unique=True)
+	eventInfo = db.Column(db.String, nullable=True)
+	startDate = db.Column(db.DateTime,nullable=True)
+	endDate = db.Column(db.DateTime,nullable=True)
+	startTime = db.Column(db.DateTime,nullable=True)
+	endTime = db.Column(db.DateTime,nullable=True)
 	totalSeats = db.Column(db.Integer)
-	occupiedSeats = db.Column(db.Integer)
-	leftSeats = db.Column(db.Integer)
+	occupiedSeats = db.Column(db.Integer,nullable=True)
+	leftSeats = db.Column(db.Integer,nullable=True)
 	eventVenue = db.Column(db.String)
 	verified = db.Column(db.Boolean, default=False)	#If the event is verified
 	createdBy = db.Column(db.Integer, db.ForeignKey('users.id')) # The id of the admin it was created by.
-	orgBy = db.relationship('OrgBy', backref='event', lazy='dynamic')
-	orgFor = db.relationship('OrgFor', backref='event', lazy='dynamic')   # The club ,the admin belongs to!
+	# orgBy = db.relationship('OrgBy', backref='event', lazy='dynamic',nullable=True)
+	# orgFor = db.relationship('OrgFor', backref='event', lazy='dynamic',nullable=True)   # The club ,the admin belongs to!
 	contacts = db.relationship('ContactsForEvent',backref='event',lazy='dynamic')	# List of contacts for the event
 
 	@staticmethod
-	def register_one(name,about,sdate,edate,stime,etime,seats,venue):
+	def register_one(name,about,seats,venue,user_id):
 		eve = EventsReg(eventName=name,
-						about=eventInfo,
-						startDate=sdate,
-						endDate = edate,
-						startTime = stime,
-						endTime = etime,
+						eventInfo=about,
 						totalSeats = seats,
-						venue = eventVenue)
+						eventVenue =venue ,
+						createdBy = user_id)
+		db.session.add(eve)
+		db.session.commit()
 		return eve
 
 	def add_contacts(self,contacts):
@@ -200,9 +199,9 @@ class ContactsForEvent(db.Model):
 		db.session.add(contact)
 		db.session.commit()
 
-												####################################
-												######## HELPER FUNCTIONS ##########
-												####################################
+####################################
+######## HELPER FUNCTIONS ##########
+####################################
 
 def get_user_club(user):
 	""" Returns a list of clubs of which the user is admin """

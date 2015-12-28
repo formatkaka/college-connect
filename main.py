@@ -50,7 +50,8 @@ arr = ["info","clubs","events"]
 class UserInformation(Resource):
 	""" API to POST and GET user info """
 
-	def post(self): 
+	def post(self,s):
+
 		user = get_current_user()
 		user_id = user.id
 		if user:
@@ -60,50 +61,47 @@ class UserInformation(Resource):
 				return jsonify(errors)
 			else :
 				
-				stat,val = UserInfo.if_unique(data['rollno'],data['mobno'],data['email'])
+				stat,val = UserInfo.if_unique(data['rollno'],data['email'],data['mobno'])
 				if not stat:
 					return ({"Status":"{0} already reg.".format(val)})
 				else :
-					if UserInfo.save_info(data['name'],data['rollno'],data['mobno'],data['email'],user_id):
+					if UserInfo.save_info(data['name'],data['rollno'],data['email'],data['mobno'],user_id):
 						return ({"Status":"Information saved."})
 					else :
 						return ({"Status":"Some error occured."})
 
 		else :
 			return ({"Status":"Invalid User."})	
-	
-	def get(self):
+
+
+	def get(self,s):
 		user = get_current_user()
 		if user:
-			# if s in arr:
-			# 	if s == arr[0]:
+			if s in arr:
+				if s == arr[0]:
 
-			# 		info = get_user_info(user)
-			# 		op = UserInfo_P_class(200,info.fullName,info.rollNo,info.emailId,info.mobNo)
-			# 		result = userinfo_p_schema.dump(op)
-			# 		return result.data
+					info = get_user_info(user)
+					op = UserInfo_P_class(200,info.fullName,info.rollNo,info.emailId,info.mobNo)
+					result = userinfo_p_schema.dump(op)
+					return result.data
 
-			# 	elif s == arr[1]:
+				elif s == arr[1]:
 					
-				myclubs = get_user_club(user)
-				op = Nested_Output(200,myclubs)
-				result = userinfo_c_schema.dump(op)
-				return result.data
-					# for item in myclubs:
-					# 	op.my_arr.append(item)
+					myclubs = get_user_club(user)
+					op = Nested_output(200,myclubs)
+					result = userinfo_c_schema.dump(myclubs)
+					return result.data
+					
 
 
-				# elif s == arr[2]:
-				# 	pass
+				elif s == arr[2]:
+					pass
 
-			# else :
-			# 	return jsonify({"Status":'Invalid request'})
+			else :
+				return jsonify({"Status":'Invalid request'})
 		else :
 			return jsonify({"Status":"Invalid"})
 
-
-class UserClub:
-	pass
 
 
 class EventRegistration(Resource):
@@ -116,29 +114,34 @@ class EventRegistration(Resource):
 				return jsonify(errors)
 			else :
 				event = EventsReg.register_one(data['name'],data['about'],
-											   data['sdate'],
-											   data['edate'],
-											   data['stime'],
-											   data['etime'],
-											   data['seats'])
+
+											   data['seats'],
+											   data['venue'],
+											   user.id)
 				if user_is_admin(user):
 					event.verified = True
-				elif not user_is_admin(admin):
+				elif not user_is_admin(user):
 					event.verified = False
 				else :
 					return jsonify({"Status":"Some error occured"})
 
 				event.add_contacts(data['contacts'])
-					
+				return jsonify({"Status":"Event Saved"})
 
 		else :
 			return jsonify({"Status":"Unauthorized access"})
 
 
+class Clubsget(Resource):
+	def get(self):
+		user = get_current_user()
+		if user:
+			clubs = ClubInfo.query.all()
 
 api.add_resource(UserRegistration,'/api/user/reg')
-api.add_resource(UserInformation,'/api/user/info')
-# api.add_resource()
+api.add_resource(UserInformation,'/api/user/<string:s>')
+api.add_resource(EventRegistration,'/api/events')
+api.add_resource(Clubsget,'/clubs/')
 
 if __name__ == "__main__":
 	db.create_all()
