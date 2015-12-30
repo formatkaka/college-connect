@@ -1,10 +1,19 @@
 from __init__ import *
 from config import *
 from models import *
+import os,flask
 
 from schemas import *
 from opschemas import *
 
+class Testing(Resource):
+	"""Test Class for API"""
+
+	def get(self):
+		hello = '<h1>It Works!</h1>'
+		response = flask.make_response(hello)
+		response.headers['content-type'] = 'text/html'
+		return response
 
 class UserRegistration(Resource):
 	""" API to register a new user or obtain token for a user"""
@@ -167,9 +176,15 @@ class EventRegistration(Resource):
 api.add_resource(UserRegistration,'/api/user/reg')
 api.add_resource(UserInformation,'/api/user/<string:s>')
 api.add_resource(EventRegistration,'/api/events')
+<<<<<<< HEAD
 # api.add_resource(Clubsget,'/api/clubs/<string:s1>/<string:s2>')
+=======
+api.add_resource(Clubsget,'/clubs/')
+api.add_resource(Testing,'/')
+>>>>>>> 7cc35dd361daa9f06ff69eaf2165ed9243f844a7
 
 if __name__ == "__main__":
 	db.create_all()
-	app.run(port=5080,debug=True)
+	port = int(os.environ.get('PORT', 5432))
+	app.run(host='0.0.0.0', port=port, debug=True)
 
