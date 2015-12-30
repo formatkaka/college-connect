@@ -39,7 +39,7 @@ class UserRegistration(Resource):
 				result = userreg_schema.dump(op)
 
 
-			return result.data
+				return result.data
 
 		elif not UserReg.if_username_unique(username) :					# Return error if username not unique
 			return jsonify({"Status":"Username not unique"})
