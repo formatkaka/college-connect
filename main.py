@@ -177,7 +177,7 @@ api.add_resource(EventRegistration,'/api/events')
 # <<<<<<< HEAD
 # api.add_resource(Clubsget,'/api/clubs/<string:s1>/<string:s2>')
 # =======
-api.add_resource(Clubsget,'/clubs/')
+# api.add_resource(Clubsget,'/clubs/')
 api.add_resource(Testing,'/')
 # >>>>>>> 7cc35dd361daa9f06ff69eaf2165ed9243f844a7
 
