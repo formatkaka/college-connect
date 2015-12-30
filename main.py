@@ -1,6 +1,7 @@
 from __init__ import *
 from config import *
 from models import *
+import os
 
 from schemas import *
 from opschemas import *
@@ -145,5 +146,6 @@ api.add_resource(Clubsget,'/clubs/')
 
 if __name__ == "__main__":
 	db.create_all()
-	app.run(port=5080,debug=True)
+	port = int(os.environ.get('PORT', 5432))
+	app.run(host='0.0.0.0', port=port, debug=True)
 
