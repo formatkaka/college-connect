@@ -10,8 +10,10 @@ class UserReg(db.Model):
 
 	id = db.Column(db.Integer, primary_key=True)
 	userName = db.Column(db.String,unique=True, nullable=False)
-	password_hash = db.Column(db.String, nullable=False)
+	passwordHash = db.Column(db.String, nullable=False)
 	isadmin = db.Column(db.Boolean, default=False)
+	activeStatus = db.Column(db.Boolean, default=True)     #For users presently in the college!
+	
 
 	@staticmethod
 	def if_username_unique(username):
@@ -22,14 +24,14 @@ class UserReg(db.Model):
 
 	
 	def check_password_hash(self,password_hash):
-		if password_hash == self.password_hash:
+		if password_hash == self.passwordHash:
 			return True
 		else :
 			return False
 
 	@staticmethod
 	def register_user(username,password_hash):
-		user = UserReg(userName=username,password_hash=password_hash)
+		user = UserReg(userName=username,passwordHash=password_hash)
 		db.session.add(user)
 		db.session.commit()
 		return user
@@ -63,6 +65,7 @@ class UserInfo(db.Model):
 	mobNo = db.Column(db.Integer, unique=True)
 	user_id = db.Column(db.Integer, db.ForeignKey('users.id'), unique=True)
 
+
 	@staticmethod
 	def save_info(name,rollno,email,mobno,user_id):
 		info = UserInfo(fullName=name,rollNo=rollno,emailId=email,mobNo=mobno,user_id=user_id)
@@ -91,13 +94,13 @@ class UserInfo(db.Model):
 
 
 class Admins(db.Model):
-	""" Table containing all the verified Admins"""
+	""" Table containing all the verified Admins """
 
 	__tablename__ = "admins"
 	id = db.Column(db.Integer, primary_key=True)
 	club_id = db.Column(db.Integer, db.ForeignKey('clubs.id'))
 	student_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-
+	current_admin = db.Column(db.Boolean,default=True)
 
 	@staticmethod
 	def register_admin(s_id,c_id):
@@ -106,7 +109,7 @@ class Admins(db.Model):
 
 
 class ClubInfo(db.Model):
-	""" A list of all the clubs ,their admins and its EventsReg"""
+	""" A list of all the clubs ,their admins and its EventsReg """
 
 	__tablename__ = "clubs"
 

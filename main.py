@@ -15,7 +15,7 @@ class UserRegistration(Resource):
 		user = request.authorization
 		username = user.username
 		password_hash = user.password
-
+		
 		if username is None:                           # Check if any of auth headers are empty
 			return jsonify({"Status":"Username field empty"})
 
@@ -23,11 +23,11 @@ class UserRegistration(Resource):
 			return jsonify({"Status":"Password field empty"})
 
 		if UserReg.if_username_unique(username):							# Check if the username is unique.If unique , register the user
-			user = UserReg.register_user(username,password_hash)			# and return the auth token generated fot the user with its id
-			token = user.gen_auth_token()
-			
-			op = UserReg_class(200,user.userName,token)
-			result = userreg_schema.dump(op)
+				user = UserReg.register_user(username,password_hash)			# and return the auth token generated fot the user with its id
+				token = user.gen_auth_token()
+				
+				op = UserReg_class(200,user.userName,token)
+				result = userreg_schema.dump(op)
 
 
 			return result.data
@@ -40,12 +40,18 @@ class UserRegistration(Resource):
 		""" Obtain/Generate token for user """
 
 		user = get_current_user()
+		if user:
+			token = user.gen_auth_token()
+			
+			op = UserReg_class(200,user.userName,token)
+			result = userreg_schema.dump(op)
+			return
+		# if user.check_password_hash(user.password_hash):
+		return jsonify({"Token":user.userName})
 
-		if user.check_password_hash(user.password_hash):
-			return jsonify({"Token":user.gen_auth_token()})
 
 
-arr = ["info","clubs","events"]
+
 
 class UserInformation(Resource):
 	""" API to POST and GET user info """
@@ -73,34 +79,41 @@ class UserInformation(Resource):
 		else :
 			return ({"Status":"Invalid User."})	
 
+arr = ["profile","myclubs","myevents","attending","followed"]
 
-	def get(self,s):
-		user = get_current_user()
-		if user:
-			if s in arr:
-				if s == arr[0]:
+	# def get(self,s):
+	# 	user = get_current_user()
+	# 	if user:
+	# 		if s in arr:
+	# 			if s == arr[0]:   # Get current user profile
 
-					info = get_user_info(user)
-					op = UserInfo_P_class(200,info.fullName,info.rollNo,info.emailId,info.mobNo)
-					result = userinfo_p_schema.dump(op)
-					return result.data
+	# 				info = get_user_info(user)
+	# 				op = UserInfo_P_class(200,info.fullName,info.rollNo,info.emailId,info.mobNo)
+	# 				result = userinfo_p_schema.dump(op)
+	# 				return result.data
 
-				elif s == arr[1]:
+	# 			elif s == arr[1]: # Get a list of clubs the user is admin of.
 					
-					myclubs = get_user_club(user)
-					op = Nested_output(200,myclubs)
-					result = userinfo_c_schema.dump(myclubs)
-					return result.data
+	# 				myclubs = get_user_club(user)
+	# 				op = Nested_output(200,myclubs)
+	# 				result = userinfo_c_schema.dump(myclubs)
+	# 				return result.data
 					
 
 
-				elif s == arr[2]:
-					pass
+	# 			elif s == arr[2]: # Get a list of event submitted by a user.
+	# 				pass
 
-			else :
-				return jsonify({"Status":'Invalid request'})
-		else :
-			return jsonify({"Status":"Invalid"})
+	# 			elif s == arr[3]: # Get a list of events the user wants to attend.
+	# 				pass
+
+	# 			elif s == arr[4]: # Get a list of clubs followed by user.
+	# 				pass
+
+	# 		else :
+	# 			return jsonify({"Status":'Invalid request'})
+	# 	else :
+	# 		return jsonify({"Status":"Invalid"})
 
 
 
@@ -113,8 +126,8 @@ class EventRegistration(Resource):
 			if errors :
 				return jsonify(errors)
 			else :
-				event = EventsReg.register_one(data['name'],data['about'],
-
+				event = EventsReg.register_one(data['name'],
+											   data['about'],
 											   data['seats'],
 											   data['venue'],
 											   user.id)
@@ -131,17 +144,30 @@ class EventRegistration(Resource):
 		else :
 			return jsonify({"Status":"Unauthorized access"})
 
+# arr2 = ["list]
 
-class Clubsget(Resource):
-	def get(self):
-		user = get_current_user()
-		if user:
-			clubs = ClubInfo.query.all()
+# class Clubsget(Resource):
+# 	def get(self,s1,s2):
+# 		user = get_current_user()
+# 		if user:
+# 			club = ClubInfo.get_club(s1)
+# 			if s1 == "list" and s2 is None:
+# 				clubs = ClubInfo.query.all()
+# 				result = userinfo_c_schema.dump(clubs)
+# 				return result.data
+# 			elif s2 == "info" and club :
+# 				result = userinfo_c_schema.dump(club)
+# 				return result.data
+# 			elif s2 == "events" and club :
+# 				result = 
+# 		else:
+# 			return Error04
+
 
 api.add_resource(UserRegistration,'/api/user/reg')
 api.add_resource(UserInformation,'/api/user/<string:s>')
 api.add_resource(EventRegistration,'/api/events')
-api.add_resource(Clubsget,'/clubs/')
+# api.add_resource(Clubsget,'/api/clubs/<string:s1>/<string:s2>')
 
 if __name__ == "__main__":
 	db.create_all()
