@@ -1,7 +1,7 @@
 from __init__ import *
 from config import *
 from models import *
-import os,flask
+import os,flask,scrap
 
 from schemas import *
 from opschemas import *
@@ -170,6 +170,20 @@ class EventRegistration(Resource):
 # 		else:
 # 			return Error04
 
+sources = ["notice", "seminar", "quick"]
+
+class WebScrap(Resource):
+	def get(self, source):
+		scrapper = scrap.Scrap()
+		if source == sources[0]:
+			return jsonify(scrapper.get_notice())
+		elif source == sources[1]:
+			return jsonify(scrapper.get_seminar())
+		elif source == sources[2]:
+			return jsonify(scrapper.get_quicks())
+		else:
+			return jsonify({"Status":'Invalid request'})
+
 
 api.add_resource(UserRegistration,'/api/user/reg')
 api.add_resource(UserInformation,'/api/user/<string:s>')
@@ -179,6 +193,7 @@ api.add_resource(EventRegistration,'/api/events')
 # =======
 # api.add_resource(Clubsget,'/clubs/')
 api.add_resource(Testing,'/')
+api.add_resource(WebScrap,'/api/scrap/<string:source>')
 # >>>>>>> 7cc35dd361daa9f06ff69eaf2165ed9243f844a7
 
 if __name__ == "__main__":
