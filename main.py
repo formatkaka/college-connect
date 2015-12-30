@@ -37,8 +37,6 @@ class UserRegistration(Resource):
 				
 				op = UserReg_class(200,user.userName,token)
 				result = userreg_schema.dump(op)
-
-
 				return result.data
 
 		elif not UserReg.if_username_unique(username) :					# Return error if username not unique
@@ -176,12 +174,12 @@ class EventRegistration(Resource):
 api.add_resource(UserRegistration,'/api/user/reg')
 api.add_resource(UserInformation,'/api/user/<string:s>')
 api.add_resource(EventRegistration,'/api/events')
-<<<<<<< HEAD
+# <<<<<<< HEAD
 # api.add_resource(Clubsget,'/api/clubs/<string:s1>/<string:s2>')
-=======
+# =======
 api.add_resource(Clubsget,'/clubs/')
 api.add_resource(Testing,'/')
->>>>>>> 7cc35dd361daa9f06ff69eaf2165ed9243f844a7
+# >>>>>>> 7cc35dd361daa9f06ff69eaf2165ed9243f844a7
 
 if __name__ == "__main__":
 	db.create_all()
