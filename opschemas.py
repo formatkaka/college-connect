@@ -66,7 +66,7 @@ class Events_Response(Schema):
 	occupied_seats = fields.Int()
 	venue = fields.Str()
 	createdby = fields.Str()
-	contacts = 
+	# contacts = 
 
 
 userreg_schema = UserReg_Response()
