@@ -22,9 +22,14 @@ class UserRegistration(Resource):
 		""" Register a user """
 
 		user = request.authorization
+		if not user:
+			return jsonify({"Status":"Empty payload"})
+
 		username = user.username
 		password_hash = user.password
 		
+
+
 		if username is None:                           # Check if any of auth headers are empty
 			return jsonify({"Status":"Username field empty"})
 
@@ -47,14 +52,19 @@ class UserRegistration(Resource):
 		""" Obtain/Generate token for user """
 
 		user = get_current_user()
+
+		if user is False:
+			return jsonify({"Status":"Dont shit here."})
+
 		if user:
 			token = user.gen_auth_token()
 			
 			op = UserReg_class(200,user.userName,token)
 			result = userreg_schema.dump(op)
-			return
-		# if user.check_password_hash(user.password_hash):
-		return jsonify({"Token":user.userName})
+			return result.data
+		
+		else:# if user.check_password_hash(user.password_hash):
+			return jsonify({"Status":"Unauthorized"})
 
 
 
@@ -68,59 +78,60 @@ class UserInformation(Resource):
 		user = get_current_user()
 		user_id = user.id
 		if user:
-			json_data = request.get_json()
-			data, errors = info_schema.load(json_data)
-			if errors :
-				return jsonify(errors)
-			else :
-				
-				stat,val = UserInfo.if_unique(data['rollno'],data['email'],data['mobno'])
-				if not stat:
-					return ({"Status":"{0} already reg.".format(val)})
+			if s == "profile":
+				json_data = request.get_json()
+				data, errors = info_schema.load(json_data)
+				if errors :
+					return jsonify(errors)
 				else :
-					if UserInfo.save_info(data['name'],data['rollno'],data['email'],data['mobno'],user_id):
-						return ({"Status":"Information saved."})
+					
+					stat,val = UserInfo.if_unique(data['rollno'],data['email'],data['mobno'])
+					if not stat:
+						return ({"Status":"{0} already reg.".format(val)})
 					else :
-						return ({"Status":"Some error occured."})
+						if UserInfo.save_info(data['name'],data['rollno'],data['email'],data['mobno'],user_id):
+							return ({"Status":"Information saved."})
+						else :
+							return ({"Status":"Some error occured."})
 
 		else :
 			return ({"Status":"Invalid User."})	
 
-arr = ["profile","myclubs","myevents","attending","followed"]
+	arr = ["profile","myclubs","myevents","attending","followed"]
 
-	# def get(self,s):
-	# 	user = get_current_user()
-	# 	if user:
-	# 		if s in arr:
-	# 			if s == arr[0]:   # Get current user profile
+	def get(self,s):
+		user = get_current_user()
+		if user:
+			if s in arr:
+				if s == arr[0]:   # Get current user profile
 
-	# 				info = get_user_info(user)
-	# 				op = UserInfo_P_class(200,info.fullName,info.rollNo,info.emailId,info.mobNo)
-	# 				result = userinfo_p_schema.dump(op)
-	# 				return result.data
+					info = get_user_info(user)
+					op = UserInfo_P_class(200,info.fullName,info.rollNo,info.emailId,info.mobNo)
+					result = userinfo_p_schema.dump(op)
+					return result.data
 
-	# 			elif s == arr[1]: # Get a list of clubs the user is admin of.
+				elif s == arr[1]: # Get a list of clubs the user is admin of.
 					
-	# 				myclubs = get_user_club(user)
-	# 				op = Nested_output(200,myclubs)
-	# 				result = userinfo_c_schema.dump(myclubs)
-	# 				return result.data
+					myclubs = get_user_club(user)
+					op = Nested_output(200,myclubs)
+					result = userinfo_c_schema.dump(myclubs)
+					return result.data
 					
 
 
-	# 			elif s == arr[2]: # Get a list of event submitted by a user.
-	# 				pass
+				elif s == arr[2]: # Get a list of event submitted by a user.
+					pass
 
-	# 			elif s == arr[3]: # Get a list of events the user wants to attend.
-	# 				pass
+				elif s == arr[3]: # Get a list of events the user wants to attend.
+					pass
 
-	# 			elif s == arr[4]: # Get a list of clubs followed by user.
-	# 				pass
+				elif s == arr[4]: # Get a list of clubs followed by user.
+					pass
 
-	# 		else :
-	# 			return jsonify({"Status":'Invalid request'})
-	# 	else :
-	# 		return jsonify({"Status":"Invalid"})
+			else :
+				return jsonify({"Status":'Invalid request'})
+		else :
+			return jsonify({"Status":"Invalid"})
 
 
 
@@ -151,6 +162,10 @@ class EventRegistration(Resource):
 		else :
 			return jsonify({"Status":"Unauthorized access"})
 
+	def get(self):
+		user = get_current_user()
+		if user:
+			
 # arr2 = ["list]
 
 # class Clubsget(Resource):
@@ -171,6 +186,7 @@ class EventRegistration(Resource):
 # 			return Error04
 
 
+
 api.add_resource(UserRegistration,'/api/user/reg')
 api.add_resource(UserInformation,'/api/user/<string:s>')
 api.add_resource(EventRegistration,'/api/events')
@@ -183,6 +199,6 @@ api.add_resource(Testing,'/')
 
 if __name__ == "__main__":
 	db.create_all()
-	port = int(os.environ.get('PORT', 5432))
-	app.run(host='0.0.0.0', port=port, debug=True)
-
+	# port = int(os.environ.get('PORT', 5432))
+	# app.run(host='0.0.0.0', port=port, debug=True)
+	app.run(port=5080,debug=True)
