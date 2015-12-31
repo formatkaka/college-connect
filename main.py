@@ -165,7 +165,7 @@ class EventRegistration(Resource):
 	def get(self):
 		user = get_current_user()
 		if user:
-			
+			pass
 # arr2 = ["list]
 
 # class Clubsget(Resource):
