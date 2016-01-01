@@ -229,6 +229,6 @@ api.add_resource(WebScrap,'/api/scrap/<string:source>')
 
 if __name__ == "__main__":
 	db.create_all()
-	# port = int(os.environ.get('PORT', 5432))
-	# app.run(host='0.0.0.0', port=port, debug=True)
-	app.run(port=6080,debug=True)
+	port = int(os.environ.get('PORT', 5432))
+	app.run(host='0.0.0.0', port=port, debug=True)
+	# app.run(port=6080,debug=True)
