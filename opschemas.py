@@ -21,7 +21,7 @@ class UserReg_Response(Schema):
 
 # 1 - Personal Info
 
-class UserInfo_P_class():
+class UserInfo_class():
 	def __init__(self,status_code,name,rollno,email,mobno):
 		self.status_code = status_code
 		self.name = name
@@ -30,7 +30,7 @@ class UserInfo_P_class():
 		self.mobno = mobno
 
 
-class UserInfo_P_Response(Schema):
+class UserInfo_Response(Schema):
 	status_code = fields.Int()
 	name = fields.Str()
 	rollno = fields.Str()
@@ -38,17 +38,28 @@ class UserInfo_P_Response(Schema):
 	mobno = fields.Int()
 
 # 2 - Clubs/Events
-	
-class Nested_output():
-	def __init__(self,status_code,my_arr):
-		self.status_code = status_code
-		self.my_arr = my_arr
+
+class Admins():
+	def __init__(self,name,mobno):
+		self.name= name
+		self.mobno = mobno
+
+class Admin_Response(Schema):
+	name = fields.Str()
+	mobno = fields.Int()
+
+class Club_class():
+	def __init__(self,name,about,admins):
+		self.clubName = name
+		self.aboutClub = about
+		self.admins = admins
 
 
 
-class Nested_response(Schema):
+class Club_response(Schema):
 	clubName = fields.Str()
 	aboutClub = fields.Str()
+	admins = fields.Nested(Admin_Response,many=True)
 
 class Error_Response(Schema):
 	status_code = fields.Int()
@@ -71,5 +82,5 @@ class Events_Response(Schema):
 
 userreg_schema = UserReg_Response()
 err_schema = Error_Response()
-userinfo_p_schema = UserInfo_P_Response()
-userinfo_c_schema = Nested_response(many=True)
+userinfo_schema = UserInfo_Response()
+club_schema = Club_response(many=True)

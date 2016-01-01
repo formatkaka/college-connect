@@ -28,8 +28,6 @@ class EventRegSchema_Request(Schema):
 	about = fields.Str()
 	sdt = fields.DateTime()
 	edt = fields.DateTime()
-	# stime = fields.DateTime()
-	# etime = fields.DateTime()
 	seats = fields.Int()
 	venue = fields.Str()
 	# organised_by = fields.Nested(OrganisedBySchema_Request, many=True)
