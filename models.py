@@ -188,9 +188,14 @@ class ClubInfo(db.Model):
 		db.session.add(club)
 		db.session.commit()
 
-	# def add_follower(clubname):
-	# 	club = ClubInfo.query.filter_by(clubName=clubname).first()
+	def add_follower(self,user):
+		self.followers.append(user)
+		db.session.add(self)
+		db.session.commit()
 
+	def remove_follower(self,user):
+		self.followers.remove(user)
+		db.session.commit()
 
 class EventsReg(db.Model):
 	""" List of events """
@@ -199,7 +204,7 @@ class EventsReg(db.Model):
 	__tablename__ = "events"
 
 	id = db.Column(db.Integer, primary_key=True)
-	eventName = db.Column(db.String, unique=True)
+	eventName = db.Column(db.String)
 	eventInfo = db.Column(db.String, nullable=True)
 	startDateTime = db.Column(db.DateTime,nullable=True)
 	endDateTime = db.Column(db.DateTime,nullable=True)
@@ -235,8 +240,17 @@ class EventsReg(db.Model):
 		return True
 
 	def set_active(self):
-		self.activeStatus=True
+		event.activeStatus=True
+		db.session.add(event)
+		db.session.commit()
+
+	def add_follower(self,user):
+		self.followers.append(user)
 		db.session.add(self)
+		db.session.commit()
+
+	def remove_follower(self,user):
+		self.followers.remove(user)
 		db.session.commit()
 
 	def __repr__(self):

@@ -170,6 +170,7 @@ class EventRegistration(Resource):
 		user = get_current_user()
 		if user:
 			pass
+			# events = Events.query.all()
 
 
 class Clubsget(Resource):
@@ -200,9 +201,41 @@ class Clubsget(Resource):
 
 
 
+class User_Follow_Status(Resource):
+	def get(self,s1,event_or_club_id,s2):
+		user = get_current_user()
+		if user:
+
+			if s1 == "club" and s2 == "follow":
+				club = ClubInfo.query.filter_by(id=event_or_club_id).first()
+				club.add_follower(user)
+				return jsonify({"Status":"Successfully followed."})
+
+			elif s1 == "event" and s2 == "follow":
+				event = EventsReg.query.filter_by(id=event_or_club_id).first()
+				event.add_follower(user)
+				return jsonify({"Status":"Successfully followed."})
+
+			elif s1 == "club" and s2 == "unfollow":
+				club = ClubInfo.query.filter_by(id=event_or_club_id).first()
+				club.remove_follower(user)
+				return jsonify({"Status":"Successfully unfollowed"})
+
+			elif s1 == "event" and s2 == "unfollow":
+				event = EventsReg.query.filter_by(id=event_or_club_id).first()
+				event.remove_follower(user)
+				return jsonify({"Status":"Successfully unfollowed"})
+
+			else :
+				return jsonify({"Status":"Invalid Request"})
 
 
+		else :
+			return jsonify({"Status":"Unauthorized access."})
 
+
+# class Follow_event(Resource):
+# 	def get(self,event_id):
 
 
 sources = ["notice", "seminar", "quick"]
@@ -227,6 +260,8 @@ api.add_resource(EventRegistration,'/api/events')
 api.add_resource(Clubsget,'/api/clubs/<string:s1>/<string:s2>')
 api.add_resource(Testing,'/')
 api.add_resource(WebScrap,'/api/scrap/<string:source>')
+api.add_resource(User_Follow_Status,'/api/<string:s1>/<int:id>/<string:s2>/')
+
 
 if __name__ == "__main__":
 	db.create_all()
