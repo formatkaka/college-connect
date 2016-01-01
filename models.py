@@ -31,11 +31,14 @@ club_admins = db.Table('club_admins',
 
 class UserReg(db.Model):
 	__tablename__ = "users"
+	__table_args__ = {'extend_existing': True}
 
 	id = db.Column(db.Integer, primary_key=True)
 	userName = db.Column(db.String,unique=True, nullable=False)
 	passwordHash = db.Column(db.String, nullable=False)
+	
 	isadmin = db.Column(db.Boolean, default=False)
+	currentAdmin = db.Column(db.Boolean, default=True)
 	activeStatus = db.Column(db.Boolean, default=True)
 
 	#For users presently in the college!
@@ -100,12 +103,13 @@ class UserReg(db.Model):
 
 class UserInfo(db.Model):
 	__tablename__ = "userinfo"
+	__table_args__ = {'extend_existing': True}
 
 	id = db.Column(db.Integer, primary_key=True)
 	fullName = db.Column(db.String, nullable=False)
 	rollNo = db.Column(db.String, nullable=False, unique=True)
 	emailId = db.Column(db.String, unique=True)
-	# dob = db.Column(db.DateTime)
+	dob = db.Column(db.DateTime)
 	mobNo = db.Column(db.Integer, unique=True)
 	user_id = db.Column(db.Integer, db.ForeignKey('users.id'), unique=True)
 
@@ -140,8 +144,9 @@ class UserInfo(db.Model):
 
 class Admins(db.Model):
 	""" Table containing all the verified Admins """
-
+	__table_args__ = {'extend_existing': True}
 	__tablename__ = "admins"
+
 	id = db.Column(db.Integer, primary_key=True)
 	club_id = db.Column(db.Integer, db.ForeignKey('clubs.id'))
 	student_id = db.Column(db.Integer, db.ForeignKey('users.id'))
@@ -155,7 +160,7 @@ class Admins(db.Model):
 
 class ClubInfo(db.Model):
 	""" A list of all the clubs ,their admins and its EventsReg """
-
+	__table_args__ = {'extend_existing': True}
 	__tablename__ = "clubs"
 
 	id = db.Column(db.Integer, primary_key=True)
@@ -189,15 +194,17 @@ class ClubInfo(db.Model):
 
 class EventsReg(db.Model):
 	""" List of events """
-
+	
+	__table_args__ = {'extend_existing': True}
 	__tablename__ = "events"
+
 	id = db.Column(db.Integer, primary_key=True)
 	eventName = db.Column(db.String, unique=True)
 	eventInfo = db.Column(db.String, nullable=True)
-	startDate = db.Column(db.DateTime,nullable=True)
-	endDate = db.Column(db.DateTime,nullable=True)
-	startTime = db.Column(db.DateTime,nullable=True)
-	endTime = db.Column(db.DateTime,nullable=True)
+	startDateTime = db.Column(db.DateTime,nullable=True)
+	endDateTime = db.Column(db.DateTime,nullable=True)
+	# startTime = db.Column(db.DateTime,nullable=True)
+	# endTime = db.Column(db.DateTime,nullable=True)
 	totalSeats = db.Column(db.Integer)
 	occupiedSeats = db.Column(db.Integer,nullable=True)
 	leftSeats = db.Column(db.Integer,nullable=True)
@@ -209,15 +216,17 @@ class EventsReg(db.Model):
 	contacts = db.relationship('ContactsForEvent',backref='event',lazy='dynamic')	# List of contacts for the event
 	followers = db.relationship('UserReg', secondary=user_events,
 		backref='events')
-
+	activeStatus = db.Column(db.Boolean, default=False)
 
 
 	@staticmethod
-	def register_one(name,about,seats,venue,user_id):
+	def register_one(name,about,seats,venue,sdt,edt,user_id):
 		eve = EventsReg(eventName=name,
 						eventInfo=about,
 						totalSeats = seats,
-						eventVenue =venue ,
+						eventVenue =venue,
+						startDateTime=sdt,
+						endDateTime=edt,
 						createdBy = user_id)
 		db.session.add(eve)
 		db.session.commit()
@@ -226,6 +235,12 @@ class EventsReg(db.Model):
 	def add_contacts(self,contacts):
 		for item in contacts:
 			ContactsForEvent.register_con(item['contactname'],item['contactnumber'],self.id)
+		return True
+
+	def set_active(self):
+		self.activeStatus=True
+		db.session.add(self)
+		db.session.commit()
 
 	def __repr__(self):
 		return "<Name> {0} <Info> {1} <Seats> {2} <Venue> {3} <Verified> {4} <createdBy> {5} ".format(self.eventName,self.eventInfo,self.eventVenue,self.verified,self.createdBy)
@@ -235,6 +250,7 @@ class EventsReg(db.Model):
 class OrgBy(db.Model):
 	""" Table containing Club ids which have organised an event (One club or more than one club combined) """
 	__tablename__="orgby"
+	__table_args__ = {'extend_existing': True}
 
 	id = db.Column(db.Integer, primary_key=True)
 	orgBy = db.Column(db.Integer, db.ForeignKey('clubs.id'))
@@ -243,7 +259,8 @@ class OrgBy(db.Model):
 class OrgFor(db.Model):
 	""" Table containing Club ids for which a given event is organised """
 	__tablename__="orgfor"
-	
+	__table_args__ = {'extend_existing': True}
+
 	id = db.Column(db.Integer, primary_key=True)
 	orgFor = db.Column(db.Integer,db.ForeignKey('clubs.id'))
 	event_id = db.Column(db.Integer, db.ForeignKey('events.id'))
@@ -251,13 +268,15 @@ class OrgFor(db.Model):
 
 class ContactsForEvent(db.Model):
 	""" List of contacts """
-
+	__table_args__ = {'extend_existing': True}
 	__tablename__ = "contacts_events"
+	
 	id = db.Column(db.Integer, primary_key=True)
 	contactName = db.Column(db.String)
 	contactNumber = db.Column(db.Integer)
 	event_id = db.Column(db.Integer,db.ForeignKey('events.id'))
 
+	@staticmethod
 	def register_con(name,number,eve_id):
 		contact = ContactsForEvent()
 		contact.contactName = name
@@ -332,11 +351,15 @@ def err_stat(a,b,c):
 
 
 def user_is_admin(user):
-	if user.isadmin:
+	if user.isadmin and user.currentAdmin:
 		return True
 	else :
 		return False
 
+
+def conv_time(t):
+	dt = datetime.fromtimestamp(t)
+	return dt
 
 # def gen_output():
 # 	use = UserReg_class()

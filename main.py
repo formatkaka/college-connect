@@ -148,6 +148,8 @@ class EventRegistration(Resource):
 											   data['about'],
 											   data['seats'],
 											   data['venue'],
+											   conv_time(data['sdt']),
+											   conv_time(data['edt']),
 											   user.id)
 				if user_is_admin(user):
 					event.verified = True
@@ -156,8 +158,9 @@ class EventRegistration(Resource):
 				else :
 					return jsonify({"Status":"Some error occured"})
 
-				event.add_contacts(data['contacts'])
-				return jsonify({"Status":"Event Saved"})
+				if event.add_contacts(data['contacts']):
+					event.set_active()
+					return jsonify({"Status":"Event Saved"})
 
 		else :
 			return jsonify({"Status":"Unauthorized access"})
@@ -214,6 +217,6 @@ api.add_resource(WebScrap,'/api/scrap/<string:source>')
 
 if __name__ == "__main__":
 	db.create_all()
-	port = int(os.environ.get('PORT', 5432))
-	app.run(host='0.0.0.0', port=port, debug=True)
-	# app.run(port=5080,debug=True)
+	# port = int(os.environ.get('PORT', 5432))
+	# app.run(host='0.0.0.0', port=port, debug=True)
+	app.run(port=5080,debug=True)
