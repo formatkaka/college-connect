@@ -97,16 +97,17 @@ class UserInformation(Resource):
 		else :
 			return ({"Status":"Invalid User."})	
 
-	arr = ["profile","myclubs","myevents","attending","followed"]
+	
 
 	def get(self,s):
 		user = get_current_user()
+		arr = ["profile","myclubs","myevents","attending","followed"]
 		if user:
 			if s in arr:
 				if s == arr[0]:   # Get current user profile
 
 					info = get_user_info(user)
-					op = UserInfo_P_class(200,info.fullName,info.rollNo,info.emailId,info.mobNo)
+					op = UserInfo_class(200,info.fullName,info.rollNo,info.emailId,info.mobNo)
 					result = userinfo_schema.dump(op)
 					return result.data
 
@@ -229,6 +230,6 @@ api.add_resource(WebScrap,'/api/scrap/<string:source>')
 
 if __name__ == "__main__":
 	db.create_all()
-	port = int(os.environ.get('PORT', 5432))
-	app.run(host='0.0.0.0', port=port, debug=True)
-	# app.run(port=6080,debug=True)
+	# port = int(os.environ.get('PORT', 5432))
+	# app.run(host='0.0.0.0', port=port, debug=True)
+	app.run(port=7080,debug=True)

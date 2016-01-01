@@ -26,10 +26,11 @@ class OrganisedForSchema_Request(Schema):
 class EventRegSchema_Request(Schema):
 	name = fields.Str()
 	about = fields.Str()
-	sdt = fields.DateTime()
-	edt = fields.DateTime()
+	sdt = fields.Float()
+	edt = fields.Float()
 	seats = fields.Int()
 	venue = fields.Str()
+	contacts = fields.Nested(ContactSchema_Request,many=True)
 	# organised_by = fields.Nested(OrganisedBySchema_Request, many=True)
 	# organised_for = fields.Nested(OrganisedForSchema_Request, many=True)
 

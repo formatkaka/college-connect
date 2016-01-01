@@ -240,7 +240,7 @@ class EventsReg(db.Model):
 		db.session.commit()
 
 	def __repr__(self):
-		return "<Name> {0} <Info> {1} <Seats> {2} <Venue> {3} <Verified> {4} <createdBy> {5} ".format(self.eventName,self.eventInfo,self.eventVenue,self.verified,self.createdBy)
+		return "<Name> {0} <Info> {1} <Seats> {2} <Venue> {3} <Verified> {4} <createdBy> {5} ".format(self.eventName,self.eventInfo,self.seats,self.eventVenue,self.verified,self.createdBy)
 
 
 
