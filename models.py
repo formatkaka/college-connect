@@ -209,8 +209,8 @@ class EventsReg(db.Model):
 	startDateTime = db.Column(db.DateTime,nullable=True)
 	endDateTime = db.Column(db.DateTime,nullable=True)
 	totalSeats = db.Column(db.Integer)
-	occupiedSeats = db.Column(db.Integer,nullable=True)
-	leftSeats = db.Column(db.Integer,nullable=True)
+	occupiedSeats = db.Column(db.Integer)
+	leftSeats = db.Column(db.Integer)
 	eventVenue = db.Column(db.String)
 	verified = db.Column(db.Boolean, default=False)	#If the event is verified
 	createdBy = db.Column(db.Integer, db.ForeignKey('users.id')) # The id of the admin it was created by.
@@ -383,6 +383,12 @@ def get_admin_info(club):
 		admins.append(a)
 	return admins
 
+def get_contact_info(event):
+	contacts = []
+	for contact in event.contacts:
+		a = Admins(contact.contactName,contact.contactNumber)
+		contacts.append(a)
+	return contacts
 # def gen_output():
 # 	use = UserReg_class()
 # 	i = a.__dict__['declared_fields']

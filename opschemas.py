@@ -4,6 +4,7 @@
 
 from marshmallow import fields, Schema
 
+
 ##### User Registration #####
 class UserReg_class():
 	def __init__(self,status_code,username,token):
@@ -67,6 +68,18 @@ class Error_Response(Schema):
 	extra_1 = fields.Str()
 	extra_2 = fields.Str()
 
+class Events_class():
+	def __init__(self,status_code,name,about,total_seats,available_seats,occupied_seats,venue,createdby,verified,contacts):
+		self.status_code = status_code
+		self.name = name
+		self.about = about
+		self.total_seats = total_seats
+		self.available_seats = available_seats
+		self.occupied_seats = occupied_seats
+		self.venue = venue
+		self.createdby = createdby
+		self.verified = verified
+		self.contacts = contacts
 
 class Events_Response(Schema):
 	status_code = fields.Int()
@@ -76,11 +89,13 @@ class Events_Response(Schema):
 	available_seats = fields.Int()
 	occupied_seats = fields.Int()
 	venue = fields.Str()
-	createdby = fields.Str()
-	# contacts = 
+	createdby = fields.Int()
+	verified = fields.Str()
+	contacts = fields.Nested(Admin_Response,many=True)
 
 
 userreg_schema = UserReg_Response()
 err_schema = Error_Response()
 userinfo_schema = UserInfo_Response()
 club_schema = Club_response(many=True)
+event_schema = Events_Response(many=True)

@@ -137,7 +137,7 @@ class UserInformation(Resource):
 
 
 class EventRegistration(Resource):
-	def post(self):
+	def post(self,id,s1):
 		user = get_current_user()
 		if user:
 			json_data = request.get_json()
@@ -169,7 +169,29 @@ class EventRegistration(Resource):
 	def get(self):
 		user = get_current_user()
 		if user:
-			pass
+			events_list = EventsReg.query.all()
+			events = []
+			for event in events_list:
+				contacts = get_contact_info(event)
+				e = Events_class(200,
+								event.eventName,
+								event.eventInfo,
+								event.totalSeats,
+								event.leftSeats,
+								event.occupiedSeats,
+								event.eventVenue,
+								event.createdBy,
+								event.verified,
+								contacts
+					)
+				events.append(e)
+				result = event_schema.dump(events)
+				# if result.error == {}:
+			return {"events":result.data}
+				# else :
+				# 	return {"error":result.error}
+		else:
+			return jsonify({"Status":"Unauthorized access"})
 			# events = Events.query.all()
 
 
@@ -187,9 +209,11 @@ class Clubsget(Resource):
 					admins = get_admin_info(club)
 					c = Club_class(club.clubName,club.aboutClub,admins)
 					clubs.append(c)
-
-				return {"clubs":club_schema.dump(clubs)}
-				
+				result = club_schema.dump(clubs)
+				# if result.error == {}:
+				return {"clubs":result.data}
+				# else :
+				# 	return {"error":result.error}
 			elif s2 == "info" and club :
 				result = userinfo_c_schema.dump(club)
 				return result.data
@@ -256,7 +280,7 @@ class WebScrap(Resource):
 
 api.add_resource(UserRegistration,'/api/user/reg')
 api.add_resource(UserInformation,'/api/user/<string:s>')
-api.add_resource(EventRegistration,'/api/events')
+api.add_resource(EventRegistration,'/api/events/')
 api.add_resource(Clubsget,'/api/clubs/<string:s1>/<string:s2>')
 api.add_resource(Testing,'/')
 api.add_resource(WebScrap,'/api/scrap/<string:source>')
