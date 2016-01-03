@@ -30,19 +30,19 @@ class UserRegistration(Resource):
 		
 
 
-		# if username is None:                           # Check if any of auth headers are empty
-		# 	return jsonify({"Status":"Username field empty"})
+		if username is None:                           # Check if any of auth headers are empty
+			return jsonify({"Status":"Username field empty"})
 
-		# if password_hash is None:
-		# 	return jsonify({"Status":"Password field empty"})
+		if password_hash is None:
+			return jsonify({"Status":"Password field empty"})
 
-		# if UserReg.if_username_unique(username):							# Check if the username is unique.If unique , register the user
-		user = UserReg.register_user(username,password_hash)			# and return the auth token generated fot the user with its id
-		token = user.gen_auth_token()
+		if UserReg.if_username_unique(username):							# Check if the username is unique.If unique , register the user
+			user = UserReg.register_user(username,password_hash)			# and return the auth token generated fot the user with its id
+			token = user.gen_auth_token()
 				
-				# op = UserReg_class(200,user.userName,token)
-				# result = userreg_schema.dump(op)
-				# return result.data
+				op = UserReg_class(200,user.userName,token)
+				result = userreg_schema.dump(op)
+				return result.data
 
 		# elif not UserReg.if_username_unique(username) :					# Return error if username not unique
 		return jsonify({"Status":"Username not unique"})
@@ -105,7 +105,7 @@ class UserInformation(Resource):
 		if user:
 			if s in arr:
 				if s == arr[0]:   # Get current user profile
-
+					
 					info = get_user_info(user)
 					op = UserInfo_class(200,info.fullName,info.rollNo,info.emailId,info.mobNo)
 					result = userinfo_schema.dump(op)
@@ -226,7 +226,7 @@ class Clubsget(Resource):
 
 
 class User_Follow_Status(Resource):
-	def get(self,s1,event_or_club_id,s2):
+	def post(self,s1,event_or_club_id,s2):
 		user = get_current_user()
 		if user:
 
