@@ -30,22 +30,22 @@ class UserRegistration(Resource):
 		
 
 
-		if username is None:                           # Check if any of auth headers are empty
-			return jsonify({"Status":"Username field empty"})
+		# if username is None:                           # Check if any of auth headers are empty
+		# 	return jsonify({"Status":"Username field empty"})
 
-		if password_hash is None:
-			return jsonify({"Status":"Password field empty"})
+		# if password_hash is None:
+		# 	return jsonify({"Status":"Password field empty"})
 
-		if UserReg.if_username_unique(username):							# Check if the username is unique.If unique , register the user
-				user = UserReg.register_user(username,password_hash)			# and return the auth token generated fot the user with its id
-				token = user.gen_auth_token()
+		# if UserReg.if_username_unique(username):							# Check if the username is unique.If unique , register the user
+		user = UserReg.register_user(username,password_hash)			# and return the auth token generated fot the user with its id
+		token = user.gen_auth_token()
 				
-				op = UserReg_class(200,user.userName,token)
-				result = userreg_schema.dump(op)
-				return result.data
+				# op = UserReg_class(200,user.userName,token)
+				# result = userreg_schema.dump(op)
+				# return result.data
 
-		elif not UserReg.if_username_unique(username) :					# Return error if username not unique
-			return jsonify({"Status":"Username not unique"})
+		# elif not UserReg.if_username_unique(username) :					# Return error if username not unique
+		return jsonify({"Status":"Username not unique"})
 
 
 	def get(self):
@@ -287,6 +287,13 @@ class EEmail(Resource):
 		return "Sent"
 		# else :
 		# 	return "Error"
+		
+@api.errorhandler(500)
+def some_error():
+	db.session.rollback()
+	return "Retry"
+
+
 
 api.add_resource(UserRegistration,'/api/user/reg')
 api.add_resource(UserInformation,'/api/user/<string:s>')
