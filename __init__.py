@@ -8,3 +8,4 @@ from itsdangerous import TimedJSONWebSignatureSerializer as Serializer, BadSigna
 from flask.ext.httpauth import *
 import time
 from datetime import datetime
+from flask.ext.mail import Mail

@@ -37,7 +37,11 @@ class UserInfo_Response(Schema):
 	rollno = fields.Str()
 	email = fields.Email()
 	mobno = fields.Int()
-
+	# clubs_following = fields.Str(many=True)
+	# events_attending = fields.Str(many=True)
+	# club_if_admin = fields.Str(many=True)
+	# events_created = fields.Str(many=True)
+	
 # 2 - Clubs/Events
 
 class Admins():
@@ -51,15 +55,15 @@ class Admin_Response(Schema):
 
 class Club_class():
 	def __init__(self,name,about,admins):
-		self.clubName = name
-		self.aboutClub = about
+		self.name = name
+		self.about = about
 		self.admins = admins
 
 
 
 class Club_response(Schema):
-	clubName = fields.Str()
-	aboutClub = fields.Str()
+	name = fields.Str()
+	about = fields.Str()
 	admins = fields.Nested(Admin_Response,many=True)
 
 class Error_Response(Schema):

@@ -11,3 +11,13 @@ api = Api(app)
 app.config['SECRET_KEY'] = 's4df65a4g6aksdh<>?:.[],-.906^&#hcsddsf]!@#%^^^&*d[bjhv]'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 auth = HTTPBasicAuth()
+# app.config.from_object(__name__)
+mail = Mail(app)
+
+MAIL_SERVER = 'smtp.gmail.com'
+MAIL_PORT = 465
+MAIL_USE_TLS = False
+MAIL_USE_SSL = True
+MAIL_USERNAME = 'college.connect28@gmail.com'
+MAIL_PASSWORD = 'collegeconnect1234'
+

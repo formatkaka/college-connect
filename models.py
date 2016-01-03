@@ -389,11 +389,4 @@ def get_contact_info(event):
 		a = Admins(contact.contactName,contact.contactNumber)
 		contacts.append(a)
 	return contacts
-# def gen_output():
-# 	use = UserReg_class()
-# 	i = a.__dict__['declared_fields']
-# 	for key_o in i:
-# 		for key_i in use:
-# 			if key_o == key_i:
-# 				setattr(userreg_schema,key_o,getattr(use,key_i))
-# 	return userreg_schema
+

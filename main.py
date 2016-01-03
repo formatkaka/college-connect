@@ -2,7 +2,7 @@ from __init__ import *
 from config import *
 from models import *
 import os,flask,scrap
-
+from flask.ext.mail import Message
 from schemas import *
 from opschemas import *
 
@@ -276,7 +276,17 @@ class WebScrap(Resource):
 		else:
 			return jsonify({"Status":'Invalid request'})
 
-
+class EEmail(Resource):
+	def get(self):
+		sender = "college.connect28@gmail.com"
+		recipient = ["siddhantloya2008@gmail.com"]
+		subject = "Test mail"
+		msg = Message(subject=subject,sender=sender,recipients=recipient[0])
+		msg.body = "Successfully Sent."
+		mail.send(msg)
+		return "Sent"
+		# else :
+		# 	return "Error"
 
 api.add_resource(UserRegistration,'/api/user/reg')
 api.add_resource(UserInformation,'/api/user/<string:s>')
@@ -284,8 +294,8 @@ api.add_resource(EventRegistration,'/api/events/')
 api.add_resource(Clubsget,'/api/clubs/<string:s1>/<string:s2>')
 api.add_resource(Testing,'/')
 api.add_resource(WebScrap,'/api/scrap/<string:source>')
-api.add_resource(User_Follow_Status,'/api/<string:s1>/<int:id>/<string:s2>/')
-
+api.add_resource(User_Follow_Status,'/api/<string:s1>/<int:event_or_club_id>/<string:s2>/')
+api.add_resource(EEmail,'/api/mail')
 
 if __name__ == "__main__":
 	db.create_all()
