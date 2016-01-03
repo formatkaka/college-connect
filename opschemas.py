@@ -56,6 +56,19 @@ class Error_Response(Schema):
 	extra_1 = fields.Str()
 	extra_2 = fields.Str()
 
+
+class Events_Response(Schema):
+	status_code = fields.Int()
+	name = fields.Str()
+	about = fields.Str()
+	total_seats = fields.Int()
+	available_seats = fields.Int()
+	occupied_seats = fields.Int()
+	venue = fields.Str()
+	createdby = fields.Str()
+	# contacts = 
+
+
 userreg_schema = UserReg_Response()
 err_schema = Error_Response()
 userinfo_p_schema = UserInfo_P_Response()

@@ -1,9 +1,33 @@
 from config import *
 from impf import *
 
+
+
+
+####### Reference table for many-many relationships #######
+
+#1 ---> CLUBS FOLLOWED BY USERS
+user_clubs = db.Table('user_clubs',
+	db.Column('club_id', db.Integer, db.ForeignKey('clubs.id')),
+	db.Column('user_id', db.Integer, db.ForeignKey('users.id'))
+)
+
+#2 ---> EVENTS ATTENDING BY USERS
+user_events = db.Table('user_events',
+	db.Column('event_id', db.Integer, db.ForeignKey('events.id')),
+	db.Column('user_id', db.Integer, db.ForeignKey('users.id'))
+)
+
+#3 ---> ADMINS LIST OF A CLUB
+club_admins = db.Table('club_admins',
+	db.Column('user_id', db.Integer, db.ForeignKey('users.id')),
+	db.Column('club_id', db.Integer, db.ForeignKey('clubs.id'))
+)
+
 #################
 #### MODELS #####
 #################
+
 
 class UserReg(db.Model):
 	__tablename__ = "users"
@@ -12,8 +36,14 @@ class UserReg(db.Model):
 	userName = db.Column(db.String,unique=True, nullable=False)
 	passwordHash = db.Column(db.String, nullable=False)
 	isadmin = db.Column(db.Boolean, default=False)
-	activeStatus = db.Column(db.Boolean, default=True)     #For users presently in the college!
-	
+	activeStatus = db.Column(db.Boolean, default=True)
+	isVerified = db.Column(db.Boolean, default=False)
+
+	#For users presently in the college!
+	# clubs_following = db.relationship('ClubInfo', secondary=user_clubs,
+	#   backref='users')
+	# events_attending = db.relationship('EventsReg', secondary=user_events,
+	# 	backref='users')	
 
 	@staticmethod
 	def if_username_unique(username):
@@ -39,7 +69,8 @@ class UserReg(db.Model):
 	def gen_auth_token(self,expiration=1200):
 		 
 		s = Serializer(app.config['SECRET_KEY'], expires_in = expiration)
-		return s.dumps({ 'id': self.id })
+		email_id = UserInfo.query.filter_by(user_id=self.id).first().emailId
+		return s.dumps({ 'email': email_id })
 
 	@staticmethod
 	def verify_auth_token(token):
@@ -50,9 +81,24 @@ class UserReg(db.Model):
 			return None # valid token, but expired
 		except BadSignature:
 			return None # invalid token
-		user = UserReg.query.get(data['id'])
+		user = UserInfo.query.get(data['email'])
 		return user
 
+	def add_club(clubname): 
+		""" Add a user to list of club followers """
+
+		club = ClubInfo.query.filter_by(clubName=clubname).first()
+		club.followers.append(self)
+		db.session.add(club)
+		db.session.commit()
+
+	def add_event(eventname):
+		""" Add a user to list of event followers """
+
+		event = EventsReg.query.filter_by(eventName=eventname).first()
+		event.followers.append(self)
+		db.session.add(event)
+		db,session.commit()
 
 class UserInfo(db.Model):
 	__tablename__ = "userinfo"
@@ -64,6 +110,7 @@ class UserInfo(db.Model):
 	# dob = db.Column(db.DateTime)
 	mobNo = db.Column(db.Integer, unique=True)
 	user_id = db.Column(db.Integer, db.ForeignKey('users.id'), unique=True)
+
 
 
 	@staticmethod
@@ -116,7 +163,11 @@ class ClubInfo(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	clubName = db.Column(db.String, nullable=False)
 	aboutClub = db.Column(db.Text)
-	adminsList = db.relationship('Admins', backref='clubs', lazy='dynamic')
+	adminsList = db.relationship('UserReg', secondary=club_admins,
+		backref='a_clubs')
+	followers = db.relationship('UserReg', secondary=user_clubs,
+		backref='f_clubs')
+
 
 	@staticmethod
 	def reg_club(name,about):
@@ -125,6 +176,17 @@ class ClubInfo(db.Model):
 		db.session.commit()
 		return True
 
+	@staticmethod
+	def reg_admin(club_name,rollno):
+		club = ClubInfo.query.filter_by(clubName).first()
+		admin_id = UserInfo.query.filter_by(rollNo).first()
+		admin = UserReg.query.filter_by(id=admin_id).first()
+		club.adminsList.append(admin)
+		db.session.add(club)
+		db.session.commit()
+
+	# def add_follower(clubname):
+	# 	club = ClubInfo.query.filter_by(clubName=clubname).first()
 
 
 class EventsReg(db.Model):
@@ -147,6 +209,10 @@ class EventsReg(db.Model):
 	# orgBy = db.relationship('OrgBy', backref='event', lazy='dynamic',nullable=True)
 	# orgFor = db.relationship('OrgFor', backref='event', lazy='dynamic',nullable=True)   # The club ,the admin belongs to!
 	contacts = db.relationship('ContactsForEvent',backref='event',lazy='dynamic')	# List of contacts for the event
+	followers = db.relationship('UserReg', secondary=user_events,
+		backref='events')
+
+
 
 	@staticmethod
 	def register_one(name,about,seats,venue,user_id):
@@ -220,11 +286,18 @@ def get_user_club(user):
 
 def get_current_user():
 	""" Find user object if it has valid token or username-password. """
+
 	user = request.authorization
+	if not user:
+		return 
+
 	username_or_token = user.username
+	password = user.password
 	
-	if UserReg.verify_auth_token(username_or_token):
-		return UserReg.verify_auth_token(username_or_token)
+	verified = UserReg.verify_auth_token(username_or_token)
+
+	if verified:
+		return verified
 
 	elif UserReg.query.filter_by(userName=username_or_token).first():
 		return UserReg.query.filter_by(userName=username_or_token).first()
