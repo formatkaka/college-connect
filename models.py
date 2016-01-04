@@ -42,6 +42,11 @@ class UserReg(db.Model):
 	currentAdmin = db.Column(db.Boolean, default=True)
 	activeStatus = db.Column(db.Boolean, default=True)
 	isVerified = db.Column(db.Boolean, default=False)
+	fullName = db.Column(db.String, nullable=False)
+	rollNo = db.Column(db.String, nullable=False, unique=True)
+	emailId = db.Column(db.String, unique=True)
+	mobNo = db.Column(db.Integer, unique=True)	
+
 
 	#For users presently in the college!
 	# clubs_following = db.relationship('ClubInfo', secondary=user_clubs,
@@ -86,7 +91,7 @@ class UserReg(db.Model):
 			return None # valid token, but expired
 		except BadSignature:
 			return None # invalid token
-		user = UserInfo.query.get(data['email'])
+		user = UserReg.query.get(data['email'])
 		return user
 
 	def add_club(clubname): 
@@ -105,44 +110,44 @@ class UserReg(db.Model):
 		db.session.add(event)
 		db,session.commit()
 
-class UserInfo(db.Model):
-	__tablename__ = "userinfo"
-	__table_args__ = {'extend_existing': True}
+# class UserInfo(db.Model):
+# 	__tablename__ = "userinfo"
+# 	__table_args__ = {'extend_existing': True}
 
-	id = db.Column(db.Integer, primary_key=True)
-	fullName = db.Column(db.String, nullable=False)
-	rollNo = db.Column(db.String, nullable=False, unique=True)
-	emailId = db.Column(db.String, unique=True)
-	mobNo = db.Column(db.Integer, unique=True)
-	user_id = db.Column(db.Integer, db.ForeignKey('users.id'), unique=True)
+# 	id = db.Column(db.Integer, primary_key=True)
+# 	fullName = db.Column(db.String, nullable=False)
+# 	rollNo = db.Column(db.String, nullable=False, unique=True)
+# 	emailId = db.Column(db.String, unique=True)
+# 	mobNo = db.Column(db.Integer, unique=True)
+# 	user_id = db.Column(db.Integer, db.ForeignKey('users.id'), unique=True)
 
 
 
-	@staticmethod
-	def save_info(name,rollno,email,mobno,user_id):
-		info = UserInfo(fullName=name,rollNo=rollno,emailId=email,mobNo=mobno,user_id=user_id)
-		db.session.add(info)
-		db.session.commit()
-		return True
+# 	@staticmethod
+# 	def save_info(name,rollno,email,mobno,user_id):
+# 		info = UserInfo(fullName=name,rollNo=rollno,emailId=email,mobNo=mobno,user_id=user_id)
+# 		db.session.add(info)
+# 		db.session.commit()
+# 		return True
 
 	@staticmethod
 	def if_unique(rollno,email,mobno):
 		a,b,c=0,0,0
-		if UserInfo.query.filter_by(rollNo=rollno).first():
+		if UserReg.query.filter_by(rollNo=rollno).first():
 			a=1
-		if UserInfo.query.filter_by(emailId=email).first(): 
+		if UserReg.query.filter_by(emailId=email).first(): 
 			b=1
-		if UserInfo.query.filter_by(mobNo=mobno).first():
+		if UserReg.query.filter_by(mobNo=mobno).first():
 			c=1
 		return err_stat(a,b,c)
 
-	@staticmethod
-	def update_info():
-		pass
+	# @staticmethod
+	# def update_info():
+	# 	pass
 
-	def __repr__(self):
-		return "<id> {0} <rollNo> {1} <fullName> {2} <emailId> {3} <mobNo> {4} ".format(self.id,self.rollNo,self.fullName,self.emailId
-																									,self.mobNo)
+	# def __repr__(self):
+	# 	return "<id> {0} <rollNo> {1} <fullName> {2} <emailId> {3} <mobNo> {4} ".format(self.id,self.rollNo,self.fullName,self.emailId
+																									# ,self.mobNo)
 
 
 class Admins(db.Model):
@@ -184,8 +189,8 @@ class ClubInfo(db.Model):
 
 	@staticmethod
 	def reg_admin(club_name,rollno):
-		club = ClubInfo.query.filter_by(clubName).first()
-		admin_id = UserInfo.query.filter_by(rollNo).first()
+		club = ClubInfo.query.filter_by(clubName=club_name).first()
+		admin_id = UserReg.query.filter_by(rollNo=rollno).first()
 		admin = UserReg.query.filter_by(id=admin_id).first()
 		club.adminsList.append(admin)
 		db.session.add(club)
@@ -226,11 +231,9 @@ class EventsReg(db.Model):
 	contacts = db.relationship('ContactsForEvent',backref='event',lazy='dynamic')	# List of contacts for the event
 	followers = db.relationship('UserReg', secondary=user_events,
 		backref='events')
-# <<<<<<< HEAD
 	activeStatus = db.Column(db.Boolean, default=False)
-# =======
 
-# >>>>>>> baee92788eb13faa096053f020139f90309c3bc3
+
 
 
 	@staticmethod
@@ -252,8 +255,8 @@ class EventsReg(db.Model):
 		return True
 
 	def set_active(self):
-		event.activeStatus=True
-		db.session.add(event)
+		self.activeStatus=True
+		db.session.add(self)
 		db.session.commit()
 
 	def add_follower(self,user):
@@ -273,20 +276,21 @@ class EventsReg(db.Model):
 class OrgBy(db.Model):
 	""" Table containing Club ids which have organised an event (One club or more than one club combined) """
 	__tablename__="orgby"
+	
 	__table_args__ = {'extend_existing': True}
 
 	id = db.Column(db.Integer, primary_key=True)
 	orgBy = db.Column(db.Integer, db.ForeignKey('clubs.id'))
 	event_id = db.Column(db.Integer, db.ForeignKey('events.id'))
 
-class OrgFor(db.Model):
-	""" Table containing Club ids for which a given event is organised """
-	__tablename__="orgfor"
-	__table_args__ = {'extend_existing': True}
+# class OrgFor(db.Model):
+# 	""" Table containing Club ids for which a given event is organised """
+# 	__tablename__="orgfor"
+# 	__table_args__ = {'extend_existing': True}
 
-	id = db.Column(db.Integer, primary_key=True)
-	orgFor = db.Column(db.Integer,db.ForeignKey('clubs.id'))
-	event_id = db.Column(db.Integer, db.ForeignKey('events.id'))
+# 	id = db.Column(db.Integer, primary_key=True)
+# 	orgFor = db.Column(db.Integer,db.ForeignKey('clubs.id'))
+# 	event_id = db.Column(db.Integer, db.ForeignKey('events.id'))
 
 
 class ContactsForEvent(db.Model):
@@ -339,8 +343,8 @@ def get_current_user():
 	
 	verified = UserReg.verify_auth_token(username_or_token)
 
-	# if verified:
-	# 	return verified
+	if verified:
+		return verified
 
 	user_get = UserReg.query.filter_by(userName=username_or_token).first()
 	if user_get:
@@ -352,12 +356,12 @@ def get_current_user():
 		return None 
 
 
-def get_user_info(user):
-	info = UserInfo.query.filter_by(user_id=user.id).first()
-	if info:
-		return info
-	else :
-		return None
+# def get_user_info(user):
+# 	info = UserReg.query.filter_by(user_id=user.id).first()
+# 	if info:
+# 		return info
+# 	else :
+# 		return None
 
 
 def err_stat(a,b,c):

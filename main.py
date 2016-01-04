@@ -35,7 +35,7 @@ class UserRegistration(Resource):
 		password_hash = user.password
 		json_data = request.get_json()
 		data, errors = info_schema.load(json_data)
-# >>>>>>> baee92788eb13faa096053f020139f90309c3bc3
+
 
 		if username is None:                           # Check if any of auth headers are empty
 			return jsonify({"Status":"Username field empty"})
@@ -48,32 +48,33 @@ class UserRegistration(Resource):
 
 
 
-		stat,val = UserInfo.if_unique(data['rollno'],data['email'],data['mobno'])
+		stat,val = UserReg.if_unique(data['rollno'],data['email'],data['mobno'])
 		email_id = data["email"]
 
 		if not stat:
 			return ({"Status":"{0} already reg.".format(val)})
 		else :
-			user_1 = UserReg(userName=username,passwordHash=password_hash)	
-			info = UserInfo(fullName=data['name'],rollNo=data['rollno'],emailId=data['email'],mobNo=data['mobno'])
-			db.session.add_all([user_1,info])
-			db.session.commit()
+				
+			user_1 = UserReg(userName=username,passwordHash=password_hash,fullName=data['name']
+							,rollNo=data['rollno'],emailId=data['email'],mobNo=data['mobno'])
+			db.session.add(user_1)
+			# db.session.commit()
 
-			user_2 = UserReg.query.filter_by(id=user_1.id).first()
-
-			token = user_2.gen_auth_token()								# TODO : Report if info commit fails
+			recieve = "sid.siddhant.loya@gmail.com"
+			token = user_1.gen_auth_token()								# TODO : Report if info commit fails
 			op = UserReg_class(200,user_1.userName,token)
 			result = userreg_schema.dump(op)
 
 			link = 'http://0.0.0.0:8080/api/verify/' + base64.b64encode(email_id)
 
-			msg = Message(subject="<p>Thank You for Registration.</p><p>Confirmation Link.Click Below.</p><p>%s</p>" % link,
-				sender = "college.connect28@gmail.com",
-				recipients = [email_id])
-			msg.body = "Sid"
-			# mail.send(msg)
+			msg = Message(subject="Thank You for Registration.Confirmation Link.Click Below.",
+				sender = "siddhantloya2008@gmail.com",
+				recipients = [recieve])
 
-			return result.data
+			msg.body = "please click on the link {0}".format(link)
+			mail.send(msg)
+
+			return "result.data"
 
 
 
@@ -99,8 +100,8 @@ class UserRegistration(Resource):
 class UserInformation(Resource):
 	""" API to GET user info """
 
-	def post(self,s):
-		return ({"Status":"Invalid Method."})	
+	# def post(self,s):
+	# 	return ({"Status":"Invalid Method."})	
 
 	# arr = ["profile","myclubs","myevents","attending","followed"]
 
@@ -143,27 +144,17 @@ class UserInformation(Resource):
 			if s in arr:
 				if s == arr[0]:   # Get current user profile
 					
-					info = get_user_info(user)
-					op = UserInfo_class(200,info.fullName,info.rollNo,info.emailId,info.mobNo)
+					# info = get_user_info(user)
+					op = UserInfo_class(200,user.fullName,user.rollNo,user.emailId,user.mobNo)
 					result = userinfo_schema.dump(op)
 					return result.data
 
 				elif s == arr[1]: # Get a list of clubs the user is admin of.
 					
 					myclubs = get_user_club(user)
-					op = Nested_output(200,myclubs)
+					op = Nested_output(200,user.myclubs)
 					result = userinfo_schema.dump(myclubs)
 					return result.data
-					
-# =======
-				elif s == arr[1]: # Get a list of clubs the user is admin of.
-					
-					myclubs = get_user_club(user)
-					op = Nested_output(200,myclubs)
-					result = userinfo_c_schema.dump(myclubs)
-					return result.data
-					
-
 
 				elif s == arr[2]: # Get a list of event submitted by a user.
 					pass
@@ -187,7 +178,7 @@ class UserUnique(Resource):
 
 	def post(self,attr):
 		return ({"Status":"Invalid Method."})
-# >>>>>>> baee92788eb13faa096053f020139f90309c3bc3
+
 
 	def get(self,attr):
 		user = request.authorization
@@ -199,7 +190,7 @@ class UserUnique(Resource):
 				return jsonify({"Status" : "False"})
 
 		elif attr == self.field[1] :
-			username = UserInfo.query.filter_by(emailId=user.username).first()
+			username = UserReg.query.filter_by(emailId=user.username).first()
 			if username is None :
 				return jsonify({"Status" : "True"})
 			else :
@@ -216,16 +207,16 @@ class EmailVerification(Resource):
 
 	def get(self,code):
 		email = base64.b64decode(code)
-		user = UserInfo.query.filter_by(emailId = email).first()
+		user = UserReg.query.filter_by(emailId = email).first()
 		user.isVerified = True		# TODO: Checking Email
 		return "<center><h1>You're Now Verified User</h1></center>"
 
 class EventRegistration(Resource):
-	def post(self,id,s1):
+	def post(self):
 		user = get_current_user()
 		if user:
 			json_data = request.get_json()
-			data, errors = event_schema.load(json_data)
+			data, errors = eventreg_schema.load(json_data)
 			if errors :
 				return jsonify(errors)
 			else :
@@ -246,6 +237,8 @@ class EventRegistration(Resource):
 				if event.add_contacts(data['contacts']):
 					event.set_active()
 					return jsonify({"Status":"Event Saved"})
+				else :
+					return jsonify({"Status":"Error"})
 
 		else :
 			return jsonify({"Status":"Unauthorized access"})
@@ -253,7 +246,6 @@ class EventRegistration(Resource):
 	def get(self):
 		user = get_current_user()
 		if user:
-# <<<<<<< HEAD
 			events_list = EventsReg.query.all()
 			events = []
 			for event in events_list:
@@ -272,7 +264,7 @@ class EventRegistration(Resource):
 				events.append(e)
 				result = event_schema.dump(events)
 				# if result.error == {}:
-			return {"events":result.data}
+				return {"events":result.data}
 				# else :
 				# 	return {"error":result.error}
 		else:
@@ -281,7 +273,10 @@ class EventRegistration(Resource):
 
 
 class Clubsget(Resource):
-	
+	def post(self,s1,s2):
+		return {"Staus":"Not allowed"}
+
+
 	def get(self,s1,s2):
 		user = get_current_user()
 		if user:
@@ -302,10 +297,11 @@ class Clubsget(Resource):
 			elif s2 == "info" and club :
 				result = userinfo_c_schema.dump(club)
 				return result.data
-			# elif s2 == "events" and club :
-			# 	result = 
-		# else:
-		# 	return Error04
+			elif s2 == "events" and club :
+				pass
+		
+		else:
+			return jsonify({"Status":"Unauthorized access."})
 
 
 
@@ -343,31 +339,6 @@ class User_Follow_Status(Resource):
 			return jsonify({"Status":"Unauthorized access."})
 
 
-# class Follow_event(Resource):
-# 	def get(self,event_id):
-
-# =======
-			# pass
-# arr2 = ["list]
-
-# class Clubsget(Resource):
-# 	def get(self,s1,s2):
-# 		user = get_current_user()
-# 		if user:
-# 			club = ClubInfo.get_club(s1)
-# 			if s1 == "list" and s2 is None:
-# 				clubs = ClubInfo.query.all()
-# 				result = userinfo_c_schema.dump(clubs)
-# 				return result.data
-# 			elif s2 == "info" and club :
-# 				result = userinfo_c_schema.dump(club)
-# 				return result.data
-# 			elif s2 == "events" and club :
-# 				result = 
-# 		else:
-# 			return Error04
-# >>>>>>> baee92788eb13faa096053f020139f90309c3bc3
-
 sources = ["notice", "seminar", "quick"]
 
 class WebScrap(Resource):
@@ -381,18 +352,6 @@ class WebScrap(Resource):
 			return jsonify(scrapper.get_quicks())
 		else:
 			return jsonify({"Status":'Invalid request'})
-
-class EEmail(Resource):
-	def get(self):
-		sender = "college.connect28@gmail.com"
-		recipient = ["siddhantloya2008@gmail.com"]
-		subject = "Test mail"
-		msg = Message(subject=subject,sender=sender,recipients=recipient[0])
-		msg.body = "Successfully Sent."
-		mail.send(msg)
-		return "Sent"
-		# else :
-		# 	return "Error"
 		
 # @api.errorhandler(500)
 # def some_error():
@@ -404,18 +363,9 @@ class EEmail(Resource):
 
 api.add_resource(UserRegistration,'/api/user/reg')
 api.add_resource(UserInformation,'/api/user/<string:s>')
-# <<<<<<< HEAD
 api.add_resource(EventRegistration,'/api/events/')
 api.add_resource(Clubsget,'/api/clubs/<string:s1>/<string:s2>')
-# =======
-# api.add_resource(EventRegistration,'/api/events')
 api.add_resource(UserUnique,'/api/unique/<string:attr>')
-api.add_resource(EmailVerification,'/api/verify/<string:code>')
-# <<<<<<< HEAD
-# api.add_resource(Clubsget,'/api/clubs/<string:s1>/<string:s2>')
-# =======
-# api.add_resource(Clubsget,'/clubs/')
-# >>>>>>> baee92788eb13faa096053f020139f90309c3bc3
 api.add_resource(Testing,'/')
 api.add_resource(WebScrap,'/api/scrap/<string:source>')
 api.add_resource(User_Follow_Status,'/api/<string:s1>/<int:event_or_club_id>/<string:s2>/')
@@ -426,9 +376,9 @@ if __name__ == "__main__":
 # <<<<<<< HEAD
 	# port = int(os.environ.get('PORT', 5432))
 	# app.run(host='0.0.0.0', port=port, debug=True)
-	app.run(port=7080,debug=True)
+	app.run(port=6080,debug=True)
 # =======
-	port = int(os.environ.get('PORT', 8080))
-	app.run(host='0.0.0.0', port=port, debug=True)
+	# port = int(os.environ.get('PORT', 8080))
+	# app.run(host='0.0.0.0', port=port, debug=True)
 	# app.run(port=5080,debug=True)
 # >>>>>>> baee92788eb13faa096053f020139f90309c3bc3

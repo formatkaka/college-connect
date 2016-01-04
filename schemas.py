@@ -43,7 +43,7 @@ class AdminSchema_Request(Schema):
 
 
 contact_schema = ContactSchema_Request(many=True)
-event_schema = EventRegSchema_Request()
+eventreg_schema = EventRegSchema_Request()
 club_schema = ClubRegSchema_Request()
 info_schema = UserInfoSchema_Request()
 # class UserSchema(Schema):
