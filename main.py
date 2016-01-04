@@ -55,7 +55,7 @@ class UserRegistration(Resource):
 			user_1 = UserReg(userName=username,passwordHash=password_hash,fullName=data['name']
 							,rollNo=data['rollno'],emailId=data['email'],mobNo=data['mobno'])
 			db.session.add(user_1)
-			# db.session.commit()
+			db.session.commit()
 
 			recieve = "sid.siddhant.loya@gmail.com"
 			token = user_1.gen_auth_token()								# TODO : Report if info commit fails
@@ -370,7 +370,7 @@ api.add_resource(User_Follow_Status,'/api/<string:s1>/<int:event_or_club_id>/<st
 
 if __name__ == "__main__":
 	db.create_all()
-	port = int(os.environ.get('PORT', 5432))
-	app.run(host='0.0.0.0', port=port, debug=True)
-	# app.run(port=6080,debug=True)
+	# port = int(os.environ.get('PORT', 5432))
+	# app.run(host='0.0.0.0', port=port, debug=True)
+	app.run(port=6080,debug=True)
 
