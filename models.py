@@ -24,6 +24,8 @@ club_admins = db.Table('club_admins',
 	db.Column('club_id', db.Integer, db.ForeignKey('clubs.id'))
 )
 
+
+
 #################
 #### MODELS #####
 #################
@@ -35,15 +37,16 @@ class UserReg(db.Model):
 
 	id = db.Column(db.Integer, primary_key=True)
 	userName = db.Column(db.String,unique=True, nullable=False)
-	passwordHash = db.Column(db.String, nullable=False)
-	
+	passwordHash = db.Column(db.String, nullable=False)	
 	isadmin = db.Column(db.Boolean, default=False)
 	currentAdmin = db.Column(db.Boolean, default=True)
 	activeStatus = db.Column(db.Boolean, default=True)
+	isVerified = db.Column(db.Boolean, default=False)
 
 	#For users presently in the college!
 	# clubs_following = db.relationship('ClubInfo', secondary=user_clubs,
-    #   backref='users')
+	#   backref='users')
+# >>>>>>> baee92788eb13faa096053f020139f90309c3bc3
 	# events_attending = db.relationship('EventsReg', secondary=user_events,
 	# 	backref='users')	
 
@@ -71,7 +74,8 @@ class UserReg(db.Model):
 	def gen_auth_token(self,expiration=1200):
 		 
 		s = Serializer(app.config['SECRET_KEY'], expires_in = expiration)
-		return s.dumps({ 'id': self.id })
+		# email_id = UserInfo.query.filter_by(user_id=self.id).first().emailId
+		return s.dumps({ 'email': self.id })
 
 	@staticmethod
 	def verify_auth_token(token):
@@ -82,7 +86,7 @@ class UserReg(db.Model):
 			return None # valid token, but expired
 		except BadSignature:
 			return None # invalid token
-		user = UserReg.query.get(data['id'])
+		user = UserInfo.query.get(data['email'])
 		return user
 
 	def add_club(clubname): 
@@ -109,7 +113,6 @@ class UserInfo(db.Model):
 	fullName = db.Column(db.String, nullable=False)
 	rollNo = db.Column(db.String, nullable=False, unique=True)
 	emailId = db.Column(db.String, unique=True)
-	dob = db.Column(db.DateTime)
 	mobNo = db.Column(db.Integer, unique=True)
 	user_id = db.Column(db.Integer, db.ForeignKey('users.id'), unique=True)
 
@@ -142,20 +145,20 @@ class UserInfo(db.Model):
 																									,self.mobNo)
 
 
-# class Admins(db.Model):
-# 	""" Table containing all the verified Admins """
-# 	__table_args__ = {'extend_existing': True}
-# 	__tablename__ = "admins"
+class Admins(db.Model):
+	""" Table containing all the verified Admins """
+	__table_args__ = {'extend_existing': True}
+	__tablename__ = "admins"
 
-# 	id = db.Column(db.Integer, primary_key=True)
-# 	club_id = db.Column(db.Integer, db.ForeignKey('clubs.id'))
-# 	student_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-# 	current_admin = db.Column(db.Boolean,default=True)
+	id = db.Column(db.Integer, primary_key=True)
+	club_id = db.Column(db.Integer, db.ForeignKey('clubs.id'))
+	student_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+	current_admin = db.Column(db.Boolean,default=True)
 
-# 	@staticmethod
-# 	def register_admin(s_id,c_id):
-# 		admin = Admins(club_id=c_id,student_id=s_id)
-# 		db.session.add(admin)
+	@staticmethod
+	def register_admin(s_id,c_id):
+		admin = Admins(club_id=c_id,student_id=s_id)
+		db.session.add(admin)
 
 
 class ClubInfo(db.Model):
@@ -188,10 +191,15 @@ class ClubInfo(db.Model):
 		db.session.add(club)
 		db.session.commit()
 
+# <<<<<<< HEAD
 	def add_follower(self,user):
 		self.followers.append(user)
 		db.session.add(self)
 		db.session.commit()
+# =======
+# 	# def add_follower(clubname):
+# 	# 	club = ClubInfo.query.filter_by(clubName=clubname).first()
+# >>>>>>> baee92788eb13faa096053f020139f90309c3bc3
 
 	def remove_follower(self,user):
 		self.followers.remove(user)
@@ -218,7 +226,11 @@ class EventsReg(db.Model):
 	contacts = db.relationship('ContactsForEvent',backref='event',lazy='dynamic')	# List of contacts for the event
 	followers = db.relationship('UserReg', secondary=user_events,
 		backref='events')
+# <<<<<<< HEAD
 	activeStatus = db.Column(db.Boolean, default=False)
+# =======
+
+# >>>>>>> baee92788eb13faa096053f020139f90309c3bc3
 
 
 	@staticmethod
@@ -315,21 +327,27 @@ def get_user_club(user):
 def get_current_user():
 	""" Find user object if it has valid token or username-password. """
 
+# Incorrect credentials
 
 	user = request.authorization
 
-	user = request.authorization
 	if not user:
-		return 
+		return jsonify({"Status":"Empty headers."})
 
 	username_or_token = user.username
+	password = user.password
 	
-	if UserReg.verify_auth_token(username_or_token):
-		return UserReg.verify_auth_token(username_or_token)
+	verified = UserReg.verify_auth_token(username_or_token)
 
-	elif UserReg.query.filter_by(userName=username_or_token).first():
-		return UserReg.query.filter_by(userName=username_or_token).first()
+	# if verified:
+	# 	return verified
 
+	user_get = UserReg.query.filter_by(userName=username_or_token).first()
+	if user_get:
+		if user_get.check_password_hash(password):
+			return UserReg.query.filter_by(userName=username_or_token).first()
+		else :
+			return None
 	else :
 		return None 
 

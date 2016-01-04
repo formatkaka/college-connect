@@ -72,6 +72,7 @@ class Error_Response(Schema):
 	extra_1 = fields.Str()
 	extra_2 = fields.Str()
 
+
 class Events_class():
 	def __init__(self,status_code,name,about,total_seats,available_seats,occupied_seats,venue,createdby,verified,contacts):
 		self.status_code = status_code
@@ -93,9 +94,14 @@ class Events_Response(Schema):
 	available_seats = fields.Int()
 	occupied_seats = fields.Int()
 	venue = fields.Str()
+# <<<<<<< HEAD
 	createdby = fields.Int()
 	verified = fields.Str()
 	contacts = fields.Nested(Admin_Response,many=True)
+# =======
+	createdby = fields.Str()
+	# contacts = 
+# >>>>>>> baee92788eb13faa096053f020139f90309c3bc3
 
 
 userreg_schema = UserReg_Response()
