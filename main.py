@@ -2,13 +2,10 @@ from __init__ import *
 from config import *
 from models import *
 import os,flask,scrap
-# <<<<<<< HEAD
 from flask.ext.mail import Message
-# =======
 from flask_mail import Message
 import base64
 
-# >>>>>>> baee92788eb13faa096053f020139f90309c3bc3
 from schemas import *
 from opschemas import *
 
@@ -373,12 +370,7 @@ api.add_resource(User_Follow_Status,'/api/<string:s1>/<int:event_or_club_id>/<st
 
 if __name__ == "__main__":
 	db.create_all()
-# <<<<<<< HEAD
-	# port = int(os.environ.get('PORT', 5432))
-	# app.run(host='0.0.0.0', port=port, debug=True)
-	app.run(port=6080,debug=True)
-# =======
-	# port = int(os.environ.get('PORT', 8080))
-	# app.run(host='0.0.0.0', port=port, debug=True)
-	# app.run(port=5080,debug=True)
-# >>>>>>> baee92788eb13faa096053f020139f90309c3bc3
+	port = int(os.environ.get('PORT', 5432))
+	app.run(host='0.0.0.0', port=port, debug=True)
+	# app.run(port=6080,debug=True)
+
