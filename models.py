@@ -130,16 +130,16 @@ class UserReg(db.Model):
 # 		db.session.commit()
 # 		return True
 
-	# @staticmethod
-	# def if_unique(rollno,email,mobno):
-	# 	a,b,c=0,0,0
-	# 	if UserReg.query.filter_by(rollNo=rollno).first():
-	# 		a=1
-	# 	if UserReg.query.filter_by(emailId=email).first(): 
-	# 		b=1
-	# 	if UserReg.query.filter_by(mobNo=mobno).first():
-	# 		c=1
-	# 	return err_stat(a,b,c)
+	@staticmethod
+	def if_unique(rollno,email,mobno):
+		a,b,c=0,0,0
+		if UserReg.query.filter_by(rollNo=rollno).first():
+			a=1
+		if UserReg.query.filter_by(emailId=email).first(): 
+			b=1
+		if UserReg.query.filter_by(mobNo=mobno).first():
+			c=1
+		return err_stat(a,b,c)
 
 	# @staticmethod
 	# def update_info():
