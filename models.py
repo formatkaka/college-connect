@@ -72,8 +72,8 @@ class UserReg(db.Model):
 	def gen_auth_token(self,expiration=1200):
 		 
 		s = Serializer(app.config['SECRET_KEY'], expires_in = expiration)
-		email_id = UserInfo.query.filter_by(user_id=self.id).first().emailId
-		return s.dumps({ 'email': self.email_id })
+		# email_id = UserInfo.query.filter_by(user_id=self.id).first().emailId
+		return s.dumps({ 'email': self.emailId })
 
 	@staticmethod
 	def verify_auth_token(token):
@@ -308,8 +308,8 @@ def get_current_user():
 
 	user = request.authorization
 
-	if not user:
-		return jsonify({"Status":"Empty headers."})
+	if  not user:
+		return None,"Empty payload"
 
 	username_or_token = user.username
 	password = user.password
@@ -317,16 +317,16 @@ def get_current_user():
 	verified = UserReg.verify_auth_token(username_or_token)
 
 	if verified:
-		return verified
+		return verified,None
 
 	user_get = UserReg.query.filter_by(userName=username_or_token).first()
 	if user_get:
 		if user_get.check_password_hash(password):
-			return UserReg.query.filter_by(userName=username_or_token).first()
+			return user_get,None
 		else :
-			return None
+			return None,"Incorrect username or password"
 	else :
-		return None 
+		return None,"Token error" 
 
 
 # def get_user_info(user):

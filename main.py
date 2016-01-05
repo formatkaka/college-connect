@@ -78,10 +78,8 @@ class UserRegistration(Resource):
 	def get(self):
 		""" Obtain/Generate token for user """
 
-		user = get_current_user()
+		user,message = get_current_user()
 
-		if user is False:
-			return jsonify({"Status":"Dont shit here."})
 
 		if user:
 			token = user.gen_auth_token()
@@ -91,7 +89,7 @@ class UserRegistration(Resource):
 			return result.data
 		
 		else:
-			return jsonify({"Status":"Unauthorized"})
+			return jsonify({"Status":message})
 
 
 class UserInformation(Resource):
