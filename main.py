@@ -62,7 +62,7 @@ class UserRegistration(Resource):
 			op = UserReg_class(200,user_1.userName,token)
 			result = userreg_schema.dump(op)
 
-			link = 'http://0.0.0.0:8080/api/verify/' + base64.b64encode(email_id)
+			link = 'https://sheltered-fjord-8731.herokuapp.com/api/verify/' + base64.b64encode(email_id)
 
 			msg = Message(subject="Thank You for Registration.Confirmation Link.Click Below.",
 				sender = "siddhantloya2008@gmail.com",
@@ -366,6 +366,7 @@ api.add_resource(UserUnique,'/api/unique/<string:attr>')
 api.add_resource(Testing,'/')
 api.add_resource(WebScrap,'/api/scrap/<string:source>')
 api.add_resource(User_Follow_Status,'/api/<string:s1>/<int:event_or_club_id>/<string:s2>/')
+api.add_resource(EmailVerification,'/api/verify/<string:code>')
 # api.add_resource(EEmail,'/api/mail')
 
 if __name__ == "__main__":
