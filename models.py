@@ -39,21 +39,14 @@ class UserReg(db.Model):
 	userName = db.Column(db.String,unique=True, nullable=False)
 	passwordHash = db.Column(db.String, nullable=False)	
 	isadmin = db.Column(db.Boolean, default=False)
-	currentAdmin = db.Column(db.Boolean, default=True)
-	activeStatus = db.Column(db.Boolean, default=True)
-	isVerified = db.Column(db.Boolean, default=False)
-	fullName = db.Column(db.String, nullable=False)
+	currentAdmin = db.Column(db.Boolean, default=True)	# Current admin or Previous admin.
+	activeStatus = db.Column(db.Boolean, default=True)  # Account active or not.
+	isVerified = db.Column(db.Boolean, default=False)   # Verified by Email.
+	fullName = db.Column(db.String, nullable=False)		
 	rollNo = db.Column(db.String, nullable=False, unique=True)
 	emailId = db.Column(db.String, unique=True)
 	mobNo = db.Column(db.Integer, unique=True)	
 
-
-	#For users presently in the college!
-	# clubs_following = db.relationship('ClubInfo', secondary=user_clubs,
-	#   backref='users')
-# >>>>>>> baee92788eb13faa096053f020139f90309c3bc3
-	# events_attending = db.relationship('EventsReg', secondary=user_events,
-	# 	backref='users')	
 
 	@staticmethod
 	def if_username_unique(username):
@@ -79,8 +72,8 @@ class UserReg(db.Model):
 	def gen_auth_token(self,expiration=1200):
 		 
 		s = Serializer(app.config['SECRET_KEY'], expires_in = expiration)
-		# email_id = UserInfo.query.filter_by(user_id=self.id).first().emailId
-		return s.dumps({ 'email': self.id })
+		email_id = UserInfo.query.filter_by(user_id=self.id).first().emailId
+		return s.dumps({ 'email': self.email_id })
 
 	@staticmethod
 	def verify_auth_token(token):
@@ -110,26 +103,6 @@ class UserReg(db.Model):
 		db.session.add(event)
 		db,session.commit()
 
-# class UserInfo(db.Model):
-# 	__tablename__ = "userinfo"
-# 	__table_args__ = {'extend_existing': True}
-
-# 	id = db.Column(db.Integer, primary_key=True)
-# 	fullName = db.Column(db.String, nullable=False)
-# 	rollNo = db.Column(db.String, nullable=False, unique=True)
-# 	emailId = db.Column(db.String, unique=True)
-# 	mobNo = db.Column(db.Integer, unique=True)
-# 	user_id = db.Column(db.Integer, db.ForeignKey('users.id'), unique=True)
-
-
-
-# 	@staticmethod
-# 	def save_info(name,rollno,email,mobno,user_id):
-# 		info = UserInfo(fullName=name,rollNo=rollno,emailId=email,mobNo=mobno,user_id=user_id)
-# 		db.session.add(info)
-# 		db.session.commit()
-# 		return True
-
 	@staticmethod
 	def if_unique(rollno,email,mobno):
 		a,b,c=0,0,0
@@ -150,20 +123,20 @@ class UserReg(db.Model):
 																									# ,self.mobNo)
 
 
-class Admins(db.Model):
-	""" Table containing all the verified Admins """
-	__table_args__ = {'extend_existing': True}
-	__tablename__ = "admins"
+# class Admins(db.Model):
+# 	""" Table containing all the verified Admins """
+# 	__table_args__ = {'extend_existing': True}
+# 	__tablename__ = "admins"
 
-	id = db.Column(db.Integer, primary_key=True)
-	club_id = db.Column(db.Integer, db.ForeignKey('clubs.id'))
-	student_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-	current_admin = db.Column(db.Boolean,default=True)
+# 	id = db.Column(db.Integer, primary_key=True)
+# 	club_id = db.Column(db.Integer, db.ForeignKey('clubs.id'))
+# 	student_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+# 	current_admin = db.Column(db.Boolean,default=True)
 
-	@staticmethod
-	def register_admin(s_id,c_id):
-		admin = Admins(club_id=c_id,student_id=s_id)
-		db.session.add(admin)
+# 	@staticmethod
+# 	def register_admin(s_id,c_id):
+# 		admin = Admins(club_id=c_id,student_id=s_id)
+# 		db.session.add(admin)
 
 
 class ClubInfo(db.Model):
@@ -190,8 +163,8 @@ class ClubInfo(db.Model):
 	@staticmethod
 	def reg_admin(club_name,rollno):
 		club = ClubInfo.query.filter_by(clubName=club_name).first()
-		admin_id = UserReg.query.filter_by(rollNo=rollno).first()
-		admin = UserReg.query.filter_by(id=admin_id).first()
+		# admin_id = UserReg.query.filter_by(rollNo=rollno).first()
+		admin = UserReg.query.filter_by(rollNo=rollno).first()
 		club.adminsList.append(admin)
 		db.session.add(club)
 		db.session.commit()

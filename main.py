@@ -97,41 +97,8 @@ class UserRegistration(Resource):
 class UserInformation(Resource):
 	""" API to GET user info """
 
-	# def post(self,s):
-	# 	return ({"Status":"Invalid Method."})	
-
-	# arr = ["profile","myclubs","myevents","attending","followed"]
-
-	# def get(self,s):
-	# 	user = get_current_user()
-	# 	arr = self.arr
-	# 	if user:
-
-	# 		if s == "profile":
-	# 			json_data = request.get_json()
-	# 			data, errors = info_schema.load(json_data)
-	# 			if errors :
-	# 				return jsonify(errors)
-	# 			else :
-					
-	# 				stat,val = UserInfo.if_unique(data['rollno'],data['email'],data['mobno'])
-	# 				if not stat:
-	# 					return ({"Status":"{0} already reg.".format(val)})
-	# 				else :
-	# 					if UserInfo.save_info(data['name'],data['rollno'],data['email'],data['mobno'],user_id):
-	# 						return ({"Status":"Information saved."})
-	# 					else :
-	# 						return ({"Status":"Some error occured."})
-
-	# 		if s in arr:
-	# 			if s == arr[0]:   
-
-	# 				info = get_user_info(user)
-	# 				op = UserInfo_P_class(200,info.fullName,info.rollNo,info.emailId,info.mobNo)
-	# 				result = userinfo_p_schema.dump(op)
-	# 				return result.data
-
-
+	def post(self,s):
+		return ({"Status":"Invalid Method."})	
 	
 
 	def get(self,s):
