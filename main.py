@@ -66,7 +66,7 @@ class UserRegistration(Resource):
 
 			msg = Message(subject="Thank You for Registration.Confirmation Link.Click Below.",
 				sender = "siddhantloya2008@gmail.com",
-				recipients = [recieve])
+				recipients = [email_id])
 
 			msg.body = "please click on the link {0}".format(link)
 			mail.send(msg)
