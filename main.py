@@ -206,6 +206,8 @@ class EmailVerification(Resource):
 		email = base64.b64decode(code)
 		user = UserReg.query.filter_by(emailId = email).first()
 		user.isVerified = True		# TODO: Checking Email
+		db.session.add(user)
+		db.session.commit()
 		return "<center><h1>You're Now Verified User</h1></center>"
 
 class EventRegistration(Resource):
