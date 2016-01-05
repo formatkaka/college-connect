@@ -373,8 +373,7 @@ def get_admin_info(club):
 	admins = []
 
 	for admin in club.adminsList:
-		info = get_user_info(admin)
-		a = Admins(admin.userName,info.mobNo)
+		a = Admins(admin.fullName,admin.mobNo)
 		admins.append(a)
 	return admins
 
