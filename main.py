@@ -65,13 +65,13 @@ class UserRegistration(Resource):
 			link = 'https://sheltered-fjord-8731.herokuapp.com/api/verify/' + base64.b64encode(email_id)
 
 			msg = Message(subject="Thank You for Registration.Confirmation Link.Click Below.",
-				sender = "siddhantloya2008@gmail.com",
+				sender = "college.connect28@gmail.com",
 				recipients = [email_id])
 
 			msg.body = "please click on the link {0}".format(link)
 			mail.send(msg)
 
-			return "result.data"
+			return result.data
 
 
 
@@ -177,7 +177,7 @@ class EmailVerification(Resource):
 
 class EventRegistration(Resource):
 	def post(self):
-		user = get_current_user()
+		user,message = get_current_user()
 		if user:
 			json_data = request.get_json()
 			data, errors = eventreg_schema.load(json_data)
@@ -205,10 +205,10 @@ class EventRegistration(Resource):
 					return jsonify({"Status":"Error"})
 
 		else :
-			return jsonify({"Status":"Unauthorized access"})
+			return jsonify({"Status":message})
 
 	def get(self):
-		user = get_current_user()
+		user,message = get_current_user()
 		if user:
 			events_list = EventsReg.query.all()
 			events = []
@@ -232,7 +232,7 @@ class EventRegistration(Resource):
 				# else :
 				# 	return {"error":result.error}
 		else:
-			return jsonify({"Status":"Unauthorized access"})
+			return jsonify({"Status":message})
 			# events = Events.query.all()
 
 
@@ -242,7 +242,7 @@ class Clubsget(Resource):
 
 
 	def get(self,s1,s2):
-		user = get_current_user()
+		user,message = get_current_user()
 		if user:
 			if s1 == "list":
 
@@ -265,14 +265,14 @@ class Clubsget(Resource):
 				pass
 		
 		else:
-			return jsonify({"Status":"Unauthorized access."})
+			return jsonify({"Status":message})
 
 
 
 
 class User_Follow_Status(Resource):
 	def post(self,s1,event_or_club_id,s2):
-		user = get_current_user()
+		user,message = get_current_user()
 		if user:
 
 			if s1 == "club" and s2 == "follow":
@@ -300,7 +300,7 @@ class User_Follow_Status(Resource):
 
 
 		else :
-			return jsonify({"Status":"Unauthorized access."})
+			return jsonify({"Status":message})
 
 
 sources = ["notice", "seminar", "quick"]
@@ -317,6 +317,18 @@ class WebScrap(Resource):
 		else:
 			return jsonify({"Status":'Invalid request'})
 		
+
+class Testing1(Resource):
+	def get(self):
+		user = request.authorization
+		if not user.username:
+			return "No username"
+		elif not user.password:
+			return "No password"
+		elif user.password == "null":
+			return "Token"
+		else:
+			return "OK"
 # @api.errorhandler(500)
 # def some_error():
 # 	db.session.rollback()
@@ -334,7 +346,8 @@ api.add_resource(Testing,'/')
 api.add_resource(WebScrap,'/api/scrap/<string:source>')
 api.add_resource(User_Follow_Status,'/api/<string:s1>/<int:event_or_club_id>/<string:s2>/')
 api.add_resource(EmailVerification,'/api/verify/<string:code>')
-# api.add_resource(EEmail,'/api/mail')
+api.add_resource(Testing1,'/api/test')
+
 
 if __name__ == "__main__":
 	db.create_all()

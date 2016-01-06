@@ -81,11 +81,11 @@ class UserReg(db.Model):
 		try:
 			data = s.loads(token)
 		except SignatureExpired:
-			return None # valid token, but expired
+			return None,0 # valid token, but expired
 		except BadSignature:
-			return None # invalid token
+			return None,1 # invalid token
 		user = UserReg.query.get(data['email'])
-		return user
+		return user,None
 
 	def add_club(clubname): 
 		""" Add a user to list of club followers """
@@ -308,27 +308,40 @@ def get_current_user():
 
 	user = request.authorization
 
-	if  not user:
+	if  not user.username and not user.password:
 		return None,"Empty payload"
 
 	username_or_token = user.username
 	password = user.password
 	
-	verified = UserReg.verify_auth_token(username_or_token)
+	verified,value = UserReg.verify_auth_token(username_or_token)
 
-	if verified:
-		return verified,None
+	if user.password == "None":
 
-	user_get = UserReg.query.filter_by(userName=username_or_token).first()
-	if user_get:
-		if user_get.check_password_hash(password):
-			return user_get,None
+		if verified:
+			return verified, None
+
+		elif not verified and value == 0:
+			return None,"Expired"
+
+		elif not verified and value == 1:
+			return None,"Invalid Token."
+
 		else :
-			return None,"Incorrect username or password"
+			return None,"Some error occured"
+
+	if user.password != "None":
+		user_get = UserReg.query.filter_by(userName=username_or_token).first()
+		if user_get:
+			if user_get.check_password_hash(password):
+				return user_get,None
+			else :
+				return None,"Incorrect username or password"
+		else :
+			return None,"Incorrect username or password" 
+
 	else :
-		return None,"Token error" 
-
-
+		return None,"Invalid Request"
 # def get_user_info(user):
 # 	info = UserReg.query.filter_by(user_id=user.id).first()
 # 	if info:
