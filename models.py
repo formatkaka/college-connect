@@ -307,7 +307,7 @@ def get_current_user():
 
 	user = request.authorization
 
-	if  not user.username and not user.password:
+	if  not user:
 		return None,"Empty payload"
 
 	username_or_token = user.username
