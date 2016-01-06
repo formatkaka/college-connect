@@ -1,4 +1,5 @@
 from config import *
+# from impf import *
 from opschemas import *
 
 
@@ -307,7 +308,7 @@ def get_current_user():
 
 	user = request.authorization
 
-	if  not user:
+	if  user.username=="" and user.password=="":
 		return None,"Empty payload"
 
 	username_or_token = user.username
