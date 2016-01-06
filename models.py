@@ -308,6 +308,9 @@ def get_current_user():
 
 	user = request.authorization
 
+	if not user:
+		return None,"Invalid.Login Required to access."
+
 	if  user.username=="" and user.password=="":
 		return None,"Empty payload"
 
