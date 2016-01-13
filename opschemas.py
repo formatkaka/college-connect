@@ -5,6 +5,10 @@
 from marshmallow import fields, Schema
 
 
+
+
+
+
 ##### User Registration #####
 class UserReg_class():
 	def __init__(self,status_code,username,token):
@@ -22,9 +26,13 @@ class UserReg_Response(Schema):
 
 # 1 - Personal Info
 
-class UserInfo_class():
-	def __init__(self,status_code,name,rollno,email,mobno):
-		self.status_code = status_code
+class UserInfo_class(Schema):
+
+	def __init__(self,admin,events,clubsfollowed,eventsattending,name,rollno,email,mobno):
+		self.admin = admin
+		self.events = events
+		self.clubsfollowed = clubsfollowed 
+		self.eventsattending = eventsattending
 		self.name = name
 		self.rollno = rollno
 		self.email = email
@@ -37,6 +45,7 @@ class UserInfo_Response(Schema):
 	rollno = fields.Str()
 	email = fields.Email()
 	mobno = fields.Int()
+	# eventsattending = fields.Nested
 	# clubs_following = fields.Str(many=True)
 	# events_attending = fields.Str(many=True)
 	# club_if_admin = fields.Str(many=True)

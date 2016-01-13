@@ -1,7 +1,7 @@
 from config import *
 # from impf import *
 from opschemas import *
-
+from sqlalchemy.dialects.postgresql import ARRAY
 
 
 ####### Reference table for many-many relationships #######
@@ -23,7 +23,11 @@ club_admins = db.Table('club_admins',
 	db.Column('user_id', db.Integer, db.ForeignKey('users.id')),
 	db.Column('club_id', db.Integer, db.ForeignKey('clubs.id'))
 )
-
+#4 ---> EVENTS-CLUBS TABLE
+club_events = db.Table('club_events',
+	db.Column('clubs_id',db.Integer,db.ForeignKey('clubs.id')),
+	db.Column('events_id',db.Integer,db.ForeignKey('events.id'))
+)
 
 
 #################
@@ -33,7 +37,7 @@ club_admins = db.Table('club_admins',
 
 class UserReg(db.Model):
 	__tablename__ = "users"
-	__table_args__ = {'extend_existing': True}
+	# __table_args__ = {'extend_existing': True}
 
 	id = db.Column(db.Integer, primary_key=True)
 	userName = db.Column(db.String,unique=True, nullable=False)
@@ -72,7 +76,6 @@ class UserReg(db.Model):
 	def gen_auth_token(self,expiration=1200):
 		 
 		s = Serializer(app.config['SECRET_KEY'], expires_in = expiration)
-		# email_id = UserInfo.query.filter_by(user_id=self.id).first().emailId
 		return s.dumps({ 'email': self.emailId })
 
 	@staticmethod
@@ -104,39 +107,25 @@ class UserReg(db.Model):
 		db,session.commit()
 
 	@staticmethod
-	def if_unique(rollno,email,mobno):
+	def if_unique(rollno=None,email=None,mobno=None):
 		a,b,c=0,0,0
 		if UserReg.query.filter_by(rollNo=rollno).first():
 			a=1
 		if UserReg.query.filter_by(emailId=email).first(): 
 			b=1
-		if UserReg.query.filter_by(mobNo=mobno).first():
-			c=1
+		if mobno is not None:
+			if UserReg.query.filter_by(mobNo=mobno).first():
+				c=1
 		return err_stat(a,b,c)
 
-	# @staticmethod
-	# def update_info():
-	# 	pass
+	def user_is_admin(self,club):
+		
+		if user.isadmin and user.currentAdmin:
+			return True
+		else :
+			return False
 
-	# def __repr__(self):
-	# 	return "<id> {0} <rollNo> {1} <fullName> {2} <emailId> {3} <mobNo> {4} ".format(self.id,self.rollNo,self.fullName,self.emailId
-																									# ,self.mobNo)
 
-
-# class Admins(db.Model):
-# 	""" Table containing all the verified Admins """
-# 	__table_args__ = {'extend_existing': True}
-# 	__tablename__ = "admins"
-
-# 	id = db.Column(db.Integer, primary_key=True)
-# 	club_id = db.Column(db.Integer, db.ForeignKey('clubs.id'))
-# 	student_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-# 	current_admin = db.Column(db.Boolean,default=True)
-
-# 	@staticmethod
-# 	def register_admin(s_id,c_id):
-# 		admin = Admins(club_id=c_id,student_id=s_id)
-# 		db.session.add(admin)
 
 
 class ClubInfo(db.Model):
@@ -151,7 +140,8 @@ class ClubInfo(db.Model):
 		backref='a_clubs')
 	followers = db.relationship('UserReg', secondary=user_clubs,
 		backref='f_clubs')
-
+	eventsList = db.relationship('EventsReg', secondary=club_events,
+		backref='e_clubs')
 
 	@staticmethod
 	def reg_club(name,about):
@@ -163,21 +153,17 @@ class ClubInfo(db.Model):
 	@staticmethod
 	def reg_admin(club_name,rollno):
 		club = ClubInfo.query.filter_by(clubName=club_name).first()
-		# admin_id = UserReg.query.filter_by(rollNo=rollno).first()
 		admin = UserReg.query.filter_by(rollNo=rollno).first()
 		club.adminsList.append(admin)
 		db.session.add(club)
 		db.session.commit()
 
-# <<<<<<< HEAD
+
 	def add_follower(self,user):
 		self.followers.append(user)
 		db.session.add(self)
 		db.session.commit()
-# =======
-# 	# def add_follower(clubname):
-# 	# 	club = ClubInfo.query.filter_by(clubName=clubname).first()
-# >>>>>>> baee92788eb13faa096053f020139f90309c3bc3
+
 
 	def remove_follower(self,user):
 		self.followers.remove(user)
@@ -205,7 +191,7 @@ class EventsReg(db.Model):
 	followers = db.relationship('UserReg', secondary=user_events,
 		backref='events')
 	activeStatus = db.Column(db.Boolean, default=False)
-
+	time_created = db.Column(db.DateTime,default=datetime.now())
 
 
 
@@ -241,8 +227,8 @@ class EventsReg(db.Model):
 		self.followers.remove(user)
 		db.session.commit()
 
-	def __repr__(self):
-		return "<Name> {0} <Info> {1} <Seats> {2} <Venue> {3} <Verified> {4} <createdBy> {5} ".format(self.eventName,self.eventInfo,self.seats,self.eventVenue,self.verified,self.createdBy)
+	# def __repr__(self):
+	# 	return "<Name> {0} <Info> {1} <Seats> {2} <Venue> {3} <Verified> {4} <createdBy> {5} ".format(self.eventName,self.eventInfo,self.seats,self.eventVenue,self.verified,self.createdBy)
 
 
 
@@ -256,14 +242,14 @@ class OrgBy(db.Model):
 	orgBy = db.Column(db.Integer, db.ForeignKey('clubs.id'))
 	event_id = db.Column(db.Integer, db.ForeignKey('events.id'))
 
-# class OrgFor(db.Model):
-# 	""" Table containing Club ids for which a given event is organised """
-# 	__tablename__="orgfor"
-# 	__table_args__ = {'extend_existing': True}
+class OrgFor(db.Model):
+	""" Table containing Club ids for which a given event is organised """
+	__tablename__="orgfor"
+	__table_args__ = {'extend_existing': True}
 
-# 	id = db.Column(db.Integer, primary_key=True)
-# 	orgFor = db.Column(db.Integer,db.ForeignKey('clubs.id'))
-# 	event_id = db.Column(db.Integer, db.ForeignKey('events.id'))
+	id = db.Column(db.Integer, primary_key=True)
+	orgFor = db.Column(db.Integer,db.ForeignKey('clubs.id'))
+	event_id = db.Column(db.Integer, db.ForeignKey('events.id'))
 
 
 class ContactsForEvent(db.Model):
@@ -285,6 +271,16 @@ class ContactsForEvent(db.Model):
 		db.session.add(contact)
 		db.session.commit()
 
+
+class GCMRegIds(db.Model):
+	""" List of GCM reg Ids"""
+	__tablename__ = "gcmids"
+	__table_args__ = {'extend_existing': True}
+
+	id = db.Column(db.Integer, primary_key=True)
+	arr = db.Column(ARRAY(db.Integer))
+
+	
 ####################################
 ######## HELPER FUNCTIONS ##########
 ####################################
@@ -345,12 +341,6 @@ def get_current_user():
 
 	else :
 		return None,"Invalid Request"
-# def get_user_info(user):
-# 	info = UserReg.query.filter_by(user_id=user.id).first()
-# 	if info:
-# 		return info
-# 	else :
-# 		return None
 
 
 def err_stat(a,b,c):
@@ -372,16 +362,17 @@ def err_stat(a,b,c):
 		return False,7
 
 
-def user_is_admin(user):
-	if user.isadmin and user.currentAdmin:
-		return True
-	else :
-		return False
 
 
-def conv_time(t):
-	dt = datetime.fromtimestamp(t)
-	return dt
+
+def conv_time(unixstamp_or_datetime):
+
+	if isinstance(unixstamp_or_datetime,datetime):
+		return time.mktime(unixstamp_or_datetime.timetuple())
+	elif isinstance(unixstamp_or_datetime,float):
+		return datetime.fromtimestamp(unixstamp_or_datetime)
+
+	# return dt
 
 
 

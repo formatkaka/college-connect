@@ -1,6 +1,8 @@
 from marshmallow import fields, Schema
 
 
+
+
 class UserInfoSchema_Request(Schema):
 	rollno = fields.Str()
 	name = fields.Str()

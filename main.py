@@ -5,9 +5,16 @@ import os,flask,scrap
 from flask.ext.mail import Message
 from flask_mail import Message
 import base64
-
+from sqlalchemy import exc
 from schemas import *
 from opschemas import *
+# from exceptions import UserError,InvalidToken
+
+class UserError(Exception):
+	pass
+
+class InvalidToken(UserError):
+	pass
 
 class Testing(Resource):
 	"""Test Class for API"""
@@ -44,20 +51,28 @@ class UserRegistration(Resource):
 			return jsonify(errors)
 
 
+		if 'mobno' not in data.keys():
+			data['mobno'] = None
+			stat,val = UserReg.if_unique(data['rollno'],data['email'],data['mobno'])
+			email_id = data["email"]
 
-		stat,val = UserReg.if_unique(data['rollno'],data['email'],data['mobno'])
-		email_id = data["email"]
-
-		if not stat:
-			return ({"Status":"{0} already reg.".format(val)})
 		else :
-				
-			user_1 = UserReg(userName=username,passwordHash=password_hash,fullName=data['name']
-							,rollNo=data['rollno'],emailId=data['email'],mobNo=data['mobno'])
-			db.session.add(user_1)
-			db.session.commit()
+			stat,val = UserReg.if_unique(data['rollno'],data['email'],data['mobno'])
+			email_id = data["email"]
 
-			recieve = "sid.siddhant.loya@gmail.com"
+		# if not stat:
+			# return ({"Status":"{0} already reg.".format(val)})
+		if 1==1 :
+			try:		
+				user_1 = UserReg(userName=username,passwordHash=password_hash,fullName=data['name']
+								,rollNo=data['rollno'],emailId=data['email'],mobNo=data['mobno'])
+				db.session.add(user_1)
+				db.session.commit()
+			except exc.IntegrityError:
+				db.session.rollback()
+				raise 
+
+			recieve = ["sid.siddhant.loya@gmail.com","murali.prajapati555@gmail.com"]
 			token = user_1.gen_auth_token()								# TODO : Report if info commit fails
 			op = UserReg_class(200,user_1.userName,token)
 			result = userreg_schema.dump(op)
@@ -66,10 +81,10 @@ class UserRegistration(Resource):
 
 			msg = Message(subject="Thank You for Registration.Confirmation Link.Click Below.",
 				sender = "college.connect28@gmail.com",
-				recipients = [email_id])
+				recipients = recieve)
 
 			msg.body = "please click on the link {0}".format(link)
-			mail.send(msg)
+			# mail.send(msg)
 
 			return result.data
 
@@ -86,11 +101,16 @@ class UserRegistration(Resource):
 			
 			op = UserReg_class(200,user.userName,token)
 			result = userreg_schema.dump(op)
-			return result.data
+			return user.fullName
 		
 		else:
 			return jsonify({"Status":message})
 
+
+class ForgotPassword(Resource):
+	""" API to Reset Password """
+
+	pass
 
 class UserInformation(Resource):
 	""" API to GET user info """
@@ -100,33 +120,17 @@ class UserInformation(Resource):
 	
 
 	def get(self,s):
-		user = get_current_user()
-		arr = ["profile","myclubs","myevents","attending","followed"]
+		user,message = get_current_user()
+
 		if user:
-			if s in arr:
-				if s == arr[0]:   # Get current user profile
-					
-					# info = get_user_info(user)
-					op = UserInfo_class(200,user.fullName,user.rollNo,user.emailId,user.mobNo)
-					result = userinfo_schema.dump(op)
-					return result.data
+			if s == "info":
 
-				elif s == arr[1]: # Get a list of clubs the user is admin of.
-					
-					myclubs = get_user_club(user)
-					op = Nested_output(200,user.myclubs)
-					result = userinfo_schema.dump(myclubs)
-					return result.data
-
-				elif s == arr[2]: # Get a list of event submitted by a user.
-					pass
-
-				elif s == arr[3]: # Get a list of events the user wants to attend.
-					pass
+				info_obj = UserInfo
+				result = userinfo_schema.dump(op)
+				return result.data
 
 
-				elif s == arr[4]: # Get a list of clubs followed by user.
-					pass
+
 			else :
 				return jsonify({"Status":'Invalid request'})
 		else :
@@ -192,6 +196,7 @@ class EventRegistration(Resource):
 											   conv_time(data['edt']),
 											   user.id)
 				if user_is_admin(user):
+					# club = 
 					event.verified = True
 				elif not user_is_admin(user):
 					event.verified = False
@@ -322,13 +327,16 @@ class Testing1(Resource):
 	def get(self):
 		user = request.authorization
 		if not user.username:
-			return "No username"
-		elif not user.password:
-			return "No password"
-		elif user.password == "null":
-			return "Token"
-		else:
-			return "OK"
+			raise InvalidToken()
+		# 	return "No username"
+		# elif not user.password:
+		# 	return "No password"
+		# elif user.password == "null":
+		# 	return "Token"
+		# else:
+		# 	return "OK"
+
+
 # @api.errorhandler(500)
 # def some_error():
 # 	db.session.rollback()
@@ -350,8 +358,9 @@ api.add_resource(Testing1,'/api/test')
 
 
 if __name__ == "__main__":
-	db.create_all()
-	port = int(os.environ.get('PORT', 5432))
-	app.run(host='0.0.0.0', port=port, debug=True)
-	# app.run(port=6080,debug=True)
+	# db.create_all()
+	# manager.run()
+	# port = int(os.environ.get('PORT', 5432))
+	# app.run(host='0.0.0.0', port=port, debug=True)
+	app.run(port=8080)
 

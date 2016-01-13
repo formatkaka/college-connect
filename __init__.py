@@ -9,3 +9,7 @@ from flask.ext.httpauth import *
 import time
 from datetime import datetime
 from flask.ext.mail import Mail
+
+from flask.ext.script import Manager
+from flask.ext.migrate import Migrate,MigrateCommand
+
