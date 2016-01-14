@@ -2,7 +2,6 @@ from __init__ import *
 import os
 from flask_mail import Mail
 
-
 app = Flask(__name__)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://siddhant:collegeconnect@localhost:5432/db5'
@@ -14,8 +13,6 @@ mail = Mail(app)
 app.config['SECRET_KEY'] = 's4df65a4g6aksdh<>?:.[],-.906^&#hcsddsf]!@#%^^^&*d[bjhv]'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 
-
-
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 465
 app.config['MAIL_USE_TLS'] = False
@@ -25,7 +22,6 @@ app.config['MAIL_PASSWORD'] = 'collegeconnect1234'
 # app.config['MAIL_USERNAME'] = 'college.connect28@gmail.com'
 # app.config['MAIL_PASSWORD'] = 'collegeconnect1234'
 mail = Mail(app)
-
 
 migrate = Migrate(app, db)
 

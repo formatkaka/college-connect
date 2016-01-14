@@ -3,31 +3,30 @@ from config import *
 from opschemas import *
 from sqlalchemy.dialects.postgresql import ARRAY
 
-
 ####### Reference table for many-many relationships #######
 
-#1 ---> CLUBS FOLLOWED BY USERS
+# 1 ---> CLUBS FOLLOWED BY USERS
 user_clubs = db.Table('user_clubs',
-    db.Column('club_id', db.Integer, db.ForeignKey('clubs.id')),
-    db.Column('user_id', db.Integer, db.ForeignKey('users.id'))
-)
+                      db.Column('club_id', db.Integer, db.ForeignKey('clubs.id')),
+                      db.Column('user_id', db.Integer, db.ForeignKey('users.id'))
+                      )
 
-#2 ---> EVENTS ATTENDING BY USERS
+# 2 ---> EVENTS ATTENDING BY USERS
 user_events = db.Table('user_events',
-	db.Column('event_id', db.Integer, db.ForeignKey('events.id')),
-	db.Column('user_id', db.Integer, db.ForeignKey('users.id'))
-)
+                       db.Column('event_id', db.Integer, db.ForeignKey('events.id')),
+                       db.Column('user_id', db.Integer, db.ForeignKey('users.id'))
+                       )
 
-#3 ---> ADMINS LIST OF A CLUB
+# 3 ---> ADMINS LIST OF A CLUB
 club_admins = db.Table('club_admins',
-	db.Column('user_id', db.Integer, db.ForeignKey('users.id')),
-	db.Column('club_id', db.Integer, db.ForeignKey('clubs.id'))
-)
-#4 ---> EVENTS-CLUBS TABLE
+                       db.Column('user_id', db.Integer, db.ForeignKey('users.id')),
+                       db.Column('club_id', db.Integer, db.ForeignKey('clubs.id'))
+                       )
+# 4 ---> EVENTS-CLUBS TABLE
 club_events = db.Table('club_events',
-	db.Column('clubs_id',db.Integer,db.ForeignKey('clubs.id')),
-	db.Column('events_id',db.Integer,db.ForeignKey('events.id'))
-)
+                       db.Column('clubs_id', db.Integer, db.ForeignKey('clubs.id')),
+                       db.Column('events_id', db.Integer, db.ForeignKey('events.id'))
+                       )
 
 
 #################
@@ -36,358 +35,348 @@ club_events = db.Table('club_events',
 
 
 class UserReg(db.Model):
-	__tablename__ = "users"
-	# __table_args__ = {'extend_existing': True}
+    __tablename__ = "users"
+    # __table_args__ = {'extend_existing': True}
 
-	id = db.Column(db.Integer, primary_key=True)
-	userName = db.Column(db.String,unique=True, nullable=False)
-	passwordHash = db.Column(db.String, nullable=False)	
-	isadmin = db.Column(db.Boolean, default=False)
-	currentAdmin = db.Column(db.Boolean, default=True)	# Current admin or Previous admin.
-	activeStatus = db.Column(db.Boolean, default=True)  # Account active or not.
-	isVerified = db.Column(db.Boolean, default=False)   # Verified by Email.
-	fullName = db.Column(db.String, nullable=False)		
-	rollNo = db.Column(db.String, nullable=False, unique=True)
-	emailId = db.Column(db.String, unique=True)
-	mobNo = db.Column(db.Integer, unique=True)	
+    id = db.Column(db.Integer, primary_key=True)
+    userName = db.Column(db.String, unique=True, nullable=False)
+    passwordHash = db.Column(db.String, nullable=False)
+    isadmin = db.Column(db.Boolean, default=False)
+    currentAdmin = db.Column(db.Boolean, default=True)  # Current admin or Previous admin.
+    activeStatus = db.Column(db.Boolean, default=True)  # Account active or not.
+    isVerified = db.Column(db.Boolean, default=False)  # Verified by Email.
+    fullName = db.Column(db.String, nullable=False)
+    rollNo = db.Column(db.String, nullable=False, unique=True)
+    emailId = db.Column(db.String, unique=True)
+    mobNo = db.Column(db.Integer, unique=True)
 
+    @staticmethod
+    def if_username_unique(username):
+        if UserReg.query.filter_by(userName=username).first():
+            return False
+        else:
+            return True
 
-	@staticmethod
-	def if_username_unique(username):
-		if UserReg.query.filter_by(userName=username).first():
-			return False
-		else :
-			return True
+    def check_password_hash(self, password_hash):
+        if password_hash == self.passwordHash:
+            return True
+        else:
+            return False
 
-	
-	def check_password_hash(self,password_hash):
-		if password_hash == self.passwordHash:
-			return True
-		else :
-			return False
+    @staticmethod
+    def register_user(username, password_hash):
+        user = UserReg(userName=username, passwordHash=password_hash)
+        db.session.add(user)
+        db.session.commit()
+        return user
 
-	@staticmethod
-	def register_user(username,password_hash):
-		user = UserReg(userName=username,passwordHash=password_hash)
-		db.session.add(user)
-		db.session.commit()
-		return user
+    def gen_auth_token(self, expiration=1200):
 
-	def gen_auth_token(self,expiration=1200):
-		 
-		s = Serializer(app.config['SECRET_KEY'], expires_in = expiration)
-		return s.dumps({ 'email': self.emailId })
+        s = Serializer(app.config['SECRET_KEY'], expires_in=expiration)
+        return s.dumps({'email': self.emailId})
 
-	@staticmethod
-	def verify_auth_token(token):
-		s = Serializer(app.config['SECRET_KEY'])
-		try:
-			data = s.loads(token)
-		except SignatureExpired:
-			return None,0 # valid token, but expired
-		except BadSignature:
-			return None,1 # invalid token
-		user = UserReg.query.get(data['email'])
-		return user,None
+    @staticmethod
+    def verify_auth_token(token):
+        s = Serializer(app.config['SECRET_KEY'])
+        try:
+            data = s.loads(token)
+        except SignatureExpired:
+            return None, 0  # valid token, but expired
+        except BadSignature:
+            return None, 1  # invalid token
+        user = UserReg.query.get(data['email'])
+        return user, None
 
-	def add_club(clubname): 
-		""" Add a user to list of club followers """
+    def add_club(self, clubname):
+        """ Add a user to list of club followers """
 
-		club = ClubInfo.query.filter_by(clubName=clubname).first()
-		club.followers.append(self)
-		db.session.add(club)
-		db.session.commit()
+        club = ClubInfo.query.filter_by(clubName=clubname).first()
+        club.followers.append(self)
+        db.session.add(club)
+        db.session.commit()
 
-	def add_event(eventname):
-		""" Add a user to list of event followers """
+    def add_event(self, eventname):
+        """ Add a user to list of event followers """
 
-		event = EventsReg.query.filter_by(eventName=eventname).first()
-		event.followers.append(self)
-		db.session.add(event)
-		db,session.commit()
+        event = EventsReg.query.filter_by(eventName=eventname).first()
+        event.followers.append(self)
+        db.session.add(event)
+        db, session.commit()
 
-	@staticmethod
-	def if_unique(rollno=None,email=None,mobno=None):
-		a,b,c=0,0,0
-		if UserReg.query.filter_by(rollNo=rollno).first():
-			a=1
-		if UserReg.query.filter_by(emailId=email).first(): 
-			b=1
-		if mobno is not None:
-			if UserReg.query.filter_by(mobNo=mobno).first():
-				c=1
-		return err_stat(a,b,c)
+    @staticmethod
+    def if_unique(rollno=None, email=None, mobno=None):
+        a, b, c = 0, 0, 0
+        if UserReg.query.filter_by(rollNo=rollno).first():
+            a = 1
+        if UserReg.query.filter_by(emailId=email).first():
+            b = 1
+        if mobno is not None:
+            if UserReg.query.filter_by(mobNo=mobno).first():
+                c = 1
+        return err_stat(a, b, c)
 
-	def user_is_admin(self,club):
-		
-		if user.isadmin and user.currentAdmin:
-			return True
-		else :
-			return False
+    def user_is_admin(self, club):
 
-
+        if user.isadmin and user.currentAdmin:
+            return True
+        else:
+            return False
 
 
 class ClubInfo(db.Model):
-	""" A list of all the clubs ,their admins and its EventsReg """
-	__table_args__ = {'extend_existing': True}
-	__tablename__ = "clubs"
+    """ A list of all the clubs ,their admins and its EventsReg """
+    __table_args__ = {'extend_existing': True}
+    __tablename__ = "clubs"
 
-	id = db.Column(db.Integer, primary_key=True)
-	clubName = db.Column(db.String, nullable=False)
-	aboutClub = db.Column(db.Text)
-	adminsList = db.relationship('UserReg', secondary=club_admins,
-		backref='a_clubs')
-	followers = db.relationship('UserReg', secondary=user_clubs,
-		backref='f_clubs')
-	eventsList = db.relationship('EventsReg', secondary=club_events,
-		backref='e_clubs')
+    id = db.Column(db.Integer, primary_key=True)
+    clubName = db.Column(db.String, nullable=False)
+    aboutClub = db.Column(db.Text)
+    adminsList = db.relationship('UserReg', secondary=club_admins,
+                                 backref='a_clubs')
+    followers = db.relationship('UserReg', secondary=user_clubs,
+                                backref='f_clubs')
+    eventsList = db.relationship('EventsReg', secondary=club_events,
+                                 backref='e_clubs')
 
-	@staticmethod
-	def reg_club(name,about):
-		club = ClubInfo(clubName=name,aboutClub=about)
-		db.session.add(club)
-		db.session.commit()
-		return True
+    @staticmethod
+    def reg_club(name, about):
+        club = ClubInfo(clubName=name, aboutClub=about)
+        db.session.add(club)
+        db.session.commit()
+        return True
 
-	@staticmethod
-	def reg_admin(club_name,rollno):
-		club = ClubInfo.query.filter_by(clubName=club_name).first()
-		admin = UserReg.query.filter_by(rollNo=rollno).first()
-		club.adminsList.append(admin)
-		db.session.add(club)
-		db.session.commit()
+    @staticmethod
+    def reg_admin(club_name, rollno):
+        club = ClubInfo.query.filter_by(clubName=club_name).first()
+        admin = UserReg.query.filter_by(rollNo=rollno).first()
+        club.adminsList.append(admin)
+        db.session.add(club)
+        db.session.commit()
 
+    def add_follower(self, user):
+        self.followers.append(user)
+        db.session.add(self)
+        db.session.commit()
 
-	def add_follower(self,user):
-		self.followers.append(user)
-		db.session.add(self)
-		db.session.commit()
+    def remove_follower(self, user):
+        self.followers.remove(user)
+        db.session.commit()
 
-
-	def remove_follower(self,user):
-		self.followers.remove(user)
-		db.session.commit()
 
 class EventsReg(db.Model):
-	""" List of events """
-	
-	__table_args__ = {'extend_existing': True}
-	__tablename__ = "events"
+    """ List of events """
 
-	id = db.Column(db.Integer, primary_key=True)
-	eventName = db.Column(db.String)
-	eventInfo = db.Column(db.String, nullable=True)
-	startDateTime = db.Column(db.DateTime,nullable=True)
-	endDateTime = db.Column(db.DateTime,nullable=True)
-	totalSeats = db.Column(db.Integer)
-	occupiedSeats = db.Column(db.Integer)
-	leftSeats = db.Column(db.Integer)
-	eventVenue = db.Column(db.String)
-	verified = db.Column(db.Boolean, default=False)	#If the event is verified
-	createdBy = db.Column(db.Integer, db.ForeignKey('users.id')) # The id of the admin it was created by.
-	# orgBy = db.relationship('OrgBy', backref='event', lazy='dynamic',nullable=True)
-	contacts = db.relationship('ContactsForEvent',backref='event',lazy='dynamic')	# List of contacts for the event
-	followers = db.relationship('UserReg', secondary=user_events,
-		backref='events')
-	activeStatus = db.Column(db.Boolean, default=False)
-	time_created = db.Column(db.DateTime,default=datetime.now())
+    __table_args__ = {'extend_existing': True}
+    __tablename__ = "events"
 
+    id = db.Column(db.Integer, primary_key=True)
+    eventName = db.Column(db.String)
+    eventInfo = db.Column(db.String, nullable=True)
+    startDateTime = db.Column(db.DateTime, nullable=True)
+    endDateTime = db.Column(db.DateTime, nullable=True)
+    lastRegDateTime = db.Column(db.DateTime, nullable=False)
+    totalSeats = db.Column(db.Integer)
+    occupiedSeats = db.Column(db.Integer)
+    leftSeats = db.Column(db.Integer)
+    eventVenue = db.Column(db.String)
+    verified = db.Column(db.Boolean, default=False)  # If the event is verified
+    createdBy = db.Column(db.Integer, db.ForeignKey('users.id'))  # The id of the admin it was created by.
+    # orgBy = db.relationship('OrgBy', backref='event', lazy='dynamic',nullable=True)
+    contacts = db.relationship('ContactsForEvent', backref='event', lazy='dynamic')  # List of contacts for the event
+    followers = db.relationship('UserReg', secondary=user_events,
+                                backref='events')
+    activeStatus = db.Column(db.Boolean, default=False)
+    time_created = db.Column(db.DateTime, default=datetime.now())
 
+    @staticmethod
+    def register_one(name, about, seats, venue, sdt, edt, user_id):
+        eve = EventsReg(eventName=name,
+                        eventInfo=about,
+                        totalSeats=seats,
+                        eventVenue=venue,
+                        startDateTime=sdt,
+                        endDateTime=edt,
+                        createdBy=user_id)
+        db.session.add(eve)
+        db.session.commit()
+        return eve
 
-	@staticmethod
-	def register_one(name,about,seats,venue,sdt,edt,user_id):
-		eve = EventsReg(eventName=name,
-						eventInfo=about,
-						totalSeats = seats,
-						eventVenue =venue,
-						startDateTime=sdt,
-						endDateTime=edt,
-						createdBy = user_id)
-		db.session.add(eve)
-		db.session.commit()
-		return eve
+    def add_contacts(self, contacts):
+        for item in contacts:
+            ContactsForEvent.register_con(item['contactname'], item['contactnumber'], self.id)
+        return True
 
-	def add_contacts(self,contacts):
-		for item in contacts:
-			ContactsForEvent.register_con(item['contactname'],item['contactnumber'],self.id)
-		return True
+    def set_active(self):
+        self.activeStatus = True
+        db.session.add(self)
+        db.session.commit()
 
-	def set_active(self):
-		self.activeStatus=True
-		db.session.add(self)
-		db.session.commit()
+    def add_follower(self, user):
+        self.followers.append(user)
+        db.session.add(self)
+        db.session.commit()
 
-	def add_follower(self,user):
-		self.followers.append(user)
-		db.session.add(self)
-		db.session.commit()
+    def remove_follower(self, user):
+        self.followers.remove(user)
+        db.session.commit()
 
-	def remove_follower(self,user):
-		self.followers.remove(user)
-		db.session.commit()
-
-	# def __repr__(self):
-	# 	return "<Name> {0} <Info> {1} <Seats> {2} <Venue> {3} <Verified> {4} <createdBy> {5} ".format(self.eventName,self.eventInfo,self.seats,self.eventVenue,self.verified,self.createdBy)
-
+    # def __repr__(self):
+    # 	return "<Name> {0} <Info> {1} <Seats> {2} <Venue> {3} <Verified> {4} <createdBy> {5} ".format(self.eventName,self.eventInfo,self.seats,self.eventVenue,self.verified,self.createdBy)
 
 
 class OrgBy(db.Model):
-	""" Table containing Club ids which have organised an event (One club or more than one club combined) """
-	__tablename__="orgby"
-	
-	__table_args__ = {'extend_existing': True}
+    """ Table containing Club ids which have organised an event (One club or more than one club combined) """
+    __tablename__ = "orgby"
 
-	id = db.Column(db.Integer, primary_key=True)
-	orgBy = db.Column(db.Integer, db.ForeignKey('clubs.id'))
-	event_id = db.Column(db.Integer, db.ForeignKey('events.id'))
+    __table_args__ = {'extend_existing': True}
+
+    id = db.Column(db.Integer, primary_key=True)
+    orgBy = db.Column(db.Integer, db.ForeignKey('clubs.id'))
+    event_id = db.Column(db.Integer, db.ForeignKey('events.id'))
+
 
 class OrgFor(db.Model):
-	""" Table containing Club ids for which a given event is organised """
-	__tablename__="orgfor"
-	__table_args__ = {'extend_existing': True}
+    """ Table containing Club ids for which a given event is organised """
+    __tablename__ = "orgfor"
+    __table_args__ = {'extend_existing': True}
 
-	id = db.Column(db.Integer, primary_key=True)
-	orgFor = db.Column(db.Integer,db.ForeignKey('clubs.id'))
-	event_id = db.Column(db.Integer, db.ForeignKey('events.id'))
+    id = db.Column(db.Integer, primary_key=True)
+    orgFor = db.Column(db.Integer, db.ForeignKey('clubs.id'))
+    event_id = db.Column(db.Integer, db.ForeignKey('events.id'))
 
 
 class ContactsForEvent(db.Model):
-	""" List of contacts """
-	__table_args__ = {'extend_existing': True}
-	__tablename__ = "contacts_events"
+    """ List of contacts """
+    __table_args__ = {'extend_existing': True}
+    __tablename__ = "contacts_events"
 
-	id = db.Column(db.Integer, primary_key=True)
-	contactName = db.Column(db.String)
-	contactNumber = db.Column(db.Integer)
-	event_id = db.Column(db.Integer,db.ForeignKey('events.id'))
+    id = db.Column(db.Integer, primary_key=True)
+    contactName = db.Column(db.String)
+    contactNumber = db.Column(db.Integer)
+    event_id = db.Column(db.Integer, db.ForeignKey('events.id'))
 
-	@staticmethod
-	def register_con(name,number,eve_id):
-		contact = ContactsForEvent()
-		contact.contactName = name
-		contact.contactNumber = number
-		contact.event_id = eve_id
-		db.session.add(contact)
-		db.session.commit()
+    @staticmethod
+    def register_con(name, number, eve_id):
+        contact = ContactsForEvent()
+        contact.contactName = name
+        contact.contactNumber = number
+        contact.event_id = eve_id
+        db.session.add(contact)
+        db.session.commit()
 
 
 class GCMRegIds(db.Model):
-	""" List of GCM reg Ids"""
-	__tablename__ = "gcmids"
-	__table_args__ = {'extend_existing': True}
+    """ List of GCM reg Ids"""
+    __tablename__ = "gcmids"
+    __table_args__ = {'extend_existing': True}
 
-	id = db.Column(db.Integer, primary_key=True)
-	arr = db.Column(ARRAY(db.Integer))
+    id = db.Column(db.Integer, primary_key=True)
+    arr = db.Column(ARRAY(db.Integer))
 
-	
+
 ####################################
 ######## HELPER FUNCTIONS ##########
 ####################################
 
 def get_user_club(user):
-	""" Returns a list of clubs of which the user is admin """
+    """ Returns a list of clubs of which the user is admin
+    """
 
-	admin = Admins.query.filter_by(student_id=user.id).all()
-	clubs = []
-	for i in range(0,len(admin)):
-		club = ClubInfo.query.filter_by(id = admin[i].club_id).first()
-		clubs.append(club)	
+    admin = Admins.query.filter_by(student_id=user.id).all()
+    clubs = []
+    for i in range(0, len(admin)):
+        club = ClubInfo.query.filter_by(id=admin[i].club_id).first()
+        clubs.append(club)
 
-	return clubs
+    return clubs
 
 
 def get_current_user():
-	""" Find user object if it has valid token or username-password. """
+    """ Find user object if it has valid token or username-password. """
 
-# Incorrect credentials
+    # Incorrect credentials
 
-	user = request.authorization
+    user = request.authorization
 
-	if not user:
-		return None,"Invalid.Login Required to access."
+    if not user:
+        return None, "Invalid.Login Required to access."
 
-	if  user.username=="" and user.password=="":
-		return None,"Empty payload"
+    if user.username == "" and user.password == "":
+        return None, "Empty payload"
 
-	username_or_token = user.username
-	password = user.password
-	
-	verified,value = UserReg.verify_auth_token(username_or_token)
+    username_or_token = user.username
+    password = user.password
 
-	if user.password == "None":
+    verified, value = UserReg.verify_auth_token(username_or_token)
 
-		if verified:
-			return verified, None
+    if user.password == "None":
 
-		elif not verified and value == 0:
-			return None,"Expired"
+        if verified:
+            return verified, None
 
-		elif not verified and value == 1:
-			return None,"Invalid Token."
+        elif not verified and value == 0:
+            return None, "Expired"
 
-		else :
-			return None,"Some error occured"
+        elif not verified and value == 1:
+            return None, "Invalid Token."
 
-	if user.password != "None":
-		user_get = UserReg.query.filter_by(userName=username_or_token).first()
-		if user_get:
-			if user_get.check_password_hash(password):
-				return user_get,None
-			else :
-				return None,"Incorrect username or password"
-		else :
-			return None,"Incorrect username or password" 
+        else:
+            return None, "Some error occured"
 
-	else :
-		return None,"Invalid Request"
+    if user.password != "None":
+        user_get = UserReg.query.filter_by(userName=username_or_token).first()
+        if user_get:
+            if user_get.check_password_hash(password):
+                return user_get, None
+            else:
+                return None, "Incorrect username or password"
+        else:
+            return None, "Incorrect username or password"
 
-
-def err_stat(a,b,c):
-	if a==0 and b==0 and c == 0:
-		return True,None
-	if a==0 and b==0 and c == 1:
-			return False,1
-	if a==0 and b==1 and c == 0:
-		return False,2
-	if a==0 and b==1 and c == 1:	
-		return False,3
-	if a==1 and b==0 and c == 0:
-		return False,4
-	if a==1 and b==0 and c == 1:
-		return False,5
-	if a==1 and b==1 and c == 0:
-		return False,6
-	if a==1 and b==1 and c == 1:
-		return False,7
+    else:
+        return None, "Invalid Request"
 
 
-
+def err_stat(a, b, c):
+    if a == 0 and b == 0 and c == 0:
+        return True, None
+    if a == 0 and b == 0 and c == 1:
+        return False, 1
+    if a == 0 and b == 1 and c == 0:
+        return False, 2
+    if a == 0 and b == 1 and c == 1:
+        return False, 3
+    if a == 1 and b == 0 and c == 0:
+        return False, 4
+    if a == 1 and b == 0 and c == 1:
+        return False, 5
+    if a == 1 and b == 1 and c == 0:
+        return False, 6
+    if a == 1 and b == 1 and c == 1:
+        return False, 7
 
 
 def conv_time(unixstamp_or_datetime):
+    if isinstance(unixstamp_or_datetime, datetime):
+        return time.mktime(unixstamp_or_datetime.timetuple())
+    elif isinstance(unixstamp_or_datetime, float):
+        return datetime.fromtimestamp(unixstamp_or_datetime)
 
-	if isinstance(unixstamp_or_datetime,datetime):
-		return time.mktime(unixstamp_or_datetime.timetuple())
-	elif isinstance(unixstamp_or_datetime,float):
-		return datetime.fromtimestamp(unixstamp_or_datetime)
-
-	# return dt
-
+    # return dt
 
 
 def get_admin_info(club):
-	admins = []
+    admins = []
 
-	for admin in club.adminsList:
-		a = Admins(admin.fullName,admin.mobNo)
-		admins.append(a)
-	return admins
+    for admin in club.adminsList:
+        a = Admins(admin.fullName, admin.mobNo)
+        admins.append(a)
+    return admins
+
 
 def get_contact_info(event):
-	contacts = []
-	for contact in event.contacts:
-		a = Admins(contact.contactName,contact.contactNumber)
-		contacts.append(a)
-	return contacts
-
+    contacts = []
+    for contact in event.contacts:
+        a = Admins(contact.contactName, contact.contactNumber)
+        contacts.append(a)
+    return contacts

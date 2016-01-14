@@ -1,0 +1,38 @@
+##################
+### EXCEPTIONS ###
+##################
+
+
+# 1 ----> AUTHENTICATION ERRORS
+
+class AuthError(Exception):
+    code = None
+    description = None
+
+class LoginRequired(AuthError):
+    code = 401
+    description = "Login Required to access"
+
+class EmptyPayload(AuthError):
+    code = 402
+
+class InvalidCredentials(AuthError):
+    code = 403
+
+class InvalidToken(AuthError):
+    code = 404
+
+class ExpiredToken(AuthError):
+    code = 405
+
+# 2 ----> UNIQUE_CONSTRAINT VIOLATION ERRORS
+
+class UniqueConstraint(Exception):
+    number = None
+    code = None
+    description = None
+
+class AlreadyTaken(UniqueConstraint):
+    code = 500 + number
+
+
