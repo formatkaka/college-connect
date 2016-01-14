@@ -8,7 +8,7 @@ import base64
 from sqlalchemy import exc
 from schemas import *
 from opschemas import *
-
+from flask.ext.restful import abort
 
 # from exceptions import UserError,InvalidToken
 
@@ -274,6 +274,7 @@ class Clubsget(Resource):
 
 
 class User_Follow_Status(Resource):
+    
     def post(self, s1, event_or_club_id, s2):
         user, message = get_current_user()
         if user:
@@ -324,9 +325,10 @@ class WebScrap(Resource):
 
 class Testing1(Resource):
     def get(self):
+        user,message = get_current_user()
         user = request.authorization
-        if not user.username:
-            raise InvalidToken()
+        # if not user.username:
+        return str(user.username=="")
         # 	return "No username"
         # elif not user.password:
         # 	return "No password"
@@ -357,7 +359,7 @@ api.add_resource(Testing1, '/api/test')
 
 if __name__ == "__main__":
     # db.create_all()
-    manager.run()
+    # manager.run()
     # port = int(os.environ.get('PORT', 5432))
     # app.run(host='0.0.0.0', port=port, debug=True)
-    app.run(port=8080)
+    app.run(port=8080,debug=True)

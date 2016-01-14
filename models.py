@@ -122,6 +122,11 @@ class UserReg(db.Model):
         else:
             return False
 
+    def is_attending_event(self,event):
+		if event in self.events:
+			return True
+		else:
+			return False
 
 class ClubInfo(db.Model):
     """ A list of all the clubs ,their admins and its EventsReg """
@@ -174,14 +179,14 @@ class EventsReg(db.Model):
     eventInfo = db.Column(db.String, nullable=True)
     startDateTime = db.Column(db.DateTime, nullable=True)
     endDateTime = db.Column(db.DateTime, nullable=True)
-    lastRegDateTime = db.Column(db.DateTime, nullable=False)
+    lastRegDateTime = db.Column(db.DateTime)
     totalSeats = db.Column(db.Integer)
     occupiedSeats = db.Column(db.Integer)
     leftSeats = db.Column(db.Integer)
     eventVenue = db.Column(db.String)
     verified = db.Column(db.Boolean, default=False)  # If the event is verified
     createdBy = db.Column(db.Integer, db.ForeignKey('users.id'))  # The id of the admin it was created by.
-    # orgBy = db.relationship('OrgBy', backref='event', lazy='dynamic',nullable=True)
+    orgBy = db.relationship('OrgBy', backref='event', lazy='dynamic')
     contacts = db.relationship('ContactsForEvent', backref='event', lazy='dynamic')  # List of contacts for the event
     followers = db.relationship('UserReg', secondary=user_events,
                                 backref='events')
@@ -212,13 +217,24 @@ class EventsReg(db.Model):
         db.session.commit()
 
     def add_follower(self, user):
-        self.followers.append(user)
-        db.session.add(self)
-        db.session.commit()
+    	if  user in self.followers:
+    		abort(409,message="ERR23")
+    	else:
+    		if self.leftSeats > 0:
+    			self.leftSeats = self.leftSeats - 1
+    			self.occupiedSeats = self.occupiedSeats + 1
+		        self.followers.append(user)
+		        db.session.add(self)
+		        db.session.commit()
+	        elif self.leftSeats == 0:
+	        	abort(409,"ERR24")
 
     def remove_follower(self, user):
         self.followers.remove(user)
         db.session.commit()
+
+    
+
 
     # def __repr__(self):
     # 	return "<Name> {0} <Info> {1} <Seats> {2} <Venue> {3} <Verified> {4} <createdBy> {5} ".format(self.eventName,self.eventInfo,self.seats,self.eventVenue,self.verified,self.createdBy)
@@ -298,62 +314,73 @@ def get_current_user():
 
     user = request.authorization
 
-    if not user:
-        return None, "Invalid.Login Required to access."
+    if user is None :
+        abort(401,message="ERR01")
 
-    if user.username == "" and user.password == "":
-        return None, "Empty payload"
+    if user is not None:
 
-    username_or_token = user.username
-    password = user.password
+		if user.username == "" :
+			abort(401,message="ERR02")
 
-    verified, value = UserReg.verify_auth_token(username_or_token)
+		if user.password == "" :
+			abort(401,message="ERR03")
 
-    if user.password == "None":
+		username_or_token = user.username
+		password = user.password
 
-        if verified:
-            return verified, None
+		verified, value = UserReg.verify_auth_token(username_or_token)
 
-        elif not verified and value == 0:
-            return None, "Expired"
+		if user.password == "None":
 
-        elif not verified and value == 1:
-            return None, "Invalid Token."
+			if verified:
+				return verified, None
 
-        else:
-            return None, "Some error occured"
+			elif not verified and value == 0:
+				abort(401,message="ERR07")
 
-    if user.password != "None":
-        user_get = UserReg.query.filter_by(userName=username_or_token).first()
-        if user_get:
-            if user_get.check_password_hash(password):
-                return user_get, None
-            else:
-                return None, "Incorrect username or password"
-        else:
-            return None, "Incorrect username or password"
+			elif not verified and value == 1:
+				abort(401,message="ERR06")			
 
-    else:
-        return None, "Invalid Request"
+			else:
+				return None, "Some error occured"
+
+		if user.password != "None":
+			user_get = UserReg.query.filter_by(userName=username_or_token).first()
+			if user_get:
+				if user_get.check_password_hash(password):
+					return user_get, None
+				else:
+					abort(401,message="ERR05")
+			else:
+				abort(401,message="ERR04")
+		else:
+			return None, "Invalid Request"
 
 
 def err_stat(a, b, c):
-    if a == 0 and b == 0 and c == 0:
-        return True, None
-    if a == 0 and b == 0 and c == 1:
-        return False, 1
-    if a == 0 and b == 1 and c == 0:
-        return False, 2
-    if a == 0 and b == 1 and c == 1:
-        return False, 3
-    if a == 1 and b == 0 and c == 0:
-        return False, 4
-    if a == 1 and b == 0 and c == 1:
-        return False, 5
-    if a == 1 and b == 1 and c == 0:
-        return False, 6
-    if a == 1 and b == 1 and c == 1:
-        return False, 7
+	if a == 0 and b == 0 and c == 0:
+		return True, None
+
+	if a == 0 and b == 0 and c == 1:
+		abort(409,message="ERR15")
+
+	if a == 0 and b == 1 and c == 0:
+		abort(409,message="ERR16")
+
+	if a == 0 and b == 1 and c == 1:
+		abort(409,message="ERR17")
+
+	if a == 1 and b == 0 and c == 0:
+		abort(409,message="ERR18")
+
+	if a == 1 and b == 0 and c == 1:
+		abort(409,message="ERR19")
+
+	if a == 1 and b == 1 and c == 0:
+		abort(409,message="ERR20")
+
+	if a == 1 and b == 1 and c == 1:
+		abort(409,message="ERR21")
 
 
 def conv_time(unixstamp_or_datetime):

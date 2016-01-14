@@ -1,38 +1,83 @@
-##################
-### EXCEPTIONS ###
-##################
+# SUCCESS CODES
+
+401 (UNAUTHORIZED ACCESS)
+
+ERR01 - Login Required.
+
+ERR02 - Empty Payload. Username Empty.
+
+ERR03 - Empty Payload. Password Empty.
+
+ERR04 - Incorrect Username.
+
+ERR05 - Incorrect Password.
+
+ERR06 - Invalid Token.
+
+ERR07 - Expired Token.
+
+ERR08 - 
+
+ERR09 -
+
+ERR10 -
+
+ERR11 -
+
+ERR12 -
 
 
-# 1 ----> AUTHENTICATION ERRORS
+405(METHOD NOT ALLOWED)
 
-class AuthError(Exception):
-    code = None
-    description = None
+ERR13 - Method Not allowed.
 
-class LoginRequired(AuthError):
-    code = 401
-    description = "Login Required to access"
 
-class EmptyPayload(AuthError):
-    code = 402
 
-class InvalidCredentials(AuthError):
-    code = 403
+409 (CONFLICT)
 
-class InvalidToken(AuthError):
-    code = 404
+ERR14 - Username already Taken.
 
-class ExpiredToken(AuthError):
-    code = 405
+# The next 7 errors are response if any of the rollno,email,mobno fields have conflicts
 
-# 2 ----> UNIQUE_CONSTRAINT VIOLATION ERRORS
+ERR15 - Mobile Number Exists.
 
-class UniqueConstraint(Exception):
-    number = None
-    code = None
-    description = None
+ERR16 - Email Id Exists.
 
-class AlreadyTaken(UniqueConstraint):
-    code = 500 + number
+ERR17 - Email Id, Mobile Number Exists.
 
+ERR18 - Roll Number Exists.
+
+ERR19 - Roll Number , Mobile Number Exists.
+
+ERR20 - Roll Number , Email Id Exists.
+
+ERR21 - All three exist.
+
+ERR22 - Event Name already Exists.
+
+ERR23 - Already following/attending.
+
+ERR24 - No seats left.
+
+ERR25 -
+
+ERR26 -
+
+ERR27 - 
+
+ERR28 -
+
+ERR29 - 
+
+ERR30 -
+
+ERR31 - 
+
+ERR32 -
+
+ERR33 -
+
+ERR34 -
+
+ERR35 -
 
