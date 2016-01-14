@@ -24,11 +24,11 @@ class UserReg_Response(Schema):
 # 1 - Personal Info
 
 class UserInfo_class(Schema):
-    def __init__(self, admin, events, clubsfollowed, eventsattending, name, rollno, email, mobno):
-        self.admin = admin
-        self.events = events
-        self.clubsfollowed = clubsfollowed
-        self.eventsattending = eventsattending
+    def __init__(self,username, name, rollno, email, mobno=None,club_admin=None,my_events=None, clubs_following=None, events_attending=None):
+        self.club_admin = club_admin
+        self.my_events = my_events
+        self.clubs_following = clubs_following
+        self.events_attending = events_attending
         self.name = name
         self.rollno = rollno
         self.email = email
@@ -36,19 +36,19 @@ class UserInfo_class(Schema):
 
 
 class UserInfo_Response(Schema):
-    status_code = fields.Int()
-    name = fields.Str()
-    rollno = fields.Str()
-    email = fields.Email()
-    mobno = fields.Int()
-# eventsattending = fields.Nested
-# clubs_following = fields.Str(many=True)
-# events_attending = fields.Str(many=True)
-# club_if_admin = fields.Str(many=True)
-# events_created = fields.Str(many=True)
+	username = fields.Str()
+	name = fields.Str()
+	rollno = fields.Str()
+	email = fields.Email()
+	mobno = fields.Int()
+	events_attending = fields.List(fields.Int)
+	clubs_following = fields.List(fields.Int)
+	club_admin = fields.List(fields.Int)
+	my_events = fields.List(fields.Int)
 
 
-# 2 - Clubs/Events
+
+##### CLUBS INFORMATION ##### 
 
 class Admins():
     def __init__(self, name, mobno):
@@ -74,17 +74,12 @@ class Club_response(Schema):
     admins = fields.Nested(Admin_Response, many=True)
 
 
-class Error_Response(Schema):
-    status_code = fields.Int()
-    err_message = fields.Str()
-    extra_1 = fields.Str()
-    extra_2 = fields.Str()
 
+##### EVENTS INFORMATION ##### 
 
 class Events_class():
-    def __init__(self, status_code, name, about, total_seats, available_seats, occupied_seats, venue, createdby,
-                 verified, contacts):
-        self.status_code = status_code
+    def __init__(self,  name, about, venue, createdby,verified, contacts,
+    			  total_seats=None, available_seats=None, occupied_seats=None):
         self.name = name
         self.about = about
         self.total_seats = total_seats
@@ -97,27 +92,20 @@ class Events_class():
 
 
 class Events_Response(Schema):
-    status_code = fields.Int()
     name = fields.Str()
     about = fields.Str()
     total_seats = fields.Int()
     available_seats = fields.Int()
     occupied_seats = fields.Int()
     venue = fields.Str()
-    # <<<<<<< HEAD
     createdby = fields.Int()
     verified = fields.Str()
     contacts = fields.Nested(Admin_Response, many=True)
-    # =======
     createdby = fields.Str()
-# contacts =
 
-
-# >>>>>>> baee92788eb13faa096053f020139f90309c3bc3
 
 
 userreg_schema = UserReg_Response()
-err_schema = Error_Response()
 userinfo_schema = UserInfo_Response()
 club_schema = Club_response(many=True)
 event_schema = Events_Response(many=True)

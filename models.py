@@ -342,24 +342,24 @@ def get_current_user():
 				abort(401,message="ERR06")			
 
 			else:
-				return None, "Some error occured"
+				abort(400)							# SOME UNKNOWN PROBLEM OCCURED
 
 		if user.password != "None":
-			user_get = UserReg.query.filter_by(userName=username_or_token).first()
+			user_get = UserReg.query.filter_by(userName=username_or_token).one()
 			if user_get:
 				if user_get.check_password_hash(password):
-					return user_get, None
+					return user_get
 				else:
 					abort(401,message="ERR05")
 			else:
 				abort(401,message="ERR04")
 		else:
-			return None, "Invalid Request"
+			return abort(400)					   # SOME UNKNOWN PROBLEM OCCURED
 
 
 def err_stat(a, b, c):
 	if a == 0 and b == 0 and c == 0:
-		return True, None
+		return True
 
 	if a == 0 and b == 0 and c == 1:
 		abort(409,message="ERR15")

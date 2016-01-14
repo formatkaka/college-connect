@@ -38,42 +38,36 @@ class UserRegistration(Resource):
 
         user = request.authorization
         if not user:
-            return jsonify({"Status": "Empty payload"})
+            abort(401,message="ERR01")
 
         username = user.username
         password_hash = user.password
         json_data = request.get_json()
         data, errors = info_schema.load(json_data)
 
-        if username is None:  # Check if any of auth headers are empty
-            return jsonify({"Status": "Username field empty"})
+        if username == "" :  # Check if any of auth headers are empty
+            abort(401,message="ERR02")
 
-        if password_hash is None:
-            return jsonify({"Status": "Password field empty"})
+        if password_hash == "" :
+            abort(401,message="ERR03")
 
         if errors:
             return jsonify(errors)
 
         if 'mobno' not in data.keys():
             data['mobno'] = None
-            stat, val = UserReg.if_unique(data['rollno'], data['email'], data['mobno'])
-            email_id = data["email"]
+            stat = UserReg.if_unique(data['rollno'], data['email'], data['mobno'])
 
         else:
-            stat, val = UserReg.if_unique(data['rollno'], data['email'], data['mobno'])
-            email_id = data["email"]
+            stat= UserReg.if_unique(data['rollno'], data['email'], data['mobno'])
 
-        # if not stat:
-        # return ({"Status":"{0} already reg.".format(val)})
-        if 1 == 1:
-            try:
-                user_1 = UserReg(userName=username, passwordHash=password_hash, fullName=data['name']
-                                 , rollNo=data['rollno'], emailId=data['email'], mobNo=data['mobno'])
-                db.session.add(user_1)
-                db.session.commit()
-            except exc.IntegrityError:
-                db.session.rollback()
-                raise
+        if stat:
+
+            user_1 = UserReg(userName=username, passwordHash=password_hash, fullName=data['name']
+                             , rollNo=data['rollno'], emailId=data['email'], mobNo=data['mobno'])
+            db.session.add(user_1)
+            db.session.commit()
+
 
             recieve = ["sid.siddhant.loya@gmail.com", "murali.prajapati555@gmail.com"]
             token = user_1.gen_auth_token()  # TODO : Report if info commit fails
@@ -116,31 +110,33 @@ class ForgotPassword(Resource):
 class UserInformation(Resource):
     """ API to GET user info """
 
-    def post(self, s):
+    def post(self):
         return ({"Status": "Invalid Method."})
 
-    def get(self, s):
-        user, message = get_current_user()
+    def get(self):
+        user = get_current_user()
+        events_attending = [user.events[i].id for i in range(0,len(user.events))]
+        clubs_following = [user.f_clubs[i].id for i in range(0,len(user.f_clubs))]
+        events_created = EventsReg.query.filter_by(createdBy=user.id).all()
+        my_events = [events_created[i].id for i in range(0,len(events_created))]
+        club_admin = [user.a_clubs[i].id for i in range(0,len(user.a_clubs))]
 
-        if user:
-            if s == "info":
+        info = UserInfo_class(user.userName,user.fullName,user.rollNo,user.emailId,
+                user.mobNo, club_admin, my_events, clubs_following, events_attending)
 
-                info_obj = UserInfo
-                result = userinfo_schema.dump(op)
-                return result.data
-
-
-
-            else:
-                return jsonify({"Status": 'Invalid request'})
-        else:
-            return jsonify({"Status": "Invalid"})
+        result, errors = userinfo_schema.dump(info)
+        if errors is None:
+            return jsonify({"Errors":errors})
+        else :
+            return jsonify({"Information":result})
+        # else:
+        #     return jsonify({"Status": "Invalid"})
 
 
 class UserUnique(Resource):
     """API to check whether username or password unique"""
 
-    field = ["username", "email"]
+    field = ["username"]
 
     def post(self, attr):
         return ({"Status": "Invalid Method."})
@@ -154,15 +150,8 @@ class UserUnique(Resource):
             else:
                 return jsonify({"Status": "False"})
 
-        elif attr == self.field[1]:
-            username = UserReg.query.filter_by(emailId=user.username).first()
-            if username is None:
-                return jsonify({"Status": "True"})
-            else:
-                return jsonify({"Status": "False"})
-
         else:
-            return ({"Status": "Invalid Request."})
+            abort(400,message="Invalid URL")
 
 
 class EmailVerification(Resource):
@@ -214,31 +203,30 @@ class EventRegistration(Resource):
             return jsonify({"Status": message})
 
     def get(self):
-        user, message = get_current_user()
-        if user:
-            events_list = EventsReg.query.all()
-            events = []
-            for event in events_list:
-                contacts = get_contact_info(event)
-                e = Events_class(200,
-                                 event.eventName,
-                                 event.eventInfo,
-                                 event.totalSeats,
-                                 event.leftSeats,
-                                 event.occupiedSeats,
-                                 event.eventVenue,
-                                 event.createdBy,
-                                 event.verified,
-                                 contacts
-                                 )
-                events.append(e)
-                result = event_schema.dump(events)
-                # if result.error == {}:
-                return {"events": result.data}
-            # else :
-            # 	return {"error":result.error}
-        else:
-            return jsonify({"Status": message})
+        user= get_current_user()
+        events_list = EventsReg.query.all()
+        events = []
+        for event in events_list:
+            contacts = get_contact_info(event)
+            e = Events_class(
+                             event.eventName,
+                             event.eventInfo,
+                             event.eventVenue,
+                             event.createdBy,
+                             event.verified,
+                             contacts,                                
+                             event.totalSeats,
+                             event.leftSeats,
+                             event.occupiedSeats
+                             
+                             )
+            events.append(e)
+            result,errors = event_schema.dump(events)
+            if errors is None:
+                return {"Error":errors}
+            else:
+                return {"events": result}
+
         # events = Events.query.all()
 
 
@@ -247,7 +235,7 @@ class Clubsget(Resource):
         return {"Staus": "Not allowed"}
 
     def get(self, s1, s2):
-        user, message = get_current_user()
+        user = get_current_user()
         if user:
             if s1 == "list":
 
@@ -347,13 +335,13 @@ class Testing1(Resource):
 
 
 api.add_resource(UserRegistration, '/api/user/reg')
-api.add_resource(UserInformation, '/api/user/<string:s>')
+api.add_resource(UserInformation, '/api/user/info')
 api.add_resource(EventRegistration, '/api/events/')
 api.add_resource(Clubsget, '/api/clubs/<string:s1>/<string:s2>')
 api.add_resource(UserUnique, '/api/unique/<string:attr>')
 api.add_resource(Testing, '/')
 api.add_resource(WebScrap, '/api/scrap/<string:source>')
-api.add_resource(User_Follow_Status, '/api/<string:s1>/<int:event_or_club_id>/<string:s2>/')
+api.add_resource(User_Follow_Status, '/api/<string:s1>/<int:event_or_club_id>/<string:s2>')
 api.add_resource(EmailVerification, '/api/verify/<string:code>')
 api.add_resource(Testing1, '/api/test')
 
