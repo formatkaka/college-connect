@@ -61,7 +61,7 @@ class UserRegistration(Resource):
 
             recieve = ["sid.siddhant.loya@gmail.com", "murali.prajapati555@gmail.com"]
             token = user_1.gen_auth_token()  # TODO : Report if info commit fails
-            op = UserReg_class(200, user_1.userName, token)
+            op = UserReg_class(token)
             result = userreg_schema.dump(op)
 
             link = 'https://sheltered-fjord-8731.herokuapp.com/api/verify/' + base64.b64encode(data['email'])
