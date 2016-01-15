@@ -328,7 +328,7 @@ api.add_resource(Testing1, '/api/test')
 
 if __name__ == "__main__":
     # db.create_all()
-    manager.run()
+    # manager.run()
     port = int(os.environ.get('PORT', 5432))
     app.run(host='0.0.0.0', port=port, debug=True)
     # app.run(port=8080,debug=True)
