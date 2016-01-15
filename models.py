@@ -73,7 +73,7 @@ class UserReg(db.Model):
     def gen_auth_token(self, expiration=1200):
 
         s = Serializer(app.config['SECRET_KEY'], expires_in=expiration)
-        return s.dumps({'email': self.emailId})
+        return s.dumps({'id': self.id})
 
     @staticmethod
     def verify_auth_token(token):
@@ -84,8 +84,8 @@ class UserReg(db.Model):
             return None, 0  # valid token, but expired
         except BadSignature:
             return None, 1  # invalid token
-        user = UserReg.query.get(data['email'])
-        return user, None
+        user = UserReg.query.get(data['id'])
+        return user,None
 
     def add_club(self, clubname):
         """ Add a user to list of club followers """
@@ -348,12 +348,12 @@ def get_current_user():
 		username_or_token = user.username
 		password = user.password
 
-		verified, value = UserReg.verify_auth_token(username_or_token)
+		verified,value = UserReg.verify_auth_token(username_or_token)
 
 		if user.password == "None":
 
 			if verified:
-				return verified, None
+				return verified
 
 			elif not verified and value == 0:
 				abort(401,message="ERR07")
