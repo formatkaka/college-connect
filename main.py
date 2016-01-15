@@ -10,16 +10,6 @@ from schemas import *
 from opschemas import *
 from flask.ext.restful import abort
 
-# from exceptions import UserError,InvalidToken
-
-class UserError(Exception):
-    pass
-
-
-class InvalidToken(UserError):
-    pass
-
-
 class Testing(Resource):
     """Test Class for API"""
 
@@ -171,33 +161,39 @@ class EmailVerification(Resource):
 
 class EventRegistration(Resource):
     def post(self):
-        user, message = get_current_user()
+        user = get_current_user()
         if user:
             json_data = request.get_json()
             data, errors = eventreg_schema.load(json_data)
             if errors:
                 return jsonify(errors)
             else:
-                event = EventsReg.register_one(data['name'],
-                                               data['about'],
-                                               data['seats'],
-                                               data['venue'],
-                                               conv_time(data['sdt']),
-                                               conv_time(data['edt']),
-                                               user.id)
-                if user_is_admin(user):
-                    # club =
-                    event.verified = True
-                elif not user_is_admin(user):
-                    event.verified = False
-                else:
-                    return jsonify({"Status": "Some error occured"})
+                # result = eventreg_schema.load()
 
-                if event.add_contacts(data['contacts']):
-                    event.set_active()
-                    return jsonify({"Status": "Event Saved"})
-                else:
-                    return jsonify({"Status": "Error"})
+                event = EventsReg.register_one(data.name,
+                                               data.about,
+                                               data.venue,
+                                               conv_time(data.sdt),
+                                               user,
+                                               data.contacts,
+                                               data.seats,
+                                               conv_time(data.edt),
+                                               conv_time(data.lastregtime)                                         
+                                               )
+                return jsonify({"a":data.name})
+                # if user_is_admin(user):
+                #     # club =
+                #     event.verified = True
+                # elif not user_is_admin(user):
+                #     event.verified = False
+                # else:
+                #     return jsonify({"Status": "Some error occured"})
+
+                # if event.add_contacts(data['contacts']):
+                #     event.set_active()
+                #     return jsonify({"Status": "Event Saved"})
+                # else:
+                #     return jsonify({"Status": "Error"})
 
         else:
             return jsonify({"Status": message})
@@ -221,11 +217,11 @@ class EventRegistration(Resource):
                              
                              )
             events.append(e)
-            result,errors = event_schema.dump(events)
-            if errors is None:
-                return {"Error":errors}
-            else:
-                return {"events": result}
+        result,errors = event_schema.dump(events)
+        if errors is None:
+            return {"Error":errors}
+        else:
+            return {"events": result}
 
         # events = Events.query.all()
 

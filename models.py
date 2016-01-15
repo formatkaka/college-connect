@@ -115,9 +115,9 @@ class UserReg(db.Model):
                 c = 1
         return err_stat(a, b, c)
 
-    def user_is_admin(self, club):
+    def user_is_admin(self):
 
-        if user.isadmin and user.currentAdmin:
+        if self.isadmin and self.currentAdmin:
             return True
         else:
             return False
@@ -194,22 +194,31 @@ class EventsReg(db.Model):
     time_created = db.Column(db.DateTime, default=datetime.now())
 
     @staticmethod
-    def register_one(name, about, seats, venue, sdt, edt, user_id):
+    def register_one(name, about, venue, sdt, user, contacts,seats=None, edt=None,lastregtime=None):
+        val = user.user_is_admin()
+
         eve = EventsReg(eventName=name,
                         eventInfo=about,
-                        totalSeats=seats,
                         eventVenue=venue,
                         startDateTime=sdt,
+                        createdBy=user.id,
+                        totalSeats=seats,
                         endDateTime=edt,
-                        createdBy=user_id)
+                        verified = val,
+                        lastRegDateTime = lastregtime,
+                        activeStatus=True
+                        )
+        eve.add_contacts(contacts)
         db.session.add(eve)
         db.session.commit()
         return eve
 
+    
     def add_contacts(self, contacts):
         for item in contacts:
-            ContactsForEvent.register_con(item['contactname'], item['contactnumber'], self.id)
-        return True
+            contact = ContactsForEvent(contactName=item['contactname'],contactNumber=item['contactnumber'])
+            self.contacts.append(contact)
+        
 
     def set_active(self):
         self.activeStatus = True
@@ -271,14 +280,6 @@ class ContactsForEvent(db.Model):
     contactNumber = db.Column(db.Integer)
     event_id = db.Column(db.Integer, db.ForeignKey('events.id'))
 
-    @staticmethod
-    def register_con(name, number, eve_id):
-        contact = ContactsForEvent()
-        contact.contactName = name
-        contact.contactNumber = number
-        contact.event_id = eve_id
-        db.session.add(contact)
-        db.session.commit()
 
 
 class GCMRegIds(db.Model):
@@ -384,6 +385,8 @@ def err_stat(a, b, c):
 
 
 def conv_time(unixstamp_or_datetime):
+    if unixstamp_or_datetime is None:
+        return None
     if isinstance(unixstamp_or_datetime, datetime):
         return time.mktime(unixstamp_or_datetime.timetuple())
     elif isinstance(unixstamp_or_datetime, float):
