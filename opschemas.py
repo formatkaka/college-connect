@@ -7,15 +7,11 @@ from marshmallow import fields, Schema
 
 ##### User Registration #####
 class UserReg_class():
-    def __init__(self, status_code, username, token):
-        self.status_code = status_code
-        self.username = username
+    def __init__(self,token): 
         self.token = token
 
 
 class UserReg_Response(Schema):
-    status_code = fields.Int()
-    username = fields.Str()
     token = fields.Str()
 
 

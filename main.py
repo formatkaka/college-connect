@@ -78,17 +78,16 @@ class UserRegistration(Resource):
     def get(self):
         """ Obtain/Generate token for user """
 
-        user, message = get_current_user()
+        user = get_current_user()
 
-        if user:
-            token = user.gen_auth_token()
+    
+        token = user.gen_auth_token()
 
-            op = UserReg_class(200, user.userName, token)
-            result = userreg_schema.dump(op)
-            return user.fullName
+        op = UserReg_class(token)
+        result = userreg_schema.dump(op)
+        return result.data
 
-        else:
-            return jsonify({"Status": message})
+        
 
 
 class ForgotPassword(Resource):
