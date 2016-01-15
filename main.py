@@ -64,7 +64,7 @@ class UserRegistration(Resource):
             op = UserReg_class(200, user_1.userName, token)
             result = userreg_schema.dump(op)
 
-            link = 'https://sheltered-fjord-8731.herokuapp.com/api/verify/' + base64.b64encode(email_id)
+            link = 'https://sheltered-fjord-8731.herokuapp.com/api/verify/' + base64.b64encode(data['email'])
 
             msg = Message(subject="Thank You for Registration.Confirmation Link.Click Below.",
                           sender="college.connect28@gmail.com",
