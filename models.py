@@ -36,7 +36,7 @@ club_events = db.Table('club_events',
 
 class UserReg(db.Model):
     __tablename__ = "users"
-    # __table_args__ = {'extend_existing': True}
+    __table_args__ = {'extend_existing': True}
 
     id = db.Column(db.Integer, primary_key=True)
     userName = db.Column(db.String, unique=True, nullable=False)
@@ -159,13 +159,18 @@ class ClubInfo(db.Model):
         db.session.commit()
 
     def add_follower(self, user):
-        self.followers.append(user)
-        db.session.add(self)
-        db.session.commit()
+        if user in self.followers:
+            abort(409,message="ERR23")
+        else:
+            self.followers.append(user)
+            db.session.commit()
 
     def remove_follower(self, user):
-        self.followers.remove(user)
-        db.session.commit()
+        if user not in self.followers:
+            abort(409,message="ERR25")
+        else:
+            self.followers.remove(user)
+            db.session.commit()
 
 
 class EventsReg(db.Model):
@@ -196,7 +201,12 @@ class EventsReg(db.Model):
     @staticmethod
     def register_one(name, about, venue, sdt, user, contacts,seats=None, edt=None,lastregtime=None):
         val = user.user_is_admin()
-
+        if seats is None:
+            leftseats = 9999
+            occupiedseats = 0
+        else :
+            leftseats = seats
+            occupiedseats = 0
         eve = EventsReg(eventName=name,
                         eventInfo=about,
                         eventVenue=venue,
@@ -206,7 +216,9 @@ class EventsReg(db.Model):
                         endDateTime=edt,
                         verified = val,
                         lastRegDateTime = lastregtime,
-                        activeStatus=True
+                        activeStatus=True,
+                        leftSeats = leftseats,
+                        occupiedSeats = occupiedseats
                         )
         eve.add_contacts(contacts)
         db.session.add(eve)
@@ -229,18 +241,25 @@ class EventsReg(db.Model):
     	if  user in self.followers:
     		abort(409,message="ERR23")
     	else:
-    		if self.leftSeats > 0:
-    			self.leftSeats = self.leftSeats - 1
-    			self.occupiedSeats = self.occupiedSeats + 1
-		        self.followers.append(user)
-		        db.session.add(self)
-		        db.session.commit()
-	        elif self.leftSeats == 0:
-	        	abort(409,"ERR24")
+            if self.leftSeats > 0 :
+                self.leftSeats = self.leftSeats - 1
+                self.occupiedSeats = self.occupiedSeats + 1
+                self.followers.append(user)
+                db.session.add(self)
+                db.session.commit()
+                
+
+            elif self.leftSeats == 0:
+                abort(409,message="ERR24")
 
     def remove_follower(self, user):
-        self.followers.remove(user)
-        db.session.commit()
+        if user not in self.followers:
+            abort(409,message="ERR25")
+        else:
+            self.followers.remove(user)
+            self.leftSeats = self.leftSeats + 1
+            self.occupiedSeats = self.occupiedSeats - 1            
+            db.session.commit()
 
     
 
@@ -387,8 +406,10 @@ def err_stat(a, b, c):
 def conv_time(unixstamp_or_datetime):
     if unixstamp_or_datetime is None:
         return None
+
     if isinstance(unixstamp_or_datetime, datetime):
         return time.mktime(unixstamp_or_datetime.timetuple())
+    
     elif isinstance(unixstamp_or_datetime, float):
         return datetime.fromtimestamp(unixstamp_or_datetime)
 

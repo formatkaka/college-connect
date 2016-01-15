@@ -162,15 +162,14 @@ class EmailVerification(Resource):
 class EventRegistration(Resource):
     def post(self):
         user = get_current_user()
-        if user:
-            json_data = request.get_json()
-            data, errors = eventreg_schema.load(json_data)
-            if errors:
-                return jsonify(errors)
-            else:
-                # result = eventreg_schema.load()
-
-                event = EventsReg.register_one(data.name,
+        
+        json_data = request.get_json()
+        data, errors = eventreg_schema.load(json_data)
+        if errors:
+            return jsonify(errors)
+        else:
+            # result = eventreg_schema.load()
+            event = EventsReg.register_one(data.name,
                                                data.about,
                                                data.venue,
                                                conv_time(data.sdt),
@@ -180,23 +179,9 @@ class EventRegistration(Resource):
                                                conv_time(data.edt),
                                                conv_time(data.lastregtime)                                         
                                                )
-                return jsonify({"a":data.name})
-                # if user_is_admin(user):
-                #     # club =
-                #     event.verified = True
-                # elif not user_is_admin(user):
-                #     event.verified = False
-                # else:
-                #     return jsonify({"Status": "Some error occured"})
+            return jsonify({"status":"event saved"})
 
-                # if event.add_contacts(data['contacts']):
-                #     event.set_active()
-                #     return jsonify({"Status": "Event Saved"})
-                # else:
-                #     return jsonify({"Status": "Error"})
 
-        else:
-            return jsonify({"Status": message})
 
     def get(self):
         user= get_current_user()
@@ -260,7 +245,7 @@ class Clubsget(Resource):
 class User_Follow_Status(Resource):
     
     def post(self, s1, event_or_club_id, s2):
-        user, message = get_current_user()
+        user = get_current_user()
         if user:
 
             if s1 == "club" and s2 == "follow":
@@ -270,7 +255,7 @@ class User_Follow_Status(Resource):
 
             elif s1 == "event" and s2 == "follow":
                 event = EventsReg.query.filter_by(id=event_or_club_id).first()
-                event.add_follower(user)
+                stat = event.add_follower(user)
                 return jsonify({"Status": "Successfully followed."})
 
             elif s1 == "club" and s2 == "unfollow":
