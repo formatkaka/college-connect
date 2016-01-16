@@ -44,17 +44,14 @@ class UserRegistration(Resource):
         if errors:
             return jsonify(errors)
 
-        if 'mobno' not in data.keys():
-            data['mobno'] = None
-            stat = UserReg.if_unique(data['rollno'], data['email'], data['mobno'])
 
-        else:
-            stat= UserReg.if_unique(data['rollno'], data['email'], data['mobno'])
+        stat = UserReg.if_unique(data.rollno, data.email, data.mobno)
+
 
         if stat:
 
-            user_1 = UserReg(userName=username, passwordHash=password_hash, fullName=data['name']
-                             , rollNo=data['rollno'], emailId=data['email'], mobNo=data['mobno'])
+            user_1 = UserReg(userName=username, passwordHash=password_hash, fullName=data.name
+                             , rollNo=data.rollno, emailId= data.email, mobNo=data.mobno)
             db.session.add(user_1)
             db.session.commit()
 
@@ -64,7 +61,7 @@ class UserRegistration(Resource):
             op = UserReg_class(token)
             result = userreg_schema.dump(op)
 
-            link = 'https://sheltered-fjord-8731.herokuapp.com/api/verify/' + base64.b64encode(data['email'])
+            link = 'https://sheltered-fjord-8731.herokuapp.com/api/verify/' + base64.b64encode(data.email)
 
             msg = Message(subject="Thank You for Registration.Confirmation Link.Click Below.",
                           sender="college.connect28@gmail.com",

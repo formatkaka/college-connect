@@ -1,14 +1,24 @@
 from marshmallow import fields, Schema, post_load
 
-
+## USER REGISTRATION SCHEMA
 
 
 class UserInfoSchema_Request(Schema):
     rollno = fields.Str()
     name = fields.Str()
     email = fields.Email()
-    # dob = fields.DateTime()
     mobno = fields.Int()
+
+    @post_load
+    def make_event(self,data):
+        return UserInfo_class(**data)
+
+class UserInfo_class(object):
+    def __init__(self,name,email,rollno,mobno=None):
+        self.name = name
+        self.email = email
+        self.rollno = rollno
+        self.mobno = mobno
 
 
 class ClubRegSchema_Request(Schema):
@@ -28,6 +38,7 @@ class OrganisedBySchema_Request(Schema):
 class OrganisedForSchema_Request(Schema):
     clubs_for_id = fields.Int()
 
+# EVENT REGISTRATION SCHEMA
 
 class EventRegSchema_Request(Schema):
     name = fields.Str()
