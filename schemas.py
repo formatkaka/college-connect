@@ -58,6 +58,10 @@ class EventRegSchema_class():
 # organised_by = fields.Nested(OrganisedBySchema_Request, many=True)
 # organised_for = fields.Nested(OrganisedForSchema_Request, many=True)
 
+class GCM_Schema(Schema):
+    gcmid = fields.Str()
+
+
 
 class AdminSchema_Request(Schema):
     rollno = fields.Str()
@@ -69,6 +73,7 @@ contact_schema = ContactSchema_Request(many=True)
 eventreg_schema = EventRegSchema_Request(partial=True)
 club_schema = ClubRegSchema_Request()
 info_schema = UserInfoSchema_Request()
+gcm_schema = GCM_Schema()
 # class UserSchema(Schema):
 # name = fields.Str()
 # email = fields.Email()

@@ -278,6 +278,22 @@ class User_Follow_Status(Resource):
 sources = ["notice", "seminar", "quick"]
 
 
+class GCMessaging(Resource):
+
+    def post(self):
+        json_data = request.get_json()
+        data, errors = gcm_schema.load(json_data)
+        
+        try:
+            gcm_id_arr = GCMRegIds.query.filter_by(id=1).one()
+            gcm_id_arr.data.append(data['gcmid'])
+            db.session.add(gcm_id_arr)
+            db.session.commit()
+            return jsonify({"Status":"saved"})
+        except:
+            abort(500,message="ERR")
+
+
 class WebScrap(Resource):
     def get(self, source):
         scrapper = scrap.Scrap()
@@ -324,6 +340,7 @@ api.add_resource(WebScrap, '/api/scrap/<string:source>')
 api.add_resource(User_Follow_Status, '/api/<string:s1>/<int:event_or_club_id>/<string:s2>')
 api.add_resource(EmailVerification, '/api/verify/<string:code>')
 api.add_resource(Testing1, '/api/test')
+api.add_resource(GCMessaging, '/api/gcm')
 
 if __name__ == "__main__":
     # db.create_all()

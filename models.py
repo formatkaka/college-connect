@@ -2,6 +2,7 @@ from config import *
 # from impf import *
 from opschemas import *
 from sqlalchemy.dialects.postgresql import ARRAY
+from sqlalchemy.ext.mutable import Mutable
 
 ####### Reference table for many-many relationships #######
 
@@ -28,6 +29,20 @@ club_events = db.Table('club_events',
                        db.Column('events_id', db.Integer, db.ForeignKey('events.id'))
                        )
 
+
+class MutableList(Mutable, list):
+    def append(self, value):
+        list.append(self, value)
+        self.changed()
+
+    @classmethod
+    def coerce(cls, key, value):
+        if not isinstance(value, MutableList):
+            if isinstance(value, list):
+                return MutableList(value)
+            return Mutable.coerce(key, value)
+        else:
+            return value
 
 #################
 #### MODELS #####
@@ -307,8 +322,7 @@ class GCMRegIds(db.Model):
     __table_args__ = {'extend_existing': True}
 
     id = db.Column(db.Integer, primary_key=True)
-    arr = db.Column(ARRAY(db.Integer))
-
+    data = db.Column(MutableList.as_mutable(ARRAY(db.String(100))))
 
 ####################################
 ######## HELPER FUNCTIONS ##########
@@ -365,7 +379,7 @@ def get_current_user():
 				abort(400)							# SOME UNKNOWN PROBLEM OCCURED
 
 		if user.password != "None":
-			user_get = UserReg.query.filter_by(userName=username_or_token).one()
+			user_get = UserReg.query.filter_by(userName=username_or_token).first()
 			if user_get:
 				if user_get.check_password_hash(password):
 					return user_get
