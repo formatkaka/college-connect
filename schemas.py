@@ -14,7 +14,7 @@ class UserInfoSchema_Request(Schema):
         return UserInfo_class(**data)
 
 class UserInfo_class(object):
-    def __init__(self,name,email,rollno,mobno=None):
+    def __init__(self,email,rollno,name=None,mobno=None):
         self.name = name
         self.email = email
         self.rollno = rollno
@@ -79,12 +79,16 @@ class AdminSchema_Request(Schema):
     clubname = fields.Str()
     club_id = fields.Int()
 
+class Forgot_Password(Schema):
+    email = fields.Email()
+    rollno = fields.Str()
 
 contact_schema = ContactSchema_Request(many=True)
 eventreg_schema = EventRegSchema_Request(partial=True)
 club_schema = ClubRegSchema_Request()
 info_schema = UserInfoSchema_Request()
 gcm_schema = GCM_Schema()
+forgot_pass = Forgot_Password()
 # class UserSchema(Schema):
 # name = fields.Str()
 # email = fields.Email()

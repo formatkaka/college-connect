@@ -85,7 +85,7 @@ class UserReg(db.Model):
         db.session.commit()
         return user
 
-    def gen_auth_token(self, expiration=1200):
+    def gen_auth_token(self, expiration=None):
 
         s = Serializer(app.config['SECRET_KEY'], expires_in=expiration)
         return s.dumps({'id': self.id})

@@ -2,10 +2,8 @@ from __init__ import *
 from config import *
 from models import *
 import os, flask, scrap
-from flask.ext.mail import Message
 from flask_mail import Message
 import base64
-from sqlalchemy import exc
 from schemas import *
 from opschemas import *
 from flask.ext.restful import abort
@@ -57,7 +55,7 @@ class UserRegistration(Resource):
 
 
             recieve = ["sid.siddhant.loya@gmail.com", "murali.prajapati555@gmail.com"]
-            token = user_1.gen_auth_token()  # TODO : Report if info commit fails
+            token = user_1.gen_auth_token(expiration=1200)
             op = UserReg_class(token)
             result = userreg_schema.dump(op)
 
@@ -78,7 +76,7 @@ class UserRegistration(Resource):
         user = get_current_user()
 
     
-        token = user.gen_auth_token()
+        token = user.gen_auth_token(expiration=1200)
 
         op = UserReg_class(token)
         result = userreg_schema.dump(op)
@@ -90,7 +88,34 @@ class UserRegistration(Resource):
 class ForgotPassword(Resource):
     """ API to Reset Password """
 
-    pass
+    def post(self):
+        json_data = request.get_json()
+        data, errors = forgot_pass.load(json_data)
+        if errors:
+            return jsonify(errors)
+
+        # try:
+        user = UserReg.query.filter_by(emailId=data['email']).first_or_404()
+        if user.rollNo == data['rollno']:
+            s = Serializer(app.config['SECRET_KEY'] ,expires_in=60*30)
+            token = s.dumps({'id':user.id})
+
+            link = 'https://sheltered-fjord-8731.herokuapp.com/api/reset/' + token
+
+            msg = Message(subject="Reset password",
+                      sender="college.connect28@gmail.com",
+                      recipients=["siddhantloya2008@gmail.com"])
+
+            msg.body = "please click on the link {0}".format(link)
+            mail.send(msg)
+            return jsonify({"status":"email sent"})
+        else:
+            abort(409,message="invalid creds")
+        # except:
+        #     abort(400,message="some error occured")
+
+    def get(self):
+        pass
 
 
 class UserInformation(Resource):
@@ -234,8 +259,6 @@ class Clubsget(Resource):
             elif s2 == "events" and club:
                 pass
 
-        else:
-            return jsonify({"Status": message})
 
 
 class User_Follow_Status(Resource):
@@ -318,11 +341,25 @@ class Testing1(Resource):
         # else:
         # 	return "OK"
 
+class Reauthenticate(Form):
+    new_password = PasswordField('Enter new password', validators=[DataRequired()])
+    re_password = PasswordField('Re-enter new password', validators=[DataRequired(), EqualTo('new_password',
+                                                                                           message=' New Passwords do not match')])
+    submit = SubmitField('Change Password')
 
-# @api.errorhandler(500)
-# def some_error():
-# 	db.session.rollback()
-# 	return "Retry"
+@app.route('/api/reset/<string:token>',methods=['GET','POST'])
+def reset_password(token):
+     s = Serializer(app.config['SECRET_KEY'])
+     data = s.loads(token)
+     user = UserReg.query.filter_by(id=data['id']).first()
+     form = Reauthenticate()
+     if form.validate_on_submit():
+         user.passwordHash = form.new_password.data
+         db.session.commit()
+         flash('Password Changed')
+         return render_template('reset.html',form=None)
+
+     return render_template('reset.html',form=form)
 
 
 
@@ -338,10 +375,11 @@ api.add_resource(User_Follow_Status, '/api/<string:s1>/<int:event_or_club_id>/<s
 api.add_resource(EmailVerification, '/api/verify/<string:code>')
 api.add_resource(Testing1, '/api/test')
 api.add_resource(GCMessaging, '/api/gcm')
+api.add_resource(ForgotPassword,'/api/passwordreset')
 
 if __name__ == "__main__":
-    # db.create_all()
+    db.create_all()
     # manager.run()
-    port = int(os.environ.get('PORT', 5432))
-    app.run(host='0.0.0.0', port=port, debug=True)
-    # app.run(port=8080,debug=True)
+    # port = int(os.environ.get('PORT', 5432))
+    # app.run(host='0.0.0.0', port=port, debug=True)
+    app.run(port=8080,debug=True)

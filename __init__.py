@@ -13,3 +13,8 @@ from flask.ext.mail import Mail
 from flask.ext.script import Manager
 from flask.ext.migrate import Migrate,MigrateCommand
 
+from flask import render_template,flash
+from flask_wtf import Form
+from wtforms import  SubmitField, PasswordField
+from wtforms.validators import DataRequired, EqualTo
+from flask.ext.bootstrap import Bootstrap

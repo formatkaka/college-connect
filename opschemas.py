@@ -97,7 +97,7 @@ class Events_Response(Schema):
     createdby = fields.Int()
     verified = fields.Str()
     contacts = fields.Nested(Admin_Response, many=True)
-    createdby = fields.Str()
+    # createdby = fields.Str()
 
 
 
