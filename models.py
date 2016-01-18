@@ -217,30 +217,34 @@ class EventsReg(db.Model):
 
     @staticmethod
     def register_one(name, about, venue, sdt, user, contacts, seats=None, edt=None, lastregtime=None):
-        val = user.user_is_admin()
-        if seats is None:
-            leftseats = 9999
-            occupiedseats = 0
-        else:
-            leftseats = seats
-            occupiedseats = 0
-        eve = EventsReg(eventName=name,
-                        eventInfo=about,
-                        eventVenue=venue,
-                        startDateTime=sdt,
-                        createdBy=user.id,
-                        totalSeats=seats,
-                        endDateTime=edt,
-                        verified=val,
-                        lastRegDateTime=lastregtime,
-                        activeStatus=True,
-                        leftSeats=leftseats,
-                        occupiedSeats=occupiedseats
-                        )
-        eve.add_contacts(contacts)
-        db.session.add(eve)
-        db.session.commit()
-        return eve
+        try:
+            val = user.user_is_admin()
+            if seats is None:
+                leftseats = 9999
+                occupiedseats = 0
+            else:
+                leftseats = seats
+                occupiedseats = 0
+            eve = EventsReg(eventName=name,
+                            eventInfo=about,
+                            eventVenue=venue,
+                            startDateTime=sdt,
+                            createdBy=user.id,
+                            totalSeats=seats,
+                            endDateTime=edt,
+                            verified=val,
+                            lastRegDateTime=lastregtime,
+                            activeStatus=True,
+                            leftSeats=leftseats,
+                            occupiedSeats=occupiedseats
+                            )
+            eve.add_contacts(contacts)
+            db.session.add(eve)
+            db.session.commit()
+            send_email(val,user,eve.id)
+            return eve
+        except:
+            abort(400,message="some error occured.")
 
     def add_contacts(self, contacts):
         for item in contacts:
@@ -445,3 +449,25 @@ def get_contact_info(event):
         a = Admins(contact.contactName, contact.contactNumber)
         contacts.append(a)
     return contacts
+
+def send_email(val,user,eve_id):
+    if val:
+        message = "Your response has been saved and shall be published shortly."
+    else:
+        message = "Your response has been saved . It shall be pusblished after verification."
+
+    recieve1 = "college.connect28@gmail.com"
+    recieve2 = user.emailId
+    msg1 = Message(subject="Response Saved",
+              sender="college.connect28@gmail.com",
+              recipients=[recieve2])
+
+    msg1.body = message
+    mail.send(msg1)
+
+    msg2 = Message(subject="Response Saved",
+              sender="college.connect28@gmail.com",
+              recipients=[recieve1])
+    msg2.body = "Event recieved from user name:{0} , rollno:{1} , eve_id {2}".format(user.fullName,user.rollNo,
+                                                                                  eve_id)
+    mail.send(msg2)

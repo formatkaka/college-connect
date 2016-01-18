@@ -145,17 +145,15 @@ class UserUnique(Resource):
 
     field = ["username"]
 
-    def post(self, attr):
-        return ({"Status": "Invalid Method."})
 
     def get(self, attr):
         user = request.authorization
         if attr == self.field[0]:
             username = UserReg.query.filter_by(userName=user.username).first()
             if username is None:
-                return jsonify({"Status": "True"})
+                return jsonify({"status": "True"})
             else:
-                return jsonify({"Status": "False"})
+                abort(409,message="ERR14")
 
         else:
             abort(400, message="Invalid URL")
@@ -170,7 +168,7 @@ class EmailVerification(Resource):
     def get(self, code):
         email = base64.b64decode(code)
         user = UserReg.query.filter_by(emailId=email).first()
-        user.isVerified = True  # TODO: Checking Email
+        user.isVerified = True
         db.session.add(user)
         db.session.commit()
         return "<center><h1>You're Now Verified User</h1></center>"
@@ -185,7 +183,7 @@ class EventRegistration(Resource):
         if errors:
             return jsonify(errors)
         else:
-            # result = eventreg_schema.load()
+
             event = EventsReg.register_one(data.name,
                                            data.about,
                                            data.venue,
