@@ -3,7 +3,7 @@ from config import *
 from opschemas import *
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.ext.mutable import Mutable
-
+from flask_mail import Message
 ####### Reference table for many-many relationships #######
 
 # 1 ---> CLUBS FOLLOWED BY USERS
