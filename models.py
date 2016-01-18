@@ -44,6 +44,7 @@ class MutableList(Mutable, list):
         else:
             return value
 
+
 #################
 #### MODELS #####
 #################
@@ -100,7 +101,7 @@ class UserReg(db.Model):
         except BadSignature:
             return None, 1  # invalid token
         user = UserReg.query.get(data['id'])
-        return user,None
+        return user, None
 
     def add_club(self, clubname):
         """ Add a user to list of club followers """
@@ -137,11 +138,12 @@ class UserReg(db.Model):
         else:
             return False
 
-    def is_attending_event(self,event):
-		if event in self.events:
-			return True
-		else:
-			return False
+    def is_attending_event(self, event):
+        if event in self.events:
+            return True
+        else:
+            return False
+
 
 class ClubInfo(db.Model):
     """ A list of all the clubs ,their admins and its EventsReg """
@@ -175,14 +177,14 @@ class ClubInfo(db.Model):
 
     def add_follower(self, user):
         if user in self.followers:
-            abort(409,message="ERR23")
+            abort(409, message="ERR23")
         else:
             self.followers.append(user)
             db.session.commit()
 
     def remove_follower(self, user):
         if user not in self.followers:
-            abort(409,message="ERR25")
+            abort(409, message="ERR25")
         else:
             self.followers.remove(user)
             db.session.commit()
@@ -214,12 +216,12 @@ class EventsReg(db.Model):
     time_created = db.Column(db.DateTime, default=datetime.now())
 
     @staticmethod
-    def register_one(name, about, venue, sdt, user, contacts,seats=None, edt=None,lastregtime=None):
+    def register_one(name, about, venue, sdt, user, contacts, seats=None, edt=None, lastregtime=None):
         val = user.user_is_admin()
         if seats is None:
             leftseats = 9999
             occupiedseats = 0
-        else :
+        else:
             leftseats = seats
             occupiedseats = 0
         eve = EventsReg(eventName=name,
@@ -229,23 +231,21 @@ class EventsReg(db.Model):
                         createdBy=user.id,
                         totalSeats=seats,
                         endDateTime=edt,
-                        verified = val,
-                        lastRegDateTime = lastregtime,
+                        verified=val,
+                        lastRegDateTime=lastregtime,
                         activeStatus=True,
-                        leftSeats = leftseats,
-                        occupiedSeats = occupiedseats
+                        leftSeats=leftseats,
+                        occupiedSeats=occupiedseats
                         )
         eve.add_contacts(contacts)
         db.session.add(eve)
         db.session.commit()
         return eve
 
-    
     def add_contacts(self, contacts):
         for item in contacts:
-            contact = ContactsForEvent(contactName=item['contactname'],contactNumber=item['contactnumber'])
+            contact = ContactsForEvent(contactName=item['contactname'], contactNumber=item['contactnumber'])
             self.contacts.append(contact)
-        
 
     def set_active(self):
         self.activeStatus = True
@@ -253,34 +253,34 @@ class EventsReg(db.Model):
         db.session.commit()
 
     def add_follower(self, user):
-    	if  user in self.followers:
-    		abort(409,message="ERR23")
-    	else:
-            if self.leftSeats > 0 :
+        if user in self.followers:
+            abort(409, message="ERR23")
+        else:
+            if self.leftSeats > 0:
                 self.leftSeats = self.leftSeats - 1
                 self.occupiedSeats = self.occupiedSeats + 1
                 self.followers.append(user)
                 db.session.add(self)
                 db.session.commit()
-                
+
 
             elif self.leftSeats == 0:
-                abort(409,message="ERR24")
+                abort(409, message="ERR24")
 
     def remove_follower(self, user):
         if user not in self.followers:
-            abort(409,message="ERR25")
+            abort(409, message="ERR25")
         else:
             self.followers.remove(user)
             self.leftSeats = self.leftSeats + 1
-            self.occupiedSeats = self.occupiedSeats - 1            
+            self.occupiedSeats = self.occupiedSeats - 1
             db.session.commit()
 
-    
 
 
-    # def __repr__(self):
-    # 	return "<Name> {0} <Info> {1} <Seats> {2} <Venue> {3} <Verified> {4} <createdBy> {5} ".format(self.eventName,self.eventInfo,self.seats,self.eventVenue,self.verified,self.createdBy)
+
+            # def __repr__(self):
+            # 	return "<Name> {0} <Info> {1} <Seats> {2} <Venue> {3} <Verified> {4} <createdBy> {5} ".format(self.eventName,self.eventInfo,self.seats,self.eventVenue,self.verified,self.createdBy)
 
 
 class OrgBy(db.Model):
@@ -315,7 +315,6 @@ class ContactsForEvent(db.Model):
     event_id = db.Column(db.Integer, db.ForeignKey('events.id'))
 
 
-
 class GCMRegIds(db.Model):
     """ List of GCM reg Ids"""
     __tablename__ = "gcmids"
@@ -323,6 +322,7 @@ class GCMRegIds(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     data = db.Column(MutableList.as_mutable(ARRAY(db.String(100))))
+
 
 ####################################
 ######## HELPER FUNCTIONS ##########
@@ -348,73 +348,73 @@ def get_current_user():
 
     user = request.authorization
 
-    if user is None :
-        abort(401,message="ERR01")
+    if user is None:
+        abort(401, message="ERR01")
 
     if user is not None:
 
-		if user.username == "" :
-			abort(401,message="ERR02")
+        if user.username == "":
+            abort(401, message="ERR02")
 
-		if user.password == "" :
-			abort(401,message="ERR03")
+        if user.password == "":
+            abort(401, message="ERR03")
 
-		username_or_token = user.username
-		password = user.password
+        username_or_token = user.username
+        password = user.password
 
-		verified,value = UserReg.verify_auth_token(username_or_token)
+        verified, value = UserReg.verify_auth_token(username_or_token)
 
-		if user.password == "None":
+        if user.password == "None":
 
-			if verified:
-				return verified
+            if verified:
+                return verified
 
-			elif not verified and value == 0:
-				abort(401,message="ERR07")
+            elif not verified and value == 0:
+                abort(401, message="ERR07")
 
-			elif not verified and value == 1:
-				abort(401,message="ERR06")			
+            elif not verified and value == 1:
+                abort(401, message="ERR06")
 
-			else:
-				abort(400)							# SOME UNKNOWN PROBLEM OCCURED
+            else:
+                abort(400)  # SOME UNKNOWN PROBLEM OCCURED
 
-		if user.password != "None":
-			user_get = UserReg.query.filter_by(userName=username_or_token).first()
-			if user_get:
-				if user_get.check_password_hash(password):
-					return user_get
-				else:
-					abort(401,message="ERR05")
-			else:
-				abort(401,message="ERR04")
-		else:
-			return abort(400)					   # SOME UNKNOWN PROBLEM OCCURED
+        if user.password != "None":
+            user_get = UserReg.query.filter_by(userName=username_or_token).first()
+            if user_get:
+                if user_get.check_password_hash(password):
+                    return user_get
+                else:
+                    abort(401, message="ERR05")
+            else:
+                abort(401, message="ERR04")
+        else:
+            return abort(400)  # SOME UNKNOWN PROBLEM OCCURED
 
 
 def err_stat(a, b, c):
-	if a == 0 and b == 0 and c == 0:
-		return True
+    if a == 0 and b == 0 and c == 0:
+        return True
 
-	if a == 0 and b == 0 and c == 1:
-		abort(409,message="ERR15")
+    if a == 0 and b == 0 and c == 1:
+        abort(409, message="ERR15")
 
-	if a == 0 and b == 1 and c == 0:
-		abort(409,message="ERR16")
+    if a == 0 and b == 1 and c == 0:
+        abort(409, message="ERR16")
 
-	if a == 0 and b == 1 and c == 1:
-		abort(409,message="ERR17")
+    if a == 0 and b == 1 and c == 1:
+        abort(409, message="ERR17")
 
-	if a == 1 and b == 0 and c == 0:
-		abort(409,message="ERR18")
+    if a == 1 and b == 0 and c == 0:
+        abort(409, message="ERR18")
 
-	if a == 1 and b == 0 and c == 1:
-		abort(409,message="ERR19")
+    if a == 1 and b == 0 and c == 1:
+        abort(409, message="ERR19")
 
-	if a == 1 and b == 1 and c == 0:
-		abort(409,message="ERR20")
+    if a == 1 and b == 1 and c == 0:
+        abort(409, message="ERR20")
 
-	if a == 1 and b == 1 and c == 1:
-		abort(409,message="ERR21")
+    if a == 1 and b == 1 and c == 1:
+        abort(409, message="ERR21")
 
 
 def conv_time(unixstamp_or_datetime):
@@ -423,11 +423,11 @@ def conv_time(unixstamp_or_datetime):
 
     if isinstance(unixstamp_or_datetime, datetime):
         return time.mktime(unixstamp_or_datetime.timetuple())
-    
+
     elif isinstance(unixstamp_or_datetime, float):
         return datetime.fromtimestamp(unixstamp_or_datetime)
 
-    # return dt
+        # return dt
 
 
 def get_admin_info(club):
