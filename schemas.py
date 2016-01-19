@@ -81,7 +81,10 @@ class AdminSchema_Request(Schema):
 
 class Forgot_Password(Schema):
     email = fields.Email()
-    rollno = fields.Str()
+
+
+
+
 
 contact_schema = ContactSchema_Request(many=True)
 eventreg_schema = EventRegSchema_Request(partial=True)

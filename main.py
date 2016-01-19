@@ -90,25 +90,24 @@ class ForgotPassword(Resource):
         if errors:
             return jsonify(errors)
 
-        try:
-            user = UserReg.query.filter_by(emailId=data['email']).first_or_404()
-            if user.rollNo == data['rollno']:
-                s = Serializer(app.config['SECRET_KEY'], expires_in=60 * 30)
-                token = s.dumps({'id': user.id})
 
-                link = 'https://sheltered-fjord-8731.herokuapp.com/api/reset/' + token
+        user = UserReg.query.filter_by(emailId=data['email']).first_or_404()
 
-                msg = Message(subject="Reset password",
-                              sender="college.connect28@gmail.com",
-                              recipients=["siddhantloya2008@gmail.com"])
+        s = Serializer(app.config['SECRET_KEY'], expires_in=60 * 30)
+        token = s.dumps({'id': user.id})
 
-                msg.body = "please click on the link {0}".format(link)
-                mail.send(msg)
-                return jsonify({"status": "email sent"})
-            else:
-                abort(409, message="invalid creds")
-        except:
-            abort(400, message="some error occured")
+        link = 'https://sheltered-fjord-8731.herokuapp.com/api/reset/' + token
+
+        msg = Message(subject="Reset password",
+                      sender="college.connect28@gmail.com",
+                      recipients=["siddhantloya2008@gmail.com"])
+
+        msg.body = "please click on the link {0}".format(link)
+        mail.send(msg)
+        return jsonify({"status": "email sent"})
+
+
+
 
     def get(self):
         pass
@@ -117,8 +116,6 @@ class ForgotPassword(Resource):
 class UserInformation(Resource):
     """ API to GET user info """
 
-    def post(self):
-        return ({"Status": "Invalid Method."})
 
     def get(self):
         user = get_current_user()
@@ -264,7 +261,7 @@ class User_Follow_Status(Resource):
 
             elif s1 == "event" and s2 == "follow":
                 event = EventsReg.query.filter_by(id=event_or_club_id).first()
-                stat = event.add_follower(user)
+                event.add_follower(user)
                 return jsonify({"Status": "Successfully followed."})
 
             elif s1 == "club" and s2 == "unfollow":
@@ -342,6 +339,7 @@ def reset_password(token):
     form = Reauthenticate()
     if form.validate_on_submit():
         user.passwordHash = form.new_password.data
+        db.session.add(user)
         db.session.commit()
         flash('Password Changed')
         return render_template('reset.html', form=None)
@@ -360,7 +358,7 @@ api.add_resource(User_Follow_Status, '/api/<string:s1>/<int:event_or_club_id>/<s
 api.add_resource(EmailVerification, '/api/verify/<string:code>')
 api.add_resource(Testing1, '/api/test')
 api.add_resource(GCMessaging, '/api/gcm')
-api.add_resource(ForgotPassword, '/api/passwordreset')
+api.add_resource(ForgotPassword, '/api/password')
 
 if __name__ == "__main__":
     db.create_all()
