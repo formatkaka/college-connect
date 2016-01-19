@@ -4,6 +4,7 @@ from models import *
 import os, flask, scrap
 from flask_mail import Message
 import base64
+from drive_api import DriveApi
 from schemas import *
 from opschemas import *
 from flask.ext.restful import abort
@@ -310,6 +311,22 @@ class WebScrap(Resource):
             return jsonify(scrapper.get_quicks())
         else:
             return jsonify({"Status": 'Invalid request'})
+
+class FileUpload(Resource):
+
+    def post(self):
+        # user = get_current_user()
+        # if user:
+        json_data = request.get_json()
+        base = json_data['file']
+        drive = DriveApi()
+        flag = drive.upload(base, 'qwerty')
+        if(flag):
+            return jsonify({"Status":"Success"})
+        else:
+            return jsonify({"Status":"Upload Failed."})
+        # else:
+        #   return jsonify({"Status":"Unauthorized access"})
 
 
 class Testing1(Resource):

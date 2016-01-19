@@ -1,5 +1,5 @@
 import urllib2
-import codecs
+import codecs, requests
 from bs4 import BeautifulSoup
 
 
@@ -18,7 +18,7 @@ class Scrap:
         return dict
 
     def get_soup(self, url):
-        source = urllib2.urlopen(url).read()
+        source = requests.get(url).text
         soup = BeautifulSoup(source, "html.parser")
         soup.prettify()
         return soup
