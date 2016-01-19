@@ -378,6 +378,7 @@ api.add_resource(EmailVerification, '/api/verify/<string:code>')
 api.add_resource(Testing1, '/api/test')
 api.add_resource(GCMessaging, '/api/gcm')
 api.add_resource(ForgotPassword, '/api/passwordreset')
+api.add_resource(FileUpload, '/api/file/upload')
 
 if __name__ == "__main__":
     db.create_all()
