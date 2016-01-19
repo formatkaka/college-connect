@@ -16,7 +16,7 @@ ERR06 - Invalid Token.
 
 ERR07 - Expired Token.
 
-ERR08 - 
+ERR08 -
 
 ERR09 -
 
@@ -55,23 +55,23 @@ ERR21 - All three exist.
 
 ERR22 - Event Name already Exists.
 
-ERR23 - Already following/attending.
+ERR23 -
 
-ERR24 - No seats left.
+ERR24 -
 
-ERR25 - Cant remove, not following/atternding.
+ERR25 -
 
 ERR26 -
 
-ERR27 - 
+ERR27 -
 
 ERR28 -
 
-ERR29 - 
+ERR29 -
 
 ERR30 -
 
-ERR31 - 
+ERR31 -
 
 ERR32 -
 
