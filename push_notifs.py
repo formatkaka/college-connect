@@ -18,4 +18,3 @@ def push_notif(message):
 
 
 
-push_notif("ad")
