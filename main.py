@@ -311,11 +311,12 @@ class WebScrap(Resource):
 
 class Testing1(Resource):
     def post(self):
-        image = DriveApi()
-        json_data = request.get_json()
-        data, errors = gcm_schema.load(json_data)
-        
-        image.upload("siddhant",data['gcmid'])
+        pass
+        # image = DriveApi()
+        # json_data = request.get_json()
+        # data, errors = gcm_schema.load(json_data)
+        #
+        # image.upload("siddhant",data['gcmid'])
         #     return jsonify({"message":"done"})
         # else:
         #     return jsonify({"message":"not done"})
