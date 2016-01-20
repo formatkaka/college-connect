@@ -7,7 +7,7 @@ import base64
 from schemas import *
 from opschemas import *
 from flask.ext.restful import abort
-
+from drive_api import DriveApi
 
 class Testing(Resource):
     """Test Class for API"""
@@ -104,7 +104,7 @@ class ForgotPassword(Resource):
 
         msg.body = "please click on the link {0}".format(link)
         mail.send(msg)
-        return jsonify({"status": "email sent"})
+        return jsonify({"message": "email sent"})
 
 
 
@@ -134,7 +134,7 @@ class UserInformation(Resource):
         else:
             return jsonify({"Information": result})
             # else:
-            #     return jsonify({"Status": "Invalid"})
+            #     return jsonify({"message": "Invalid"})
 
 
 class UserUnique(Resource):
@@ -148,9 +148,9 @@ class UserUnique(Resource):
         if attr == self.field[0]:
             username = UserReg.query.filter_by(userName=user.username).first()
             if username is None:
-                return jsonify({"status": "True"})
+                return jsonify({"message": "True"})
             else:
-                abort(409,message="ERR14")
+                abort(409,message="ERR14")message
 
         else:
             abort(400, message="Invalid URL")
@@ -160,7 +160,7 @@ class EmailVerification(Resource):
     """API to Verify Email"""
 
     # def post(self):
-    #     return ({"Status": "Invalid Method."})
+    #     return ({"message": "Invalid Method."})
 
     def get(self, code):
         email = base64.b64decode(code)
@@ -191,7 +191,7 @@ class EventRegistration(Resource):
                                            conv_time(data.edt),
                                            conv_time(data.lastregtime)
                                            )
-            return jsonify({"status": "event saved"})
+            return jsonify({"message": "event saved"})
 
     def get(self):
         user = get_current_user()
@@ -249,7 +249,7 @@ class Clubsget(Resource):
                 pass
 
 
-class User_Follow_Status(Resource):
+class User_Follow_message(Resource):
     def post(self, s1, event_or_club_id, s2):
         user = get_current_user()
         if user:
@@ -257,25 +257,25 @@ class User_Follow_Status(Resource):
             if s1 == "club" and s2 == "follow":
                 club = ClubInfo.query.filter_by(id=event_or_club_id).first()
                 club.add_follower(user)
-                return jsonify({"Status": "Successfully followed."})
+                return jsonify({"message": "Successfully followed."})
 
             elif s1 == "event" and s2 == "follow":
                 event = EventsReg.query.filter_by(id=event_or_club_id).first()
                 event.add_follower(user)
-                return jsonify({"Status": "Successfully followed."})
+                return jsonify({"message": "Successfully followed."})
 
             elif s1 == "club" and s2 == "unfollow":
                 club = ClubInfo.query.filter_by(id=event_or_club_id).first()
                 club.remove_follower(user)
-                return jsonify({"Status": "Successfully unfollowed"})
+                return jsonify({"message": "Successfully unfollowed"})
 
             elif s1 == "event" and s2 == "unfollow":
                 event = EventsReg.query.filter_by(id=event_or_club_id).first()
                 event.remove_follower(user)
-                return jsonify({"Status": "Successfully unfollowed"})
+                return jsonify({"message": "Successfully unfollowed"})
 
             else:
-                return jsonify({"Status": "Invalid Request"})
+                return jsonify({"message": "Invalid Request"})
 
 
 sources = ["notice", "seminar", "quick"]
@@ -291,7 +291,7 @@ class GCMessaging(Resource):
             gcm_id_arr.data.append(data['gcmid'])
             db.session.add(gcm_id_arr)
             db.session.commit()
-            return jsonify({"Status": "saved"})
+            return jsonify({"message": "saved"})
         except:
             abort(500, message="ERR")
 
@@ -306,22 +306,21 @@ class WebScrap(Resource):
         elif source == sources[2]:
             return jsonify(scrapper.get_quicks())
         else:
-            return jsonify({"Status": 'Invalid request'})
+            return jsonify({"message": 'Invalid request'})
 
 
 class Testing1(Resource):
-    def get(self):
-        user, message = get_current_user()
-        user = request.authorization
-        # if not user.username:
-        return str(user.username == "")
-        # 	return "No username"
-        # elif not user.password:
-        # 	return "No password"
-        # elif user.password == "null":
-        # 	return "Token"
+    def post(self):
+        image = DriveApi()
+        json_data = request.get_json()
+        data, errors = gcm_schema.load(json_data)
+        
+        image.upload("siddhant",data['gcmid'])
+        #     return jsonify({"message":"done"})
         # else:
-        # 	return "OK"
+        #     return jsonify({"message":"not done"})
+
+
 
 
 class Reauthenticate(Form):
@@ -354,7 +353,7 @@ api.add_resource(Clubsget, '/api/clubs/<string:s1>/<string:s2>')
 api.add_resource(UserUnique, '/api/unique/<string:attr>')
 api.add_resource(Testing, '/')
 api.add_resource(WebScrap, '/api/scrap/<string:source>')
-api.add_resource(User_Follow_Status, '/api/<string:s1>/<int:event_or_club_id>/<string:s2>')
+api.add_resource(User_Follow_message, '/api/<string:s1>/<int:event_or_club_id>/<string:s2>')
 api.add_resource(EmailVerification, '/api/verify/<string:code>')
 api.add_resource(Testing1, '/api/test')
 api.add_resource(GCMessaging, '/api/gcm')
@@ -363,6 +362,6 @@ api.add_resource(ForgotPassword, '/api/password')
 if __name__ == "__main__":
     db.create_all()
     # manager.run()
-    port = int(os.environ.get('PORT', 5432))
-    app.run(host='0.0.0.0', port=port, debug=True)
-    # app.run(port=8080,debug=True)
+    # port = int(os.environ.get('PORT', 5432))
+    # app.run(host='0.0.0.0', port=port, debug=True)
+    app.run(port=8080,debug=True)

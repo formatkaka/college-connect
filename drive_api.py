@@ -16,7 +16,7 @@ try:
 except ImportError:
 	flags = None
 
-class DriveApi:
+class DriveApi(object):
 
 	SCOPES = 'https://www.googleapis.com/auth/drive.file'
 	CLIENT_SECRET_FILE = 'client_secret.json'
@@ -44,7 +44,7 @@ class DriveApi:
 
 		return file
 	  except errors.HttpError, error:
-		print('An error occured: %s' % error)
+		# print('An error occured: %s' % error)
 		return None
 
 	def get_credentials(self):
@@ -64,7 +64,7 @@ class DriveApi:
 				credentials = tools.run_flow(flow, store, flags)
 			else: # Needed only for compatibility with Python 2.6
 				credentials = tools.run(flow, store)
-			print('Storing credentials to ' + credential_path)
+			# print('Storing credentials to ' + credential_path)
 		return credentials
 
 	def upload(self, base, username):
