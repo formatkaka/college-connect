@@ -7,7 +7,7 @@ import base64
 from schemas import *
 from opschemas import *
 from flask.ext.restful import abort
-# from drive_api import DriveApi
+from drive_api import DriveApi
 
 class Testing(Resource):
     """Test Class for API"""
@@ -180,7 +180,7 @@ class EventRegistration(Resource):
         if errors:
             return jsonify(errors)
         else:
-
+            # try:
             event = EventsReg.register_one(data.name,
                                            data.about,
                                            data.venue,
@@ -191,7 +191,15 @@ class EventRegistration(Resource):
                                            conv_time(data.edt),
                                            conv_time(data.lastregtime)
                                            )
+            drive = DriveApi()
+            flag = drive.upload(data.image, 'qwerty')
+            event.imageLink = str(flag)
+            db.session.add(event)
+            db.session.commit()
+            push_notif("A new event has been created.{0}".format(data.name))
             return jsonify({"message": "event saved"})
+
+
 
     def get(self):
         user = get_current_user()
@@ -286,14 +294,14 @@ class GCMessaging(Resource):
         json_data = request.get_json()
         data, errors = gcm_schema.load(json_data)
 
-        try:
-            gcm_id_arr = GCMRegIds.query.filter_by(id=1).one()
-            gcm_id_arr.data.append(data['gcmid'])
-            db.session.add(gcm_id_arr)
-            db.session.commit()
-            return jsonify({"message": "saved"})
-        except:
-            abort(500, message="ERR")
+
+        gcm_id_arr = GCMRegIds.query.filter_by(id=1).first()
+        gcm_id_arr.data.append(data['gcmid'])
+        db.session.add(gcm_id_arr)
+        db.session.commit()
+        return jsonify({"message": "saved"})
+        # except:
+        #     abort(500, message="ERR")
 
 
 class WebScrap(Resource):
@@ -308,18 +316,22 @@ class WebScrap(Resource):
         else:
             return jsonify({"message": 'Invalid request'})
 
+from push_notifs import push_notif
+
+
 
 class Testing1(Resource):
     def post(self):
-        pass
-        # image = DriveApi()
-        # json_data = request.get_json()
-        # data, errors = gcm_schema.load(json_data)
-        #
-        # image.upload("siddhant",data['gcmid'])
-        #     return jsonify({"message":"done"})
-        # else:
-        #     return jsonify({"message":"not done"})
+     # user = get_current_user()
+     # if user:
+         json_data = request.get_json()
+         base = json_data['file']
+         drive = DriveApi()
+         flag = drive.upload(base, 'qwerty')
+         if flag:
+             return jsonify({"Status":"Success"})
+         else:
+            return jsonify({"Status":"Upload Failed."})
 
 
 
@@ -349,7 +361,7 @@ def reset_password(token):
 
 api.add_resource(UserRegistration, '/api/user/reg')
 api.add_resource(UserInformation, '/api/user/info')
-api.add_resource(EventRegistration, '/api/events/')
+api.add_resource(EventRegistration, '/api/events')
 api.add_resource(Clubsget, '/api/clubs/<string:s1>/<string:s2>')
 api.add_resource(UserUnique, '/api/unique/<string:attr>')
 api.add_resource(Testing, '/')
@@ -361,7 +373,7 @@ api.add_resource(GCMessaging, '/api/gcm')
 api.add_resource(ForgotPassword, '/api/password')
 
 if __name__ == "__main__":
-    db.create_all()
+    # db.create_all()
     # manager.run()
     port = int(os.environ.get('PORT', 5432))
     app.run(host='0.0.0.0', port=port, debug=True)

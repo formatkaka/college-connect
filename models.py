@@ -4,6 +4,7 @@ from opschemas import *
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.ext.mutable import Mutable
 from flask_mail import Message
+import sqlalchemy
 ####### Reference table for many-many relationships #######
 
 # 1 ---> CLUBS FOLLOWED BY USERS
@@ -213,38 +214,39 @@ class EventsReg(db.Model):
     followers = db.relationship('UserReg', secondary=user_events,
                                 backref='events')
     activeStatus = db.Column(db.Boolean, default=False)
+    imageLink = db.Column(db.String, default=None)
     time_created = db.Column(db.DateTime, default=datetime.now())
 
     @staticmethod
     def register_one(name, about, venue, sdt, user, contacts, seats=None, edt=None, lastregtime=None):
-        try:
-            val = user.user_is_admin()
-            if seats is None:
-                leftseats = 9999
-                occupiedseats = 0
-            else:
-                leftseats = seats
-                occupiedseats = 0
-            eve = EventsReg(eventName=name,
-                            eventInfo=about,
-                            eventVenue=venue,
-                            startDateTime=sdt,
-                            createdBy=user.id,
-                            totalSeats=seats,
-                            endDateTime=edt,
-                            verified=val,
-                            lastRegDateTime=lastregtime,
-                            activeStatus=True,
-                            leftSeats=leftseats,
-                            occupiedSeats=occupiedseats
-                            )
-            eve.add_contacts(contacts)
-            db.session.add(eve)
-            db.session.commit()
-            send_email(val,user,eve.id)
-            return eve
-        except:
-            abort(400,message="some error occured.")
+        # try:
+        val = user.user_is_admin()
+        if seats is None:
+            leftseats = 9999
+            occupiedseats = 0
+        else:
+            leftseats = seats
+            occupiedseats = 0
+        eve = EventsReg(eventName=name,
+                        eventInfo=about,
+                        eventVenue=venue,
+                        startDateTime=sdt,
+                        createdBy=user.id,
+                        totalSeats=seats,
+                        endDateTime=edt,
+                        verified=val,
+                        lastRegDateTime=lastregtime,
+                        activeStatus=True,
+                        leftSeats=leftseats,
+                        occupiedSeats=occupiedseats
+                        )
+        eve.add_contacts(contacts)
+        db.session.add(eve)
+        db.session.commit()
+        send_email(val,user,eve.id)
+        return eve
+        # except:
+        #     abort(400,message="some error occured.")
 
     def add_contacts(self, contacts):
         for item in contacts:
@@ -325,7 +327,7 @@ class GCMRegIds(db.Model):
     __table_args__ = {'extend_existing': True}
 
     id = db.Column(db.Integer, primary_key=True)
-    data = db.Column(MutableList.as_mutable(ARRAY(db.String(100))))
+    data = db.Column(MutableList.as_mutable(ARRAY(db.String())))
 
 
 ####################################

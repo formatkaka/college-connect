@@ -39,3 +39,4 @@ uritemplate==0.6
 wheel==0.24.0
 whitenoise==2.0.6
 wsgiref==0.1.2
+pushjack==1.2.1

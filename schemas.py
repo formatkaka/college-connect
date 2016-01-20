@@ -49,13 +49,14 @@ class EventRegSchema_Request(Schema):
     venue = fields.Str()
     contacts = fields.Nested(ContactSchema_Request, many=True)
     lastregtime = fields.Float()
+    image = fields.Str()
 
     @post_load
     def make_event(self,data):
         return EventRegSchema_class(**data)
 
 class EventRegSchema_class():
-    def __init__(self,name,about,sdt,seats,venue,contacts,edt=None,lastregtime=None):
+    def __init__(self,name,about,sdt,seats,venue,contacts,image=None,edt=None,lastregtime=None):
         self.name = name
         self.about = about
         self.sdt = sdt
@@ -64,6 +65,7 @@ class EventRegSchema_class():
         self.venue = venue
         self.contacts = contacts
         self.lastregtime = lastregtime
+        self.image = image
 
 
 # organised_by = fields.Nested(OrganisedBySchema_Request, many=True)
