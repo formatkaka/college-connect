@@ -7,7 +7,7 @@ import base64
 from schemas import *
 from opschemas import *
 from flask.ext.restful import abort
-from drive_api import DriveApi
+# from drive_api import DriveApi
 
 class Testing(Resource):
     """Test Class for API"""
@@ -191,11 +191,11 @@ class EventRegistration(Resource):
                                            conv_time(data.edt),
                                            conv_time(data.lastregtime)
                                            )
-            drive = DriveApi()
-            flag = drive.upload(data.image, 'qwerty')
-            event.imageLink = str(flag)
-            db.session.add(event)
-            db.session.commit()
+            # drive = DriveApi()
+            # flag = drive.upload(data.image, 'qwerty')
+            # event.imageLink = str(flag)
+            # db.session.add(event)
+            # db.session.commit()
             push_notif("A new event has been created.{0}".format(data.name))
             return jsonify({"message": "event saved"})
 
