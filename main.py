@@ -7,7 +7,7 @@ import base64
 from schemas import *
 from opschemas import *
 from flask.ext.restful import abort
-from drive_api import DriveApi
+# from drive_api import DriveApi
 
 class Testing(Resource):
     """Test Class for API"""
