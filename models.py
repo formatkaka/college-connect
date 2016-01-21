@@ -121,7 +121,7 @@ class UserReg(db.Model):
         db, session.commit()
 
     @staticmethod
-    def if_unique(rollno=None, email=None, mobno=None):
+    def if_unique(rollno=None, email=None, mobno=None, user=None):
         a, b, c = 0, 0, 0
         if UserReg.query.filter_by(rollNo=rollno).first():
             a = 1
@@ -130,6 +130,8 @@ class UserReg(db.Model):
         if mobno is not None:
             if UserReg.query.filter_by(mobNo=mobno).first():
                 c = 1
+        if user:
+            return err_stat2(a,b,c,rollno,email,mobno)
         return err_stat(a, b, c)
 
     def user_is_admin(self):
@@ -422,6 +424,18 @@ def err_stat(a, b, c):
     if a == 1 and b == 1 and c == 1:
         abort(409, message="ERR21")
 
+def err_stat2(a,b,c,rollno,email,mobno):
+    user = get_current_user()
+    if a==1 :
+        if  UserReg.query.filter_by(rollNo=rollno).first() is user:
+            a=0
+    if b==1:
+        if  UserReg.query.filter_by(emailId=email).first() is user:
+            b=0
+    if c==1:
+        if  UserReg.query.filter_by(mobNo=mobno).first() is user:
+            c=0
+    return err_stat(a,b,c)
 
 def conv_time(unixstamp_or_datetime):
     if unixstamp_or_datetime is None:

@@ -22,9 +22,10 @@ class Testing(Resource):
 class UserRegistration(Resource):
     """ API to register a new user or obtain token for a user"""
 
-    def post(self):
+    def post(self,s1):
         """ Register a user """
-
+        if s1!= "reg":
+            abort(400)
         user = request.authorization
         if not user:
             abort(401, message="ERR01")
@@ -67,9 +68,10 @@ class UserRegistration(Resource):
 
             return result.data
 
-    def get(self):
+    def get(self,s1):
         """ Obtain/Generate token for user """
-
+        if s1 != "token":
+            abort(400)
         user = get_current_user()
 
         token = user.gen_auth_token(expiration=1200)
@@ -78,8 +80,22 @@ class UserRegistration(Resource):
         result = userreg_schema.dump(op)
         return result.data
 
-    def put(self):
-        pass
+    def put(self,s1):
+        if s1 != "edit":
+            abort(400)
+        user = get_current_user()
+        json_data = request.get_json()
+        data, errors = info_schema.load(json_data)
+        if errors:
+            return jsonify(errors)
+        stat = UserReg.if_unique(data.rollno, data.email, data.mobno, user)
+        user.emailId = data.email
+        user.mobNo = data.mobno
+        user.rollNo = data.rollno
+        user.fullName = data.name
+        db.session.add(user)
+        db.session.commit()
+        return jsonify({"message":"edited"})
 
 class ForgotPassword(Resource):
     """ API to Reset Password """
@@ -359,7 +375,7 @@ def reset_password(token):
     return render_template('reset.html', form=form)
 
 
-api.add_resource(UserRegistration, '/api/user/reg')
+api.add_resource(UserRegistration, '/api/user/<string:s1>')
 api.add_resource(UserInformation, '/api/user/info')
 api.add_resource(EventRegistration, '/api/events')
 api.add_resource(Clubsget, '/api/clubs/<string:s1>/<string:s2>')
