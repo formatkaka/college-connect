@@ -394,3 +394,7 @@ if __name__ == "__main__":
     port = int(os.environ.get('PORT', 5432))
     app.run(host='0.0.0.0', port=port, debug=True)
     # app.run(port=8080,debug=True)
+
+#TODO - 1. server_id for event and clubs
+#TODO - 2. clubs event list, user.isAdmin implementation !
+#TODO - 3. clubname in events api.
