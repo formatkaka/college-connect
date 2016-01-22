@@ -7,6 +7,7 @@ import base64
 from schemas import *
 from opschemas import *
 from flask.ext.restful import abort
+from push_notifs import push_notif
 # from drive_api import DriveApi
 
 class Testing(Resource):
@@ -332,7 +333,7 @@ class WebScrap(Resource):
         else:
             return jsonify({"message": 'Invalid request'})
 
-from push_notifs import push_notif
+
 
 
 
