@@ -23,7 +23,7 @@ class Scrap:
 		source = urllib2.urlopen(url)
 		soup = BeautifulSoup(source, "html.parser")
 		soup.prettify()
-		sleep(1)
+		sleep(10)
 		return soup
 
 	def get_notice(self):
