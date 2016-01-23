@@ -1,4 +1,5 @@
 from config import app,db
+from flask.ext.migrate import Migrate,MigrateCommand
 
 migrate = Migrate(app, db)
 
