@@ -3,7 +3,7 @@ import codecs
 from bs4 import BeautifulSoup
 from time import sleep
 
-os.environ['NO_PROXY'] = 'svnit.ac.in'
+os.environ['http_proxy']=''
 
 class Scrap:
 	url = 'http://svnit.ac.in/'
