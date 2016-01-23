@@ -8,7 +8,7 @@ os.environ['https_proxy']=''
 os.environ['no_proxy']='svnit.ac.in'
 
 import urllib2, requests
-from urllib2 import HTTPError
+from requests.exceptions
 
 class Scrap:
 	url = 'http://svnit.ac.in:80/'
