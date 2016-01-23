@@ -4,6 +4,8 @@ from bs4 import BeautifulSoup
 from time import sleep
 
 os.environ['http_proxy']=''
+os.environ['https_proxy']=''
+os.environ['no_proxy']='svnit.ac.in'
 
 class Scrap:
 	url = 'http://svnit.ac.in/'
@@ -20,10 +22,13 @@ class Scrap:
 		return dict
 
 	def get_soup(self, url):
+		proxy = urllib2.ProxyHandler()
+		opener = urllib2.build_opener(proxy)
+		urllib2.install_opener(opener)
 		source = urllib2.urlopen(url)
 		soup = BeautifulSoup(source, "html.parser")
 		soup.prettify()
-		sleep(10)
+		sleep(2)
 		return soup
 
 	def get_notice(self):
