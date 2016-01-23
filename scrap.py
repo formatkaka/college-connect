@@ -7,7 +7,7 @@ os.environ['http_proxy']=''
 os.environ['https_proxy']=''
 os.environ['no_proxy']='svnit.ac.in'
 
-import urllib2
+import urllib2, requests
 
 class Scrap:
 	url = 'http://svnit.ac.in/'
@@ -24,10 +24,12 @@ class Scrap:
 		return dict
 
 	def get_soup(self, url):
-		proxy = urllib2.ProxyHandler()
-		opener = urllib2.build_opener(proxy)
-		urllib2.install_opener(opener)
-		source = urllib2.urlopen(url)
+		# proxy = urllib2.ProxyHandler()
+		# opener = urllib2.build_opener(proxy)
+		# urllib2.install_opener(opener)
+		session = requests.Session()
+		session.trust_env = False
+		source = requests.get(url).text
 		soup = BeautifulSoup(source, "html.parser")
 		soup.prettify()
 		sleep(2)
