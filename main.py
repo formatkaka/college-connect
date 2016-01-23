@@ -67,7 +67,7 @@ class UserRegistration(Resource):
                           recipients=recieve)
 
             msg.body = "please click on the link {0}".format(link)
-            # mail.send(msg)
+            mail.send(msg)
 
             return result.data
 
