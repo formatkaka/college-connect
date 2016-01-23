@@ -323,15 +323,6 @@ class OrgBy(db.Model):
     event_id = db.Column(db.Integer, db.ForeignKey('events.id'))
 
 
-class OrgFor(db.Model):
-    """ Table containing Club ids for which a given event is organised """
-    __tablename__ = "orgfor"
-    __table_args__ = {'extend_existing': True}
-
-    id = db.Column(db.Integer, primary_key=True)
-    orgFor = db.Column(db.Integer, db.ForeignKey('clubs.id'))
-    event_id = db.Column(db.Integer, db.ForeignKey('events.id'))
-
 
 class ContactsForEvent(db.Model):
     """ List of contacts """
@@ -352,7 +343,10 @@ class GCMRegIds(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     data = db.Column(MutableList.as_mutable(ARRAY(db.String())))
 
-
+class TestMigration(db.Model):
+    __tablename__  = "test"
+    id = db.Column(db.Integer, primary_key=True)
+    dataa = db.Column(db.String)
 ####################################
 ######## HELPER FUNCTIONS ##########
 ####################################

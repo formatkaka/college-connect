@@ -9,7 +9,7 @@ app = Flask(__name__)
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://siddhant:collegeconnect@localhost:5432/db7'
 
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://pvokrejooerxqb:OK2EVuhUXYxoVtIdO_rfCz7Ev6@ec2-107-22-170-249.compute-1.amazonaws.com:5432/d8bgfga3qa0vu7'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://aqpaakonwhbylp:3i3QJx4CXUopiUAVIDAmGxNcWw@ec2-54-204-8-224.compute-1.amazonaws.com:5432/d2lhjtda08utu1'
 db = SQLAlchemy(app)
 api = Api(app)
 mail = Mail(app)
@@ -25,7 +25,10 @@ app.config['MAIL_PASSWORD'] = 'collegeconnect1234'
 # app.config['MAIL_USERNAME'] = 'college.connect28@gmail.com'
 # app.config['MAIL_PASSWORD'] = 'collegeconnect1234'
 mail = Mail(app)
+migrate = Migrate(app, db)
 
+manager = Manager(app)
+manager.add_command('db', MigrateCommand)
 
 
 bootstrap = Bootstrap(app)
