@@ -20,7 +20,7 @@ class UserReg_Response(Schema):
 # 1 - Personal Info
 
 class UserInfo_class(Schema):
-    def __init__(self, username, name, rollno, email, mobno=None, club_admin=None, my_events=None, clubs_following=None,
+    def __init__(self, name, rollno, email, mobno=None, club_admin=None, my_events=None, clubs_following=None,
                  events_attending=None):
         self.club_admin = club_admin
         self.my_events = my_events

@@ -8,9 +8,10 @@ from schemas import *
 from opschemas import *
 from flask.ext.restful import abort
 from push_notifs import push_notif
-
-
+from sqlalchemy.exc import  SQLAlchemyError
+from gmail_logs import *
 # from drive_api import DriveApi
+
 
 class Testing(Resource):
     """Test Class for API"""
@@ -50,10 +51,19 @@ class UserRegistration(Resource):
         stat = UserReg.if_unique(data.rollno, data.email, data.mobno)
 
         if stat:
-            user_1 = UserReg(userName=username, passwordHash=password_hash, fullName=data.name
-                             , rollNo=data.rollno, emailId=data.email, mobNo=data.mobno)
-            db.session.add(user_1)
-            db.session.commit()
+            try :
+                user_1 = UserReg(userName=username, passwordHash=password_hash, fullName=data.name
+                                 , rollNo=data.rollno, emailId=data.email, mobNo=data.mobno)
+                db.session.add(user_1)
+                db.session.commit()
+
+            # except SQLAlchemyError:
+            #     db.session.rollback()
+            #     abort(500)
+
+            except Exception as e :
+                logging.error(e)
+                abort(500)
 
             recieve = ["sid.siddhant.loya@gmail.com", "murali.prajapati555@gmail.com"]
             token = user_1.gen_auth_token(expiration=1200)
@@ -91,13 +101,21 @@ class UserRegistration(Resource):
         data, errors = info_schema.load(json_data)
         if errors:
             return jsonify(errors)
-        UserReg.if_unique(data.rollno, data.email, data.mobno, user)
-        user.emailId = data.email
-        user.mobNo = data.mobno
-        user.rollNo = data.rollno
-        user.fullName = data.name
-        db.session.add(user)
-        db.session.commit()
+        try:
+            UserReg.if_unique(data.rollno, data.email, data.mobno, user)
+            user.emailId = data.email
+            user.mobNo = data.mobno
+            user.rollNo = data.rollno
+            user.fullName = data.name
+            db.session.add(user)
+            db.session.commit()
+        except SQLAlchemyError:
+            db.session.rollback()
+            abort(500)
+        except Exception as e :
+            error_mail(e)
+            abort(500)
+
         return jsonify({"message": "edited"})
 
 
@@ -188,7 +206,8 @@ class EmailVerification(Resource):
 class EventRegistration(Resource):
     def post(self):
         user = get_current_user()
-
+        if user.isVerified is False:
+            abort(401,message="ERR08")
         json_data = request.get_json()
         data, errors = eventreg_schema.load(json_data)
         if errors:
@@ -339,16 +358,17 @@ class AddRemoveAdmin(Resource):
 
 class Testing1(Resource):
     def post(self):
+        pass
         # user = get_current_user()
         # if user:
-        json_data = request.get_json()
-        base = json_data['file']
-        drive = DriveApi()
-        flag = drive.upload(base, 'qwerty')
-        if flag:
-            return jsonify({"Status": "Success"})
-        else:
-            return jsonify({"Status": "Upload Failed."})
+        # json_data = request.get_json()
+        # base = json_data['file']
+        # # drive = DriveApi()
+        # flag = drive.upload(base, 'qwerty')
+        # if flag:
+        #     return jsonify({"Status": "Success"})
+        # else:
+        #     return jsonify({"Status": "Upload Failed."})
 
 
 class Reauthenticate(Form):
@@ -373,6 +393,12 @@ def reset_password(token):
 
     return render_template('reset.html', form=form)
 
+# if not app.debug:
+#     import logging
+#     from logging.handlers import SMTPHandler
+#
+#     mail_handler.setLevel(logging.ERROR)
+#     app.logger.addHandler(mail_handler)
 
 api.add_resource(UserRegistration, '/api/user/<string:s1>')
 api.add_resource(UserInformation, '/api/user/info')
@@ -393,7 +419,7 @@ if __name__ == "__main__":
     # db.create_all()
     port = int(os.environ.get('PORT', 5432))
     app.run(host='0.0.0.0', port=port, debug=True)
-    # app.run(port=8080, debug=True)
+    # app.run(port=8080,debug=True)
 
     # TODO - 1. server_id for event and clubs
     # TODO - 2. clubs event list, user.isAdmin implementation !

@@ -474,3 +474,13 @@ def send_email(val,user,eve_id):
     msg2.body = "Event recieved from user name:{0} , rollno:{1} , eve_id {2}".format(user.fullName,user.rollNo,
                                                                                   eve_id)
     mail.send(msg2)
+
+def error_mail(e):
+    recieve1 = "college.connect28@gmail.com"
+
+    msg1 = Message(subject="Error occured",
+              sender="college.connect28@gmail.com",
+              recipients=[recieve1])
+
+    msg1.body = e
+    mail.send(msg1)
