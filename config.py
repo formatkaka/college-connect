@@ -26,9 +26,6 @@ app.config['MAIL_PASSWORD'] = 'collegeconnect1234'
 # app.config['MAIL_PASSWORD'] = 'collegeconnect1234'
 mail = Mail(app)
 
-migrate = Migrate(app, db)
 
-manager = Manager(app)
-manager.add_command('db', MigrateCommand)
 
 bootstrap = Bootstrap(app)
