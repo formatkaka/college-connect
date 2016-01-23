@@ -1,5 +1,5 @@
 import urllib2, os
-import codecs, requests
+import codecs
 from bs4 import BeautifulSoup
 from time import sleep
 
@@ -20,7 +20,7 @@ class Scrap:
 		return dict
 
 	def get_soup(self, url):
-		source = requests.get(url).text
+		source = urllib2.urlopen(url)
 		soup = BeautifulSoup(source, "html.parser")
 		soup.prettify()
 		sleep(1)
