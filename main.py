@@ -8,6 +8,8 @@ from schemas import *
 from opschemas import *
 from flask.ext.restful import abort
 from push_notifs import push_notif
+
+
 # from drive_api import DriveApi
 
 class Testing(Resource):
@@ -23,9 +25,9 @@ class Testing(Resource):
 class UserRegistration(Resource):
     """ API to register a new user or obtain token for a user"""
 
-    def post(self,s1):
+    def post(self, s1):
         """ Register a user """
-        if s1!= "reg":
+        if s1 != "reg":
             abort(400)
         user = request.authorization
         if not user:
@@ -65,11 +67,11 @@ class UserRegistration(Resource):
                           recipients=recieve)
 
             msg.body = "please click on the link {0}".format(link)
-            mail.send(msg)
+            # mail.send(msg)
 
             return result.data
 
-    def get(self,s1):
+    def get(self, s1):
         """ Obtain/Generate token for user """
         if s1 != "token":
             abort(400)
@@ -81,7 +83,7 @@ class UserRegistration(Resource):
         result = userreg_schema.dump(op)
         return result.data
 
-    def put(self,s1):
+    def put(self, s1):
         if s1 != "edit":
             abort(400)
         user = get_current_user()
@@ -89,14 +91,15 @@ class UserRegistration(Resource):
         data, errors = info_schema.load(json_data)
         if errors:
             return jsonify(errors)
-        stat = UserReg.if_unique(data.rollno, data.email, data.mobno, user)
+        UserReg.if_unique(data.rollno, data.email, data.mobno, user)
         user.emailId = data.email
         user.mobNo = data.mobno
         user.rollNo = data.rollno
         user.fullName = data.name
         db.session.add(user)
         db.session.commit()
-        return jsonify({"message":"edited"})
+        return jsonify({"message": "edited"})
+
 
 class ForgotPassword(Resource):
     """ API to Reset Password """
@@ -106,7 +109,6 @@ class ForgotPassword(Resource):
         data, errors = forgot_pass.load(json_data)
         if errors:
             return jsonify(errors)
-
 
         user = UserReg.query.filter_by(emailId=data['email']).first_or_404()
 
@@ -123,16 +125,12 @@ class ForgotPassword(Resource):
         mail.send(msg)
         return jsonify({"message": "email sent"})
 
-
-
-
     def get(self):
         pass
 
 
 class UserInformation(Resource):
     """ API to GET user info """
-
 
     def get(self):
         user = get_current_user()
@@ -159,7 +157,6 @@ class UserUnique(Resource):
 
     field = ["username"]
 
-
     def get(self, attr):
         user = request.authorization
         if attr == self.field[0]:
@@ -167,7 +164,7 @@ class UserUnique(Resource):
             if username is None:
                 return jsonify({"message": "True"})
             else:
-                abort(409,message="ERR14")
+                abort(409, message="ERR14")
 
         else:
             abort(400, message="Invalid URL")
@@ -216,10 +213,8 @@ class EventRegistration(Resource):
             push_notif("A new event has been created.{0}".format(data.name))
             return jsonify({"message": "event saved"})
 
-
-
     def get(self):
-        user = get_current_user()
+
         events_list = EventsReg.query.all()
         events = []
         for event in events_list:
@@ -247,25 +242,19 @@ class EventRegistration(Resource):
 
 
 class Clubsget(Resource):
-    def post(self, s1, s2):
-        return {"Staus": "Not allowed"}
 
     def get(self):
-
-
-
         clubs_list = ClubInfo.query.all()
 
         clubs = []
         for club in clubs_list:
             admins = get_admin_info(club)
-            events = [club.eventsList[i].id for i in range(0,len(club.eventsList))]
+            events = [club.eventsList[i].id for i in range(0, len(club.eventsList))]
             c = Club_class(club.clubName, club.aboutClub, admins, events)
             clubs.append(c)
         result = club_schema.dump(clubs)
         # if result.error == {}:
         return {"clubs": result.data}
-
 
 
 class User_Follow_message(Resource):
@@ -305,7 +294,6 @@ class GCMessaging(Resource):
         json_data = request.get_json()
         data, errors = gcm_schema.load(json_data)
 
-
         gcm_id_arr = GCMRegIds.query.filter_by(id=1).first()
         gcm_id_arr.data.append(data['gcmid'])
         db.session.add(gcm_id_arr)
@@ -327,8 +315,8 @@ class WebScrap(Resource):
         else:
             return jsonify({"message": 'Invalid request'})
 
-class AddRemoveAdmin(Resource):
 
+class AddRemoveAdmin(Resource):
     def post(self):
         json_data = request.get_json()
         data, errors = admin_schema.load(json_data)
@@ -338,30 +326,29 @@ class AddRemoveAdmin(Resource):
             club = ClubInfo.query.filter_by(id=data['club_id']).first_or_404()
             user = UserReg.query.filter_by(rollNo=data['rollno']).first_or_404()
             if not user.isVerified:
-                abort(401,message="ERR08")
+                abort(401, message="ERR08")
             if user.isAdmin:
-                abort(409,message="ERR26")
+                abort(409, message="ERR26")
             else:
                 club.adminsList.append(user)
                 user.isAdmin = True
-                db.session.add_all([club,user])
+                db.session.add_all([club, user])
                 db.session.commit()
-                return jsonify({"message":"admin added"})
+                return jsonify({"message": "admin added"})
+
 
 class Testing1(Resource):
     def post(self):
-     # user = get_current_user()
-     # if user:
-         json_data = request.get_json()
-         base = json_data['file']
-         drive = DriveApi()
-         flag = drive.upload(base, 'qwerty')
-         if flag:
-             return jsonify({"Status":"Success"})
-         else:
-            return jsonify({"Status":"Upload Failed."})
-
-
+        # user = get_current_user()
+        # if user:
+        json_data = request.get_json()
+        base = json_data['file']
+        drive = DriveApi()
+        flag = drive.upload(base, 'qwerty')
+        if flag:
+            return jsonify({"Status": "Success"})
+        else:
+            return jsonify({"Status": "Upload Failed."})
 
 
 class Reauthenticate(Form):
@@ -399,16 +386,17 @@ api.add_resource(EmailVerification, '/api/verify/<string:code>')
 api.add_resource(Testing1, '/api/test')
 api.add_resource(GCMessaging, '/api/gcm')
 api.add_resource(ForgotPassword, '/api/password')
-api.add_resource(AddRemoveAdmin,'/api/admin')
+api.add_resource(AddRemoveAdmin, '/api/admin')
 
 if __name__ == "__main__":
     # manager.run()
     # db.create_all()
     port = int(os.environ.get('PORT', 5432))
     app.run(host='0.0.0.0', port=port, debug=True)
-    # app.run(port=8080,debug=True)
+    # app.run(port=8080, debug=True)
 
-#TODO - 1. server_id for event and clubs
-#TODO - 2. clubs event list, user.isAdmin implementation !
-#TODO - 3. clubname in events api.
-#TODO - 4. not,None
+    # TODO - 1. server_id for event and clubs
+    # TODO - 2. clubs event list, user.isAdmin implementation !
+    # TODO - 3. clubname in events api.
+    # TODO - 4. not,None
+    # TODO - 5.mobile number,json string input!

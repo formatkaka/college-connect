@@ -7,7 +7,7 @@ from marshmallow import fields, Schema
 
 ##### User Registration #####
 class UserReg_class():
-    def __init__(self,token): 
+    def __init__(self, token):
         self.token = token
 
 
@@ -20,7 +20,8 @@ class UserReg_Response(Schema):
 # 1 - Personal Info
 
 class UserInfo_class(Schema):
-    def __init__(self,username, name, rollno, email, mobno=None,club_admin=None,my_events=None, clubs_following=None, events_attending=None):
+    def __init__(self, username, name, rollno, email, mobno=None, club_admin=None, my_events=None, clubs_following=None,
+                 events_attending=None):
         self.club_admin = club_admin
         self.my_events = my_events
         self.clubs_following = clubs_following
@@ -32,19 +33,18 @@ class UserInfo_class(Schema):
 
 
 class UserInfo_Response(Schema):
-	username = fields.Str()
-	name = fields.Str()
-	rollno = fields.Str()
-	email = fields.Email()
-	mobno = fields.Int()
-	events_attending = fields.List(fields.Int)
-	clubs_following = fields.List(fields.Int)
-	club_admin = fields.List(fields.Int)
-	my_events = fields.List(fields.Int)
+    username = fields.Str()
+    name = fields.Str()
+    rollno = fields.Str()
+    email = fields.Email()
+    mobno = fields.Int()
+    events_attending = fields.List(fields.Int)
+    clubs_following = fields.List(fields.Int)
+    club_admin = fields.List(fields.Int)
+    my_events = fields.List(fields.Int)
 
 
-
-##### CLUBS INFORMATION ##### 
+##### CLUBS INFORMATION #####
 
 class Admins():
     def __init__(self, name, mobno):
@@ -64,6 +64,7 @@ class Club_class():
         self.admins = admins
         self.events = events
 
+
 class Club_response(Schema):
     name = fields.Str()
     about = fields.Str()
@@ -74,8 +75,8 @@ class Club_response(Schema):
 ##### EVENTS INFORMATION ##### 
 
 class Events_class():
-    def __init__(self,  name, about, venue, createdby,verified, contacts,
-    			  total_seats=None, available_seats=None, occupied_seats=None):
+    def __init__(self, name, about, venue, createdby, verified, contacts,
+                 total_seats=None, available_seats=None, occupied_seats=None):
         self.name = name
         self.about = about
         self.total_seats = total_seats
@@ -98,7 +99,6 @@ class Events_Response(Schema):
     verified = fields.Str()
     contacts = fields.Nested(Admin_Response, many=True)
     # createdby = fields.Str()
-
 
 
 userreg_schema = UserReg_Response()

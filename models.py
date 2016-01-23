@@ -4,7 +4,6 @@ from opschemas import *
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.ext.mutable import Mutable
 from flask_mail import Message
-import sqlalchemy
 ####### Reference table for many-many relationships #######
 
 # 1 ---> CLUBS FOLLOWED BY USERS
@@ -103,22 +102,6 @@ class UserReg(db.Model):
             return None, 1  # invalid token
         user = UserReg.query.get(data['id'])
         return user, None
-
-    def add_club(self, clubname):
-        """ Add a user to list of club followers """
-
-        club = ClubInfo.query.filter_by(clubName=clubname).first()
-        club.followers.append(self)
-        db.session.add(club)
-        db.session.commit()
-
-    def add_event(self, eventname):
-        """ Add a user to list of event followers """
-
-        event = EventsReg.query.filter_by(eventName=eventname).first()
-        event.followers.append(self)
-        db.session.add(event)
-        db, session.commit()
 
     @staticmethod
     def if_unique(rollno=None, email=None, mobno=None, user=None):
