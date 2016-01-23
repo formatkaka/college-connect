@@ -50,13 +50,14 @@ class EventRegSchema_Request(Schema):
     contacts = fields.Nested(ContactSchema_Request, many=True)
     lastregtime = fields.Float()
     image = fields.Str()
+    club_id = fields.Int()
 
     @post_load
     def make_event(self,data):
         return EventRegSchema_class(**data)
 
 class EventRegSchema_class():
-    def __init__(self,name,about,sdt,seats,venue,contacts,image=None,edt=None,lastregtime=None):
+    def __init__(self,name,about,sdt,venue,contacts,club_id,seats=None,image=None,edt=None,lastregtime=None):
         self.name = name
         self.about = about
         self.sdt = sdt
@@ -66,7 +67,7 @@ class EventRegSchema_class():
         self.contacts = contacts
         self.lastregtime = lastregtime
         self.image = image
-
+        self.club_id = club_id
 
 # organised_by = fields.Nested(OrganisedBySchema_Request, many=True)
 # organised_for = fields.Nested(OrganisedForSchema_Request, many=True)
@@ -78,7 +79,6 @@ class GCM_Schema(Schema):
 
 class AdminSchema_Request(Schema):
     rollno = fields.Str()
-    clubname = fields.Str()
     club_id = fields.Int()
 
 class Forgot_Password(Schema):
@@ -94,6 +94,7 @@ club_schema = ClubRegSchema_Request()
 info_schema = UserInfoSchema_Request()
 gcm_schema = GCM_Schema()
 forgot_pass = Forgot_Password()
+admin_schema = AdminSchema_Request()
 # class UserSchema(Schema):
 # name = fields.Str()
 # email = fields.Email()

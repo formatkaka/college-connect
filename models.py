@@ -58,7 +58,7 @@ class UserReg(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     userName = db.Column(db.String, unique=True, nullable=False)
     passwordHash = db.Column(db.String, nullable=False)
-    isadmin = db.Column(db.Boolean, default=False)
+    isAdmin = db.Column(db.Boolean, default=False)
     currentAdmin = db.Column(db.Boolean, default=True)  # Current admin or Previous admin.
     activeStatus = db.Column(db.Boolean, default=True)  # Account active or not.
     isVerified = db.Column(db.Boolean, default=False)  # Verified by Email.
@@ -136,10 +136,12 @@ class UserReg(db.Model):
 
     def user_is_admin(self):
 
-        if self.isadmin and self.currentAdmin:
-            return True
+        if self.isAdmin and self.currentAdmin:
+            club = self.a_club[0]
+            return True,club
         else:
-            return False
+            club = ClubInfo.query.first()
+            return False,club
 
     def is_attending_event(self, event):
         if event in self.events:
@@ -220,11 +222,12 @@ class EventsReg(db.Model):
     time_created = db.Column(db.DateTime, default=datetime.now())
 
     @staticmethod
-    def register_one(name, about, venue, sdt, user, contacts, seats=None, edt=None, lastregtime=None):
+    def register_one(name, about, venue, sdt, user, contacts,club_id, seats=None, edt=None, lastregtime=None):
         # try:
-        val = user.user_is_admin()
+        val,club = user.user_is_admin()
+        club = ClubInfo.query.filter_by(id=club_id).first_or_404()
         if seats is None:
-            leftseats = 9999
+            leftseats = None
             occupiedseats = 0
         else:
             leftseats = seats
@@ -243,7 +246,8 @@ class EventsReg(db.Model):
                         occupiedSeats=occupiedseats
                         )
         eve.add_contacts(contacts)
-        db.session.add(eve)
+        club.eventsList.append(eve)
+        db.session.add(club)
         db.session.commit()
         send_email(val,user,eve.id)
         return eve
@@ -261,12 +265,19 @@ class EventsReg(db.Model):
         db.session.commit()
 
     def add_follower(self, user):
+
         if user in self.followers:
             abort(409, message="ERR23")
         else:
-            if self.leftSeats > 0:
-                self.leftSeats = self.leftSeats - 1
-                self.occupiedSeats = self.occupiedSeats + 1
+            if self.seats is None:
+                self.occupiedSeats += 1
+                self.followers.append(user)
+                db.session.add(self)
+                db.session.commit()
+
+            elif self.leftSeats > 0:
+                self.leftSeats -=  1
+                self.occupiedSeats +=  1
                 self.followers.append(user)
                 db.session.add(self)
                 db.session.commit()
@@ -279,10 +290,20 @@ class EventsReg(db.Model):
         if user not in self.followers:
             abort(409, message="ERR25")
         else:
-            self.followers.remove(user)
-            self.leftSeats = self.leftSeats + 1
-            self.occupiedSeats = self.occupiedSeats - 1
-            db.session.commit()
+            if self.seats is None:
+                self.occupiedSeats -= 1
+                self.followers.remove(user)
+                db.session.add(self)
+                db.session.commit()
+
+            elif self.leftSeats > 0:
+                self.leftSeats +=  1
+                self.occupiedSeats -=  1
+                self.followers.remove(user)
+                db.session.add(self)
+                db.session.commit()
+
+
 
 
 
@@ -336,17 +357,6 @@ class GCMRegIds(db.Model):
 ######## HELPER FUNCTIONS ##########
 ####################################
 
-def get_user_club(user):
-    """ Returns a list of clubs of which the user is admin
-    """
-
-    admin = Admins.query.filter_by(student_id=user.id).all()
-    clubs = []
-    for i in range(0, len(admin)):
-        club = ClubInfo.query.filter_by(id=admin[i].club_id).first()
-        clubs.append(club)
-
-    return clubs
 
 
 def get_current_user():

@@ -16,7 +16,7 @@ ERR06 - Invalid Token.
 
 ERR07 - Expired Token.
 
-ERR08 -
+ERR08 - Not a verified user.
 
 ERR09 -
 
@@ -55,13 +55,13 @@ ERR21 - All three exist.
 
 ERR22 - Event Name already Exists.
 
-ERR23 -
+ERR23 - User already a follower
 
-ERR24 -
+ERR24 - No seats left.
 
-ERR25 -
+ERR25 - Cant unfollow . Not following.
 
-ERR26 -
+ERR26 - Already admin.
 
 ERR27 -
 

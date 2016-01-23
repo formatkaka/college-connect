@@ -250,28 +250,22 @@ class Clubsget(Resource):
     def post(self, s1, s2):
         return {"Staus": "Not allowed"}
 
-    def get(self, s1, s2):
-        user = get_current_user()
-        if user:
-            if s1 == "list":
+    def get(self):
 
-                clubs_list = ClubInfo.query.all()
 
-                clubs = []
-                for club in clubs_list:
-                    admins = get_admin_info(club)
-                    c = Club_class(club.clubName, club.aboutClub, admins)
-                    clubs.append(c)
-                result = club_schema.dump(clubs)
-                # if result.error == {}:
-                return {"clubs": result.data}
-            # else :
-            # 	return {"error":result.error}
-            elif s2 == "info" and club:
-                result = userinfo_c_schema.dump(club)
-                return result.data
-            elif s2 == "events" and club:
-                pass
+
+        clubs_list = ClubInfo.query.all()
+
+        clubs = []
+        for club in clubs_list:
+            admins = get_admin_info(club)
+            events = [club.eventsList[i].id for i in range(0,len(club.eventsList))]
+            c = Club_class(club.clubName, club.aboutClub, admins, events)
+            clubs.append(c)
+        result = club_schema.dump(clubs)
+        # if result.error == {}:
+        return {"clubs": result.data}
+
 
 
 class User_Follow_message(Resource):
@@ -333,9 +327,26 @@ class WebScrap(Resource):
         else:
             return jsonify({"message": 'Invalid request'})
 
+class AddRemoveAdmin(Resource):
 
-
-
+    def post(self):
+        json_data = request.get_json()
+        data, errors = admin_schema.load(json_data)
+        if errors:
+            return jsonify(errors)
+        else:
+            club = ClubInfo.query.filter_by(id=data['club_id']).first_or_404()
+            user = UserReg.query.filter_by(rollNo=data['rollno']).first_or_404()
+            if not user.isVerified:
+                abort(401,message="ERR08")
+            if user.isAdmin:
+                abort(409,message="ERR26")
+            else:
+                club.adminsList.append(user)
+                user.isAdmin = True
+                db.session.add_all([club,user])
+                db.session.commit()
+                return jsonify({"message":"admin added"})
 
 class Testing1(Resource):
     def post(self):
@@ -379,7 +390,7 @@ def reset_password(token):
 api.add_resource(UserRegistration, '/api/user/<string:s1>')
 api.add_resource(UserInformation, '/api/user/info')
 api.add_resource(EventRegistration, '/api/events')
-api.add_resource(Clubsget, '/api/clubs/<string:s1>/<string:s2>')
+api.add_resource(Clubsget, '/api/clubs/list')
 api.add_resource(UserUnique, '/api/unique/<string:attr>')
 api.add_resource(Testing, '/')
 api.add_resource(WebScrap, '/api/scrap/<string:source>')
@@ -388,10 +399,10 @@ api.add_resource(EmailVerification, '/api/verify/<string:code>')
 api.add_resource(Testing1, '/api/test')
 api.add_resource(GCMessaging, '/api/gcm')
 api.add_resource(ForgotPassword, '/api/password')
+api.add_resource(AddRemoveAdmin,'/api/admin')
 
 if __name__ == "__main__":
     db.create_all()
-    # manager.run()
     port = int(os.environ.get('PORT', 5432))
     app.run(host='0.0.0.0', port=port, debug=True)
     # app.run(port=8080,debug=True)
@@ -399,3 +410,4 @@ if __name__ == "__main__":
 #TODO - 1. server_id for event and clubs
 #TODO - 2. clubs event list, user.isAdmin implementation !
 #TODO - 3. clubname in events api.
+#TODO - 4. not,None
