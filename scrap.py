@@ -10,7 +10,7 @@ os.environ['no_proxy']='svnit.ac.in'
 import urllib2, requests
 
 class Scrap:
-	url = 'http://svnit.ac.in/'
+	url = 'http://svnit.ac.in:80/'
 	home = url + 'home.php'
 	index = url + 'index.php'
 
@@ -29,7 +29,14 @@ class Scrap:
 		# urllib2.install_opener(opener)
 		session = requests.Session()
 		session.trust_env = False
-		source = requests.get(url).text
+		limit = 0
+		while limit < 3:
+			try:
+				source = requests.get(url).text
+			except (exceptions.ConnectionError, exceptions.HTTPError, exceptions.Timeout):
+				raise "Error"
+				break
+			limit = limit + 1
 		soup = BeautifulSoup(source, "html.parser")
 		soup.prettify()
 		sleep(2)
