@@ -1,4 +1,4 @@
-import urllib2, os
+import os
 import codecs
 from bs4 import BeautifulSoup
 from time import sleep
@@ -6,6 +6,8 @@ from time import sleep
 os.environ['http_proxy']=''
 os.environ['https_proxy']=''
 os.environ['no_proxy']='svnit.ac.in'
+
+import urllib2
 
 class Scrap:
 	url = 'http://svnit.ac.in/'
