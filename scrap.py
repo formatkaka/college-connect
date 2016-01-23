@@ -1,6 +1,7 @@
 import urllib2
 import codecs, requests
 from bs4 import BeautifulSoup
+from time import sleep
 
 
 class Scrap:
@@ -21,6 +22,7 @@ class Scrap:
         source = requests.get(url).text
         soup = BeautifulSoup(source, "html.parser")
         soup.prettify()
+        sleep(1)
         return soup
 
     def get_notice(self):
