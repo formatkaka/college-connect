@@ -32,11 +32,7 @@ class Scrap:
 		session.trust_env = False
 		limit = 0
 		while limit < 3:
-			try:
-				source = requests.get(url).text
-			except (exceptions.ConnectionError, exceptions.HTTPError, exceptions.Timeout):
-				raise "Error"
-				break
+			source = requests.get(url).text
 			limit = limit + 1
 		soup = BeautifulSoup(source, "html.parser")
 		soup.prettify()
