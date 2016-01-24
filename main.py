@@ -12,10 +12,20 @@ from sqlalchemy.exc import  SQLAlchemyError
 from gmail_logs import *
 # from drive_api import DriveApi
 
+from functools import wraps
+
+
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        user= get_current_user()
+
+            # return redirect(url_for('login', next=request.url))
+        return f(*args, **kwargs)
+    return decorated_function
 
 class Testing(Resource):
     """Test Class for API"""
-
     def get(self):
         hello = '<h1>It Works!</h1>'
         response = flask.make_response(hello)
@@ -62,6 +72,7 @@ class UserRegistration(Resource):
             #     abort(500)
 
             except Exception as e :
+                db.session.rollback()
                 logging.error(e)
                 abort(500)
 
@@ -111,9 +122,10 @@ class UserRegistration(Resource):
             db.session.commit()
         except SQLAlchemyError:
             db.session.rollback()
+            logging.error(e)
             abort(500)
         except Exception as e :
-            error_mail(e)
+            logging.error(e)
             abort(500)
 
         return jsonify({"message": "edited"})
@@ -158,14 +170,14 @@ class UserInformation(Resource):
         my_events = [events_created[i].id for i in range(0, len(events_created))]
         club_admin = [user.a_clubs[i].id for i in range(0, len(user.a_clubs))]
 
-        info = UserInfo_class(user.userName, user.fullName, user.rollNo, user.emailId,
+        info = UserInfo_class( user.fullName, user.rollNo, user.emailId,
                               user.mobNo, club_admin, my_events, clubs_following, events_attending)
 
-        result, errors = userinfo_schema.dump(info)
-        if errors is None:
+        data, errors = userinfo_schema.dump(info)
+        if errors:
             return jsonify({"Errors": errors})
         else:
-            return jsonify({"Information": result})
+            return jsonify({"Information": data})
             # else:
             #     return jsonify({"message": "Invalid"})
 
@@ -200,7 +212,11 @@ class EmailVerification(Resource):
         user.isVerified = True
         db.session.add(user)
         db.session.commit()
-        return "<center><h1>You're Now Verified User</h1></center>"
+
+        hello = '<h1>You are now a verified user.</h1>'
+        response = flask.make_response(hello)
+        response.headers['content-type'] = 'text/html'
+        return response
 
 
 class EventRegistration(Resource):
@@ -229,7 +245,7 @@ class EventRegistration(Resource):
             # event.imageLink = str(flag)
             # db.session.add(event)
             # db.session.commit()
-            push_notif("A new event has been created.{0}".format(data.name))
+            # push_notif("A new event has been created.{0}".format(data.name))
             return jsonify({"message": "event saved"})
 
     def get(self):
@@ -251,11 +267,9 @@ class EventRegistration(Resource):
 
             )
             events.append(e)
+
         result, errors = event_schema.dump(events)
-        if errors is None:
-            return {"Error": errors}
-        else:
-            return {"events": result}
+        return {"events": result}
 
             # events = Events.query.all()
 
@@ -282,22 +296,22 @@ class User_Follow_message(Resource):
         if user:
 
             if s1 == "club" and s2 == "follow":
-                club = ClubInfo.query.filter_by(id=event_or_club_id).first()
+                club = ClubInfo.query.filter_by(id=event_or_club_id).first_or_404()
                 club.add_follower(user)
                 return jsonify({"message": "Successfully followed."})
 
             elif s1 == "event" and s2 == "follow":
-                event = EventsReg.query.filter_by(id=event_or_club_id).first()
+                event = EventsReg.query.filter_by(id=event_or_club_id).first_or_404()
                 event.add_follower(user)
                 return jsonify({"message": "Successfully followed."})
 
             elif s1 == "club" and s2 == "unfollow":
-                club = ClubInfo.query.filter_by(id=event_or_club_id).first()
+                club = ClubInfo.query.filter_by(id=event_or_club_id).first_or_404()
                 club.remove_follower(user)
                 return jsonify({"message": "Successfully unfollowed"})
 
             elif s1 == "event" and s2 == "unfollow":
-                event = EventsReg.query.filter_by(id=event_or_club_id).first()
+                event = EventsReg.query.filter_by(id=event_or_club_id).first_or_404()
                 event.remove_follower(user)
                 return jsonify({"message": "Successfully unfollowed"})
 
@@ -425,4 +439,6 @@ if __name__ == "__main__":
     # TODO - 2. clubs event list, user.isAdmin implementation !
     # TODO - 3. clubname in events api.
     # TODO - 4. not,None
-    # TODO - 5.mobile number,json string input!
+    # TODO - 5. mobile number,json string input!
+    # TODO - 6. gcm(events created)
+    # TODO - 7. imports
