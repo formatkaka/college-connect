@@ -64,7 +64,7 @@ class UserReg(db.Model):
     fullName = db.Column(db.String, nullable=False)
     rollNo = db.Column(db.String, nullable=False, unique=True)
     emailId = db.Column(db.String, unique=True)
-    mobNo = db.Column(db.Integer, unique=True)
+    mobNo = db.Column(db.BigInteger, unique=True)
 
     @staticmethod
     def if_username_unique(username):
@@ -120,7 +120,7 @@ class UserReg(db.Model):
     def user_is_admin(self):
 
         if self.isAdmin and self.currentAdmin:
-            club = self.a_club[0]
+            club = self.a_clubs[0]
             return True,club
         else:
             club = ClubInfo.query.first()
@@ -205,10 +205,10 @@ class EventsReg(db.Model):
     time_created = db.Column(db.DateTime, default=datetime.now())
 
     @staticmethod
-    def register_one(name, about, venue, sdt, user, contacts,club_id, seats=None, edt=None, lastregtime=None):
+    def register_one(name, about, venue, sdt, user, contacts, seats=None, edt=None, lastregtime=None):
         # try:
         val,club = user.user_is_admin()
-        club = ClubInfo.query.filter_by(id=club_id).first_or_404()
+        # club = ClubInfo.query.filter_by(id=club_id).first_or_404()
         if seats is None:
             leftseats = None
             occupiedseats = 0
@@ -219,7 +219,7 @@ class EventsReg(db.Model):
                         eventInfo=about,
                         eventVenue=venue,
                         startDateTime=sdt,
-                        createdBy=user.id,
+                        createdBy=club.id,
                         totalSeats=seats,
                         endDateTime=edt,
                         verified=val,
@@ -252,7 +252,7 @@ class EventsReg(db.Model):
         if user in self.followers:
             abort(409, message="ERR23")
         else:
-            if self.seats is None:
+            if self.totalSeats is None:
                 self.occupiedSeats += 1
                 self.followers.append(user)
                 db.session.add(self)
@@ -273,7 +273,7 @@ class EventsReg(db.Model):
         if user not in self.followers:
             abort(409, message="ERR25")
         else:
-            if self.seats is None:
+            if self.totalSeats is None:
                 self.occupiedSeats -= 1
                 self.followers.remove(user)
                 db.session.add(self)
@@ -314,7 +314,7 @@ class ContactsForEvent(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     contactName = db.Column(db.String)
-    contactNumber = db.Column(db.Integer)
+    contactNumber = db.Column(db.BigInteger)
     event_id = db.Column(db.Integer, db.ForeignKey('events.id'))
 
 
@@ -326,10 +326,10 @@ class GCMRegIds(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     data = db.Column(MutableList.as_mutable(ARRAY(db.String())))
 
-class TestMigration(db.Model):
-    __tablename__  = "test"
-    id = db.Column(db.Integer, primary_key=True)
-    dataa = db.Column(db.String)
+# class TestMigration(db.Model):
+#     __tablename__  = "test"
+#     id = db.Column(db.Integer, primary_key=True)
+#     dataa = db.Column(db.String)
 ####################################
 ######## HELPER FUNCTIONS ##########
 ####################################
