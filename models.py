@@ -326,10 +326,10 @@ class GCMRegIds(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     data = db.Column(MutableList.as_mutable(ARRAY(db.String())))
 
-class TestMigration(db.Model):
-    __tablename__  = "test"
-    id = db.Column(db.Integer, primary_key=True)
-    dataa = db.Column(db.String)
+# class TestMigration(db.Model):
+#     __tablename__  = "test"
+#     id = db.Column(db.Integer, primary_key=True)
+#     dataa = db.Column(db.String)
 ####################################
 ######## HELPER FUNCTIONS ##########
 ####################################
