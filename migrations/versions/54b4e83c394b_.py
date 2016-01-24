@@ -1,13 +1,13 @@
 """empty message
 
-Revision ID: 24e1693032d0
+Revision ID: 54b4e83c394b
 Revises: None
-Create Date: 2016-01-24 19:56:12.267000
+Create Date: 2016-01-24 20:05:53.882000
 
 """
 
 # revision identifiers, used by Alembic.
-revision = '24e1693032d0'
+revision = '54b4e83c394b'
 down_revision = None
 
 from alembic import op
@@ -24,12 +24,7 @@ def upgrade():
     )
     op.create_table('gcmids',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('data', postgresql.ARRAY(String()), nullable=True),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_table('test',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('dataa', sa.String(), nullable=True),
+    sa.Column('data', postgresql.ARRAY(sa.String()), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('users',
@@ -122,7 +117,6 @@ def downgrade():
     op.drop_table('events')
     op.drop_table('club_admins')
     op.drop_table('users')
-    op.drop_table('test')
     op.drop_table('gcmids')
     op.drop_table('clubs')
     ### end Alembic commands ###
