@@ -34,7 +34,7 @@ class DriveApi(object):
 		}
 		# Set the parent folder.
 		if parent_id:
-			body['parents'] = [{'id': '0B1vBxa7BraUAUTNwM2VaZFRDZWM'}]
+			body['parents'] = [{'id': parent_id}]
 
 		try:
 			file = service.files().insert(
@@ -80,7 +80,7 @@ class DriveApi(object):
 		filename = 'index.jpeg'
 		title = username + '.jpeg'
 		description = 'uploading photo'
-		file = self.insert_file(service, title, description, None, mime_type, filename)
+		file = self.insert_file(service, title, description, '0B1vBxa7BraUAUTNwM2VaZFRDZWM', mime_type, filename)
 		os.remove('index.jpeg')
 		if not file:
 			return False
