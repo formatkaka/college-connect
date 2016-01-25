@@ -436,7 +436,7 @@ api.add_resource(AddRemoveAdmin, '/api/admin')
 if __name__ == "__main__":
 	# manager.run()
 	# db.create_all()
-	port = int(os.environ.get('PORT', 5432))
+	port = int(os.environ.get('PORT', 8000))
 	app.run(host='0.0.0.0', port=port, debug=True)
 	# app.run(port=8080,debug=True)
 
