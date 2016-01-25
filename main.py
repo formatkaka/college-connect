@@ -376,7 +376,7 @@ class AddRemoveAdmin(Resource):
 				return jsonify({"message": "admin added"})
 
 
-class Testing1(Resource):
+# class Testing1(Resource):
 	# def post(self):
 	# 	pass
 	# 	user = get_current_user()
@@ -429,7 +429,7 @@ api.add_resource(Testing, '/')
 api.add_resource(WebScrap, '/api/scrap/<string:source>')
 api.add_resource(User_Follow_message, '/api/<string:s1>/<int:event_or_club_id>/<string:s2>')
 api.add_resource(EmailVerification, '/api/verify/<string:code>')
-api.add_resource(Testing1, '/api/test')
+# api.add_resource(Testing1, '/api/test')
 api.add_resource(GCMessaging, '/api/gcm')
 api.add_resource(ForgotPassword, '/api/password')
 api.add_resource(AddRemoveAdmin, '/api/admin')
