@@ -66,31 +66,36 @@ class UserRegistration(Resource):
                                  , rollNo=data.rollno, emailId=data.email, mobNo=data.mobno)
                 db.session.add(user_1)
                 db.session.commit()
+                recieve = ["sid.siddhant.loya@gmail.com", "murali.prajapati555@gmail.com"]
+                token = user_1.gen_auth_token(expiration=1200)
+                op = UserReg_class(token)
+                result = userreg_schema.dump(op)
 
+                link = 'https://sheltered-fjord-8731.herokuapp.com/api/verify/' + base64.b64encode(data.email)
+
+                msg = Message(subject="Thank You for Registration.Confirmation Link.Click Below.",
+                          sender="college.connect28@gmail.com",
+                          recipients=recieve)
+
+                msg.body = "please click on the link {0}".format(link)
+                mail.send(msg)
+
+                return result.data
             # except SQLAlchemyError:
             #     db.session.rollback()
             #     abort(500)
 
             except Exception as e :
-                db.session.rollback()
+
+                try:
+                    db.session.delete(user_1)
+                    db.session.commit()
+                except:
+                    db.session.rollback()
                 logging.error(e)
                 abort(500)
 
-            recieve = ["sid.siddhant.loya@gmail.com", "murali.prajapati555@gmail.com"]
-            token = user_1.gen_auth_token(expiration=1200)
-            op = UserReg_class(token)
-            result = userreg_schema.dump(op)
 
-            link = 'https://sheltered-fjord-8731.herokuapp.com/api/verify/' + base64.b64encode(data.email)
-
-            msg = Message(subject="Thank You for Registration.Confirmation Link.Click Below.",
-                          sender="college.connect28@gmail.com",
-                          recipients=recieve)
-
-            msg.body = "please click on the link {0}".format(link)
-            mail.send(msg)
-
-            return result.data
 
     def get(self, s1):
         """ Obtain/Generate token for user """
@@ -246,7 +251,7 @@ class EventRegistration(Resource):
             # db.session.add(event)
             # db.session.commit()
             push_notif("A new event has been created.{0}".format(data.name))
-            return jsonify({"message": "event saved"})
+            return jsonify({"message": event.id})
 
     def get(self):
 
@@ -262,6 +267,7 @@ class EventRegistration(Resource):
                     event.verified,
                     contacts,
                     event.clubName,
+                    event.id,
                     event.totalSeats,
                     event.leftSeats,
                     event.occupiedSeats
