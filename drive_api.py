@@ -11,12 +11,13 @@ import oauth2client
 from oauth2client import client
 from oauth2client import tools
 
-try:
-	import argparse
+# try:
+# 	import argparse
 
-	flags = argparse.ArgumentParser(parents=[tools.argparser]).parse_args()
-except ImportError:
-	flags = None
+# 	flags = argparse.ArgumentParser(parents=[tools.argparser]).parse_args()
+# except ImportError:
+# 	flags = None
+flags = None
 
 
 class DriveApi(object):

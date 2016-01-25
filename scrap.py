@@ -34,9 +34,9 @@ class Scrap:
 		while limit < 3:
 			source = requests.get(url).text
 			limit = limit + 1
+			sleep(2)
 		soup = BeautifulSoup(source, "html.parser")
 		soup.prettify()
-		sleep(2)
 		return soup
 
 	def get_notice(self):
