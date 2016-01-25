@@ -30,16 +30,11 @@ class DriveApi(object):
 		body = {
 			'title': title,
 			'description': description,
-			'mimeType': mime_type,
-			"parents": [{
-				"kind": "drive#fileLink",
-				"id": "0B1vBxa7BraUAUTNwM2VaZFRDZWM"
-			}]
-
+			'mimeType': mime_type
 		}
 		# Set the parent folder.
 		if parent_id:
-			body['parents'] = [{'id': parent_id}]
+			body['parents'] = [{'id': '0B1vBxa7BraUAUTNwM2VaZFRDZWM'}]
 
 		try:
 			file = service.files().insert(
@@ -91,6 +86,4 @@ class DriveApi(object):
 			return False
 		else:
 			return True
-
-	def download(self, username):
 

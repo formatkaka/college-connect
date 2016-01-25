@@ -11,7 +11,6 @@ from push_notifs import push_notif
 from sqlalchemy.exc import  SQLAlchemyError
 from gmail_logs import *
 from drive_api import DriveApi
-
 from functools import wraps
 
 
