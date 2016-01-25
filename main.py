@@ -44,12 +44,12 @@ class UserRegistration(Resource):
         if not user:
             abort(401, message="ERR01")
 
-        username = user.username
+        email = user.username
         password_hash = user.password
         json_data = request.get_json()
         data, errors = info_schema.load(json_data)
 
-        if username == "":  # Check if any of auth headers are empty
+        if email == "":  # Check if any of auth headers are empty
             abort(401, message="ERR02")
 
         if password_hash == "":
@@ -58,42 +58,42 @@ class UserRegistration(Resource):
         if errors:
             return jsonify(errors)
 
-        stat = UserReg.if_unique(data.rollno, data.email, data.mobno)
+        stat = UserReg.if_unique(data.rollno, data.mobno)
 
         if stat:
-            try :
-                user_1 = UserReg(userName=username, passwordHash=password_hash, fullName=data.name
-                                 , rollNo=data.rollno, emailId=data.email, mobNo=data.mobno)
-                db.session.add(user_1)
-                db.session.commit()
-                recieve = ["sid.siddhant.loya@gmail.com", "murali.prajapati555@gmail.com"]
-                token = user_1.gen_auth_token(expiration=1200)
-                op = UserReg_class(token)
-                result = userreg_schema.dump(op)
+            # try :
+            user_1 = UserReg( passwordHash=password_hash, fullName=data.name
+                             , rollNo=data.rollno, emailId=email, mobNo=data.mobno)
+            db.session.add(user_1)
+            db.session.commit()
+            recieve = ["sid.siddhant.loya@gmail.com", "murali.prajapati555@gmail.com"]
+            token = user_1.gen_auth_token(expiration=1200)
+            op = UserReg_class(token)
+            result = userreg_schema.dump(op)
 
-                link = 'https://sheltered-fjord-8731.herokuapp.com/api/verify/' + base64.b64encode(data.email)
+            link = 'https://sheltered-fjord-8731.herokuapp.com/api/verify/' + base64.b64encode(email)
 
-                msg = Message(subject="Thank You for Registration.Confirmation Link.Click Below.",
-                          sender="college.connect28@gmail.com",
-                          recipients=recieve)
+            msg = Message(subject="Thank You for Registration.Confirmation Link.Click Below.",
+                      sender="college.connect28@gmail.com",
+                      recipients=recieve)
 
-                msg.body = "please click on the link {0}".format(link)
-                mail.send(msg)
+            msg.body = "please click on the link {0}".format(link)
+            mail.send(msg)
 
-                return result.data
+            return result.data
             # except SQLAlchemyError:
             #     db.session.rollback()
             #     abort(500)
 
-            except Exception as e :
+            # except Exception as e :
 
-                try:
-                    db.session.delete(user_1)
-                    db.session.commit()
-                except:
-                    db.session.rollback()
-                logging.error(e)
-                abort(500)
+                # try:
+                #     db.session.delete(user_1)
+                #     db.session.commit()
+                # except:
+                #     db.session.rollback()
+                # logging.error(e)
+                # abort(500)
 
 
 
@@ -118,8 +118,7 @@ class UserRegistration(Resource):
         if errors:
             return jsonify(errors)
         try:
-            UserReg.if_unique(data.rollno, data.email, data.mobno, user)
-            user.emailId = data.email
+            UserReg.if_unique(data.rollno, data.mobno, user)
             user.mobNo = data.mobno
             user.rollNo = data.rollno
             user.fullName = data.name
@@ -153,7 +152,7 @@ class ForgotPassword(Resource):
         link = 'https://sheltered-fjord-8731.herokuapp.com/api/reset/' + token
 
         msg = Message(subject="Reset password",
-                      sender="college.connect28@gmail.com",
+                      sender="college.connect01@gmail.com",
                       recipients=["siddhantloya2008@gmail.com"])
 
         msg.body = "please click on the link {0}".format(link)
@@ -190,13 +189,13 @@ class UserInformation(Resource):
 class UserUnique(Resource):
     """API to check whether username or password unique"""
 
-    field = ["username"]
+    field = ["email"]
 
     def get(self, attr):
         user = request.authorization
         if attr == self.field[0]:
-            username = UserReg.query.filter_by(userName=user.username).first()
-            if username is None:
+            email = UserReg.query.filter_by(emailId=user.username).first()
+            if email is None:
                 return jsonify({"message": "True"})
             else:
                 abort(409, message="ERR14")
@@ -213,7 +212,7 @@ class EmailVerification(Resource):
 
     def get(self, code):
         email = base64.b64decode(code)
-        user = UserReg.query.filter_by(emailId=email).first()
+        user = UserReg.query.filter_by(emailId=email).first_or_404()
         user.isVerified = True
         db.session.add(user)
         db.session.commit()
@@ -254,7 +253,6 @@ class EventRegistration(Resource):
             return jsonify({"message": event.id})
 
     def get(self):
-
         events_list = EventsReg.query.all()
         events = []
         for event in events_list:
@@ -439,9 +437,9 @@ api.add_resource(AddRemoveAdmin, '/api/admin')
 if __name__ == "__main__":
     # manager.run()
     # db.create_all()
-    port = int(os.environ.get('PORT', 5432))
-    app.run(host='0.0.0.0', port=port, debug=True)
-    # app.run(port=8080,debug=True)
+    # port = int(os.environ.get('PORT', 5432))
+    # app.run(host='0.0.0.0', port=port, debug=True)
+    app.run(port=8080,debug=True)
 
     # TODO - 1. server_id for event and clubs
     # TODO - 2. clubs event list, user.isAdmin implementation !

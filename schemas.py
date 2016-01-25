@@ -6,20 +6,19 @@ from marshmallow import fields, Schema, post_load
 class UserInfoSchema_Request(Schema):
     rollno = fields.Str()
     name = fields.Str()
-    email = fields.Email()
     mobno = fields.Int()
+    hostelname = fields.Str()
 
     @post_load
     def make_event(self,data):
         return UserInfo_class(**data)
 
 class UserInfo_class(object):
-    def __init__(self,email,rollno,name=None,mobno=None):
+    def __init__(self,rollno,name,hostelname,mobno=None):
         self.name = name
-        self.email = email
         self.rollno = rollno
         self.mobno = mobno
-
+        self.hostelname = hostelname
 
 class ClubRegSchema_Request(Schema):
     name = fields.Str()

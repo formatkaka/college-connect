@@ -55,7 +55,7 @@ class UserReg(db.Model):
     __table_args__ = {'extend_existing': True}
 
     id = db.Column(db.Integer, primary_key=True)
-    userName = db.Column(db.String, unique=True, nullable=False)
+    emailId = db.Column(db.String, unique=True)
     passwordHash = db.Column(db.String, nullable=False)
     isAdmin = db.Column(db.Boolean, default=False)
     currentAdmin = db.Column(db.Boolean, default=True)  # Current admin or Previous admin.
@@ -63,15 +63,11 @@ class UserReg(db.Model):
     isVerified = db.Column(db.Boolean, default=False)  # Verified by Email.
     fullName = db.Column(db.String, nullable=False)
     rollNo = db.Column(db.String, nullable=False, unique=True)
-    emailId = db.Column(db.String, unique=True)
     mobNo = db.Column(db.BigInteger, unique=True)
+    hostelite_or_localite = db.Column(db.Boolean)
+    hostelName = db.Column(db.String, default="localite")
 
-    @staticmethod
-    def if_username_unique(username):
-        if UserReg.query.filter_by(userName=username).first():
-            return False
-        else:
-            return True
+
 
     def check_password_hash(self, password_hash):
         if password_hash == self.passwordHash:
@@ -79,12 +75,7 @@ class UserReg(db.Model):
         else:
             return False
 
-    @staticmethod
-    def register_user(username, password_hash):
-        user = UserReg(userName=username, passwordHash=password_hash)
-        db.session.add(user)
-        db.session.commit()
-        return user
+
 
     def gen_auth_token(self, expiration=None):
 
@@ -104,17 +95,17 @@ class UserReg(db.Model):
         return user, None
 
     @staticmethod
-    def if_unique(rollno=None, email=None, mobno=None, user=None):
+    def if_unique(rollno, mobno, user=None):
         a, b, c = 0, 0, 0
         if UserReg.query.filter_by(rollNo=rollno).first():
             a = 1
-        if UserReg.query.filter_by(emailId=email).first():
-            b = 1
+        # if UserReg.query.filter_by(emailId=email).first():
+        #     b = 1
         if mobno is not None:
             if UserReg.query.filter_by(mobNo=mobno).first():
                 c = 1
         if user:
-            return err_stat2(a,b,c,rollno,email,mobno)
+            return err_stat2(a,b,c,rollno,mobno)
         return err_stat(a, b, c)
 
     def user_is_admin(self):
@@ -374,7 +365,7 @@ def get_current_user():
                 abort(400)  # SOME UNKNOWN PROBLEM OCCURED
 
         if user.password != "None":
-            user_get = UserReg.query.filter_by(userName=username_or_token).first()
+            user_get = UserReg.query.filter_by(emailId=username_or_token).first()
             if user_get:
                 if user_get.check_password_hash(password):
                     return user_get
@@ -411,14 +402,15 @@ def err_stat(a, b, c):
     if a == 1 and b == 1 and c == 1:
         abort(409, message="ERR21")
 
-def err_stat2(a,b,c,rollno,email,mobno):
+def err_stat2(a,b,c,rollno,mobno):
     user = get_current_user()
+    b=0
     if a==1 :
         if  UserReg.query.filter_by(rollNo=rollno).first() is user:
             a=0
-    if b==1:
-        if  UserReg.query.filter_by(emailId=email).first() is user:
-            b=0
+    # if b==1:
+    #     if  UserReg.query.filter_by(emailId=email).first() is user:
+    #         b=0
     if c==1:
         if  UserReg.query.filter_by(mobNo=mobno).first() is user:
             c=0
