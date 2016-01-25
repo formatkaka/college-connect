@@ -203,11 +203,13 @@ class EventsReg(db.Model):
     activeStatus = db.Column(db.Boolean, default=False)
     imageLink = db.Column(db.String, default=None)
     time_created = db.Column(db.DateTime, default=datetime.now())
+    clubName = db.Column(db.String)
 
     @staticmethod
     def register_one(name, about, venue, sdt, user, contacts, seats=None, edt=None, lastregtime=None):
         # try:
         val,club = user.user_is_admin()
+        clubname = club.clubName
         # club = ClubInfo.query.filter_by(id=club_id).first_or_404()
         if seats is None:
             leftseats = None
@@ -219,14 +221,15 @@ class EventsReg(db.Model):
                         eventInfo=about,
                         eventVenue=venue,
                         startDateTime=sdt,
-                        createdBy=club.id,
+                        createdBy=user.id,
                         totalSeats=seats,
                         endDateTime=edt,
                         verified=val,
                         lastRegDateTime=lastregtime,
                         activeStatus=True,
                         leftSeats=leftseats,
-                        occupiedSeats=occupiedseats
+                        occupiedSeats=occupiedseats,
+                        clubName = clubname
                         )
         eve.add_contacts(contacts)
         club.eventsList.append(eve)

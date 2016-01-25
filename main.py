@@ -245,7 +245,7 @@ class EventRegistration(Resource):
             # event.imageLink = str(flag)
             # db.session.add(event)
             # db.session.commit()
-            # push_notif("A new event has been created.{0}".format(data.name))
+            push_notif("A new event has been created.{0}".format(data.name))
             return jsonify({"message": "event saved"})
 
     def get(self):
@@ -263,7 +263,8 @@ class EventRegistration(Resource):
                     contacts,
                     event.totalSeats,
                     event.leftSeats,
-                    event.occupiedSeats
+                    event.occupiedSeats,
+                    event.clubName
 
             )
             events.append(e)
