@@ -32,7 +32,10 @@ class Scrap:
 		session.trust_env = False
 		limit = 0
 		while limit < 3:
-			source = requests.get(url).text
+			try:
+				source = requests.get(url).text
+			except requests.exceptions.ConnectionError:
+				r.status_code = "Connection refused"
 			limit = limit + 1
 			sleep(10)
 		soup = BeautifulSoup(source, "html.parser")
