@@ -7,7 +7,7 @@ class TitledSMTPHandler(logging.handlers.SMTPHandler):
 # below is to test
 logging.getLogger().addHandler(TitledSMTPHandler(
     ('smtp.gmail.com',587),
-    'college.connect01@gmail.com', 'college.connecsdf@gmail.com',
+    'college.connect01@gmail.com', 'college.connect28@gmail.com',
     '%(asctime)s Error: %(message)s',
     ('college.connect01@gmail.com', 'collegeconnect1234'), ()
 ))
