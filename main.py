@@ -265,11 +265,12 @@ class EventRegistration(Resource):
 					contacts,
 					event.clubName,
 					event.id,
+                    conv_time(event.startDateTime),
+                    conv_time(event.endDateTime),
+                    conv_time(event.lastRegDateTime),
 					event.totalSeats,
 					event.leftSeats,
 					event.occupiedSeats
-
-
 			)
 			events.append(e)
 
