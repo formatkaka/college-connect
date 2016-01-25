@@ -30,7 +30,12 @@ class DriveApi(object):
 		body = {
 			'title': title,
 			'description': description,
-			'mimeType': mime_type
+			'mimeType': mime_type,
+			"parents": [{
+				"kind": "drive#fileLink",
+				"id": "0B1vBxa7BraUAUTNwM2VaZFRDZWM"
+			}]
+
 		}
 		# Set the parent folder.
 		if parent_id:
@@ -86,3 +91,6 @@ class DriveApi(object):
 			return False
 		else:
 			return True
+
+	def download(self, username):
+
