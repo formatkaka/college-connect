@@ -261,10 +261,11 @@ class EventRegistration(Resource):
                     event.createdBy,
                     event.verified,
                     contacts,
+                    event.clubName,
                     event.totalSeats,
                     event.leftSeats,
-                    event.occupiedSeats,
-                    event.clubName
+                    event.occupiedSeats
+
 
             )
             events.append(e)
