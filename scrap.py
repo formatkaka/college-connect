@@ -30,11 +30,14 @@ class Scrap:
 		# urllib2.install_opener(opener)
 		session = requests.Session()
 		session.trust_env = False
-		limit = 0
-		while limit < 3:
+		# limit = 0
+		# while limit < 3:
+		try:
 			source = requests.get(url).text
-			limit = limit + 1
+		except requests.exceptions.ConnectionError:
 			sleep(10)
+			response = requests.get(url)
+				# limit = limit + 1
 		soup = BeautifulSoup(source, "html.parser")
 		soup.prettify()
 		return soup
