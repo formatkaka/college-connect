@@ -379,16 +379,16 @@ class AddRemoveAdmin(Resource):
 class Testing1(Resource):
 	def post(self):
 		pass
-		user = get_current_user()
-		if user:
-			json_data = request.get_json()
-			base = json_data['file']
-			drive = DriveApi()
-			flag = drive.upload(base, 'qwerty')
-			if flag:
-				return jsonify({"Status": "Success"})
-			else:
-				return jsonify({"Status": "Upload Failed."})
+		# user = get_current_user()
+		# if user:
+		json_data = request.get_json()
+		base = json_data['file']
+		drive = DriveApi()
+		flag = drive.upload(base, 'qwerty')
+		if flag:
+			return jsonify({"Status": "Success"})
+		else:
+			return jsonify({"Status": "Upload Failed."})
 
 
 class Reauthenticate(Form):
