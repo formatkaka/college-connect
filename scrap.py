@@ -35,7 +35,7 @@ class Scrap:
 		try:
 			source = requests.get(url).text
 		except requests.exceptions.ConnectionError:
-			# time.sleep(10)
+			time.sleep(10)
 			response = requests.get(url)
 				# limit = limit + 1
 		soup = BeautifulSoup(source, "html.parser")
