@@ -423,7 +423,7 @@ def conv_time(unixstamp_or_datetime):
     if isinstance(unixstamp_or_datetime, datetime):
         return time.mktime(unixstamp_or_datetime.timetuple())
 
-    elif isinstance(unixstamp_or_datetime, long):
+    else:
         return datetime.fromtimestamp(unixstamp_or_datetime)
 
         # return dt
