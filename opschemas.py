@@ -76,7 +76,7 @@ class Club_response(Schema):
 
 class Events_class():
     def __init__(self, name, about, venue, createdby, verified, contacts,clubname,
-                 event_id,sdt,edt=None,lrt=None,total_seats=None, available_seats=None, occupied_seats=None):
+                 event_id,sdt,club_id,edt=None,lrt=None,total_seats=None, available_seats=None, occupied_seats=None):
         self.name = name
         self.about = about
         self.total_seats = total_seats
@@ -91,6 +91,7 @@ class Events_class():
         self.sdt = sdt
         self.edt = edt
         self.lrt = lrt
+        self.club_id = club_id
 
 class Events_Response(Schema):
     name = fields.Str()
@@ -107,6 +108,7 @@ class Events_Response(Schema):
     sdt = fields.Float()
     edt = fields.Float()
     lrt = fields.Float()
+    club_id = fields.Int()
     # createdby = fields.Str()
 
 
