@@ -239,6 +239,7 @@ class EventRegistration(Resource):
 										   conv_time(data.sdt),
 										   user,
 										   data.contacts,
+										   data.image,
 										   data.seats,
 										   conv_time(data.edt),
 										   conv_time(data.lastregtime)

@@ -62,7 +62,7 @@ class UserReg(db.Model):
     activeStatus = db.Column(db.Boolean, default=True)  # Account active or not.
     isVerified = db.Column(db.Boolean, default=False)  # Verified by Email.
     fullName = db.Column(db.String, nullable=False)
-    rollNo = db.Column(db.String, nullable=False, unique=True)
+    rollNo = db.Column(db.String, unique=True)
     mobNo = db.Column(db.BigInteger, unique=True)
     hostelite_or_localite = db.Column(db.Boolean)
     hostelName = db.Column(db.String, default="localite")
@@ -195,9 +195,10 @@ class EventsReg(db.Model):
     imageLink = db.Column(db.String, default=None)
     time_created = db.Column(db.DateTime, default=datetime.now())
     clubName = db.Column(db.String)
+    imageB64 = db.Column(db.Text)
 
     @staticmethod
-    def register_one(name, about, venue, sdt, user, contacts, seats=None, edt=None, lastregtime=None):
+    def register_one(name, about, venue, sdt, user, contacts,image, seats=None, edt=None, lastregtime=None):
         # try:
         val,club = user.user_is_admin()
         clubname = club.clubName
@@ -220,7 +221,8 @@ class EventsReg(db.Model):
                         activeStatus=True,
                         leftSeats=leftseats,
                         occupiedSeats=occupiedseats,
-                        clubName = clubname
+                        clubName = clubname,
+                        imageB64 = image,
                         )
         eve.add_contacts(contacts)
         club.eventsList.append(eve)
@@ -384,11 +386,11 @@ def err_stat(a, b, c):
     if a == 0 and b == 0 and c == 1:
         abort(409, message="ERR15")
 
-    if a == 0 and b == 1 and c == 0:
-        abort(409, message="ERR16")
-
-    if a == 0 and b == 1 and c == 1:
-        abort(409, message="ERR17")
+    # if a == 0 and b == 1 and c == 0:
+    #     abort(409, message="ERR16")
+    #
+    # if a == 0 and b == 1 and c == 1:
+    #     abort(409, message="ERR17")
 
     if a == 1 and b == 0 and c == 0:
         abort(409, message="ERR18")
@@ -396,11 +398,11 @@ def err_stat(a, b, c):
     if a == 1 and b == 0 and c == 1:
         abort(409, message="ERR19")
 
-    if a == 1 and b == 1 and c == 0:
-        abort(409, message="ERR20")
-
-    if a == 1 and b == 1 and c == 1:
-        abort(409, message="ERR21")
+    # if a == 1 and b == 1 and c == 0:
+    #     abort(409, message="ERR20")
+    #
+    # if a == 1 and b == 1 and c == 1:
+    #     abort(409, message="ERR21")
 
 def err_stat2(a,b,c,rollno,mobno):
     user = get_current_user()

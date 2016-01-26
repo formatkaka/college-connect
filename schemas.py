@@ -50,6 +50,7 @@ class EventRegSchema_Request(Schema):
     lastregtime = fields.Float()
     image = fields.Str()
 
+
     @post_load
     def make_event(self,data):
         return EventRegSchema_class(**data)
