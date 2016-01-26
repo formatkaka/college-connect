@@ -14,7 +14,7 @@ class UserInfoSchema_Request(Schema):
         return UserInfo_class(**data)
 
 class UserInfo_class(object):
-    def __init__(self,rollno,name,hostelname,mobno=None):
+    def __init__(self,name,hostelname,rollno=None,mobno=None):
         self.name = name
         self.rollno = rollno
         self.mobno = mobno
