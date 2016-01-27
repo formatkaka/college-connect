@@ -15,10 +15,10 @@ from functools import wraps
 from config import mail
 from flask_mail import Message
 # from apscheduler.schedulers.background import BackgroundScheduler
-import logging
+# import logging
 # from config import scheduler
 
-logging.basicConfig()
+# logging.basicConfig()
 
 
 def login_required(f):
