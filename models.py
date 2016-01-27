@@ -95,12 +95,12 @@ class UserReg(db.Model):
         return user, None
 
     @staticmethod
-    def if_unique(rollno, mobno, user=None):
+    def if_unique(rollno, email,mobno, user=None):
         a, b, c = 0, 0, 0
         if UserReg.query.filter_by(rollNo=rollno).first():
             a = 1
-        # if UserReg.query.filter_by(emailId=email).first():
-        #     b = 1
+        if UserReg.query.filter_by(emailId=email).first():
+            b = 1
         if mobno is not None:
             if UserReg.query.filter_by(mobNo=mobno).first():
                 c = 1
@@ -386,11 +386,11 @@ def err_stat(a, b, c):
     if a == 0 and b == 0 and c == 1:
         abort(409, message="ERR15")
 
-    # if a == 0 and b == 1 and c == 0:
-    #     abort(409, message="ERR16")
-    #
-    # if a == 0 and b == 1 and c == 1:
-    #     abort(409, message="ERR17")
+    if a == 0 and b == 1 and c == 0:
+        abort(409, message="ERR16")
+
+    if a == 0 and b == 1 and c == 1:
+        abort(409, message="ERR17")
 
     if a == 1 and b == 0 and c == 0:
         abort(409, message="ERR18")
@@ -398,11 +398,11 @@ def err_stat(a, b, c):
     if a == 1 and b == 0 and c == 1:
         abort(409, message="ERR19")
 
-    # if a == 1 and b == 1 and c == 0:
-    #     abort(409, message="ERR20")
-    #
-    # if a == 1 and b == 1 and c == 1:
-    #     abort(409, message="ERR21")
+    if a == 1 and b == 1 and c == 0:
+        abort(409, message="ERR20")
+
+    if a == 1 and b == 1 and c == 1:
+        abort(409, message="ERR21")
 
 def err_stat2(a,b,c,rollno,mobno):
     user = get_current_user()
