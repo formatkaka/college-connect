@@ -4,12 +4,12 @@ from flask_mail import Mail
 
 app = Flask(__name__)
 
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:1234@localhost:5432/databse'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:1234@localhost:5432/databse'
 
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://siddhant:collegeconnect@localhost:5432/db7'
 
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://ivgvlzznskwrmp:mvzdkwCP6UAdedpzuu83A-SoBO@ec2-204-236-226-63.compute-1.amazonaws.com:5432/dat3mrlsck6nk7'
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://ivgvlzznskwrmp:mvzdkwCP6UAdedpzuu83A-SoBO@ec2-204-236-226-63.compute-1.amazonaws.com:5432/dat3mrlsck6nk7'
 db = SQLAlchemy(app)
 api = Api(app)
 mail = Mail(app)
@@ -32,3 +32,6 @@ manager.add_command('db', MigrateCommand)
 
 
 bootstrap = Bootstrap(app)
+# from flask_apscheduler import APScheduler
+# scheduler = APScheduler()
+# scheduler.init_app(app)

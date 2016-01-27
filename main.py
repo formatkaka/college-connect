@@ -14,9 +14,9 @@ from drive_api import DriveApi
 from functools import wraps
 from config import mail
 from flask_mail import Message
-from apscheduler.schedulers.background import BackgroundScheduler
+# from apscheduler.schedulers.background import BackgroundScheduler
 import logging
-from config import scheduler
+# from config import scheduler
 
 logging.basicConfig()
 
