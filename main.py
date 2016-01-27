@@ -131,10 +131,10 @@ class UserRegistration(Resource):
             user.fullName = data.name
             db.session.add(user)
             db.session.commit()
-        except SQLAlchemyError:
-            db.session.rollback()
-            logging.error(e)
-            abort(500)
+        # except SQLAlchemyError:
+        #     db.session.rollback()
+        #     logging.error(e)
+        #     abort(500)
         except Exception as e:
             logging.error(e)
             abort(500)

@@ -97,8 +97,9 @@ class UserReg(db.Model):
     @staticmethod
     def if_unique(rollno, email,mobno, user=None):
         a, b, c = 0, 0, 0
-        if UserReg.query.filter_by(rollNo=rollno).first():
-            a = 1
+        if rollno is not None:
+            if UserReg.query.filter_by(rollNo=rollno).first():
+                a = 1
         if UserReg.query.filter_by(emailId=email).first():
             b = 1
         if mobno is not None:
