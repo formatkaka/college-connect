@@ -65,7 +65,7 @@ class UserReg(db.Model):
     rollNo = db.Column(db.String, unique=True)
     mobNo = db.Column(db.BigInteger, unique=True)
     hostelite_or_localite = db.Column(db.Boolean)
-    hostelName = db.Column(db.String, default="localite")
+    hostelName = db.Column(db.String)
 
 
 

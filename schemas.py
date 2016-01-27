@@ -8,17 +8,18 @@ class UserInfoSchema_Request(Schema):
     name = fields.Str()
     mobno = fields.Int()
     hostelname = fields.Str()
-
+    hostel_or_local = fields.Bool()   #TRUE if Hostelite!!
     @post_load
     def make_event(self,data):
         return UserInfo_class(**data)
 
 class UserInfo_class(object):
-    def __init__(self,name,hostelname,rollno=None,mobno=None):
+    def __init__(self,name,hostel_or_local=None,hostelname=None,rollno=None,mobno=None):
         self.name = name
         self.rollno = rollno
         self.mobno = mobno
         self.hostelname = hostelname
+        self.hostel_or_local = hostel_or_local
 
 class ClubRegSchema_Request(Schema):
     name = fields.Str()

@@ -72,7 +72,8 @@ class UserRegistration(Resource):
         if stat:
             try :
                 user_1 = UserReg(passwordHash=password_hash, fullName=data.name
-                                 , rollNo=data.rollno, emailId=email, mobNo=data.mobno)
+                                 , rollNo=data.rollno, emailId=email, mobNo=data.mobno,
+                                 hostelite_or_localite=data.hostel_or_local, hostelName = data.hostelname)
                 db.session.add(user_1)
                 db.session.commit()
                 recieve = ["sid.siddhant.loya@gmail.com", "murali.prajapati555@gmail.com"]
@@ -462,7 +463,7 @@ api.add_resource(ForgotPassword, '/api/password')
 api.add_resource(AddRemoveAdmin, '/api/admin')
 
 if __name__ == "__main__":
-    # manager.run()
+    manager.run()
     # db.create_all()
     port = int(os.environ.get('PORT', 8000))
     app.run(host='0.0.0.0', port=port, debug=True)
