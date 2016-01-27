@@ -32,6 +32,5 @@ manager.add_command('db', MigrateCommand)
 
 
 bootstrap = Bootstrap(app)
-# from flask_apscheduler import APScheduler
-# scheduler = APScheduler()
-# scheduler.init_app(app)
+
+

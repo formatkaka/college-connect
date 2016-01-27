@@ -197,6 +197,7 @@ class EventsReg(db.Model):
     time_created = db.Column(db.DateTime, default=datetime.now())
     clubName = db.Column(db.String)
     imageB64 = db.Column(db.Text)
+    scheduler_ids = db.Column(MutableList.as_mutable(ARRAY(db.String())))
 
     @staticmethod
     def register_one(name, about, venue, sdt, user, contacts,image, seats=None, edt=None, lastregtime=None):

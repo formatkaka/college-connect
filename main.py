@@ -14,6 +14,7 @@ from drive_api import DriveApi
 from functools import wraps
 from config import mail
 from flask_mail import Message
+import hashlib
 # from apscheduler.schedulers.background import BackgroundScheduler
 # import logging
 # from config import scheduler
@@ -432,7 +433,7 @@ def reset_password(token):
     user = UserReg.query.filter_by(id=data['id']).first()
     form = Reauthenticate()
     if form.validate_on_submit():
-        user.passwordHash = form.new_password.data
+        user.passwordHash = hashlib.sha1(new_password.data).hexdigest()
         db.session.add(user)
         db.session.commit()
         flash('Password Changed')
