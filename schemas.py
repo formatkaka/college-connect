@@ -9,6 +9,7 @@ class UserInfoSchema_Request(Schema):
     mobno = fields.Int()
     hostelname = fields.Str()
     hostel_or_local = fields.Bool()   #TRUE if Hostelite!!
+
     @post_load
     def make_event(self,data):
         return UserInfo_class(**data)
@@ -25,11 +26,22 @@ class ClubRegSchema_Request(Schema):
     name = fields.Str()
     about = fields.Str()
 
+class ContactEvent_class(object):
+    def __init__(self, contactname, contactnumber, contactid=None ,contactemail=None):
+        self.contactname = contactname
+        self.contactnumber = contactnumber
+        self.contactemail = contactemail
+        self.contactid = contactid
 
 class ContactSchema_Request(Schema):
+    contactid = fields.Int()
     contactname = fields.Str()
     contactnumber = fields.Int()
+    contactemail = fields.Email()
 
+    @post_load
+    def make_event(self,data):
+        return ContactEvent_class(**data)
 
 class OrganisedBySchema_Request(Schema):
     club_by_id = fields.Int()
@@ -41,6 +53,7 @@ class Date_Request(Schema):
 # EVENT REGISTRATION SCHEMA
 
 class EventRegSchema_Request(Schema):
+    eventid = fields.Int()
     name = fields.Str()
     about = fields.Str()
     sdt = fields.Float()
@@ -57,7 +70,7 @@ class EventRegSchema_Request(Schema):
         return EventRegSchema_class(**data)
 
 class EventRegSchema_class(object):
-    def __init__(self,name,about,sdt,venue,contacts,seats=None,image=None,edt=None,lastregtime=None):
+    def __init__(self,name,about,sdt,venue,contacts,eventid=None,seats=None,image=None,edt=None,lastregtime=None):
         self.name = name
         self.about = about
         self.sdt = sdt
@@ -67,6 +80,7 @@ class EventRegSchema_class(object):
         self.contacts = contacts
         self.lastregtime = lastregtime
         self.image = image
+        self.eventid = eventid
 
 
 # organised_by = fields.Nested(OrganisedBySchema_Request, many=True)

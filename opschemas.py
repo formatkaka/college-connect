@@ -47,15 +47,17 @@ class UserInfo_Response(Schema):
 ##### CLUBS INFORMATION #####
 
 class Admins():
-    def __init__(self, name, mobno):
+    def __init__(self, name, mobno,email=None, id=None):
         self.name = name
         self.mobno = mobno
-
+        self.id = id
+        self.email = email
 
 class Admin_Response(Schema):
     name = fields.Str()
     mobno = fields.Int()
-
+    id = fields.Int()
+    email = fields.Email()
 
 class Club_class():
     def __init__(self, name, about, admins, events, club_id):

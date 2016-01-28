@@ -230,15 +230,22 @@ class EventsReg(db.Model):
         club.eventsList.append(eve)
         db.session.add(club)
         db.session.commit()
-        send_email(val,user,eve.id)
+        # send_email(val,user,eve.id)
         return eve
         # except:
         #     abort(400,message="some error occured.")
 
     def add_contacts(self, contacts):
         for item in contacts:
-            contact = ContactsForEvent(contactName=item['contactname'], contactNumber=item['contactnumber'])
-            self.contacts.append(contact)
+            if not item.contactid:
+                contact = ContactsForEvent(contactName=item.contactname, contactNumber=item.contactnumber
+                                           , contactEmail = item.contactemail)
+                self.contacts.append(contact)
+            if item.contactid:
+                contact = ContactsForEvent.query.filter_by(id=item.contactid).first_or_404()
+                contact.contactName = item.contactname
+                contact.contactNumber = item.contactnumber
+                contact.contactEmail = item.contactemail
 
     def set_active(self):
         self.activeStatus = True
@@ -284,7 +291,13 @@ class EventsReg(db.Model):
                 db.session.add(self)
                 db.session.commit()
 
+    def edit_seats(self, seats):
+        if seats < self.occupiedSeats:
+            abort(400,message="ERR36")
 
+
+    def reschedule_gcm(self,new_time):
+        pass
 
 
 
@@ -313,6 +326,7 @@ class ContactsForEvent(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     contactName = db.Column(db.String)
     contactNumber = db.Column(db.BigInteger)
+    contactEmail = db.Column(db.String)
     event_id = db.Column(db.Integer, db.ForeignKey('events.id'))
 
 
@@ -445,7 +459,7 @@ def get_admin_info(club):
 def get_contact_info(event):
     contacts = []
     for contact in event.contacts:
-        a = Admins(contact.contactName, contact.contactNumber)
+        a = Admins(contact.contactName, contact.contactNumber,contact.contactEmail ,contact.id)
         contacts.append(a)
     return contacts
 
@@ -456,7 +470,7 @@ def send_email(val,user,eve_id):
         message = "Your response has been saved . It shall be pusblished after verification."
 
     recieve1 = "college.connect28@gmail.com"
-    recieve2 = user.emailId
+    recieve2 = "college.connect28@gmail.com"
     msg1 = Message(subject="Response Saved",
               sender="college.connect28@gmail.com",
               recipients=[recieve2])

@@ -245,7 +245,7 @@ class EventCheck(Resource):
             date = data['date']
             date1 = conv_time(date) + datetime.timedelta(hours=1)
             date2 = conv_time(date) - datetime.timedelta(hours=1)
-            eve_list = EventsReg.query.filter(EventsReg.startDateTime > date2, EventsReg.startDateTime < date1  ).all()
+            eve_list = EventsReg.query.filter(EventsReg.startDateTime > date2, EventsReg.startDateTime < date1).all()
             return jsonify({"message":str(len(eve_list))})
 
 
@@ -307,7 +307,8 @@ class EventRegistration(Resource):
                     conv_time(event.lastRegDateTime),
                     event.totalSeats,
                     event.leftSeats,
-                    event.occupiedSeats
+                    event.occupiedSeats,
+
             )
             events.append(e)
 
@@ -315,7 +316,31 @@ class EventRegistration(Resource):
         return {"events": result}
 
         # events = Events.query.all()
+    def put(self):
+        user = get_current_user()
+        json_data = request.get_json()
+        data, errors = eventreg_schema.load(json_data)
+        if errors:
+            return jsonify(errors)
 
+        eve = EventsReg.query.filter_by(id=data.eventid).first_or_404()
+        eve.eventName = data.name,
+        eve.eventInfo = data.about
+        eve.eventVenue = data.venue,
+        eve.startDateTime = conv_time(data.sdt)
+        eve.user = user
+        eve.image = data.image
+        eve.edit_seats(data.seats)
+        eve.totalSeats = data.seats
+        eve.startDateTime = conv_time(data.sdt)
+        eve.reschedule_gcm(conv_time(data.sdt))
+        eve.lastRegDateTime = conv_time(data.lastregtime)
+        eve.endDateTime = conv_time(data.edt)
+        eve.imageB64 = data.image
+        eve.add_contacts(data.contacts)
+        db.session.add(eve)
+        db.session.commit()
+        return jsonify({"message":"success"})
 
 class Clubsget(Resource):
     def get(self):
@@ -492,7 +517,7 @@ api.add_resource(EventCheck, '/api/check/<string:foo>')
 if __name__ == "__main__":
     # manager.run()
     # db.create_all()
-    port = int(os.environ.get('PORT', 8000))
+    port = int(os.environ.get('PORT', 8080))
     app.run(host='0.0.0.0', port=port, debug=True)
     # app.run(port=8080, debug=True)
 

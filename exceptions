@@ -81,3 +81,6 @@ ERR34 -
 
 ERR35 -
 
+400 (BAD REQUEST)
+
+ERR36 - Editing seats not possible. Occupied seats are more.
