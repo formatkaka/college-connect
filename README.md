@@ -1,3 +1,5 @@
+READ readme.txt
+
 # college-connect
 
 1. REGISTER USER(POST)
