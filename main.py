@@ -15,6 +15,8 @@ from functools import wraps
 from config import mail
 from flask_mail import Message
 import hashlib
+import datetime
+
 # from apscheduler.schedulers.background import BackgroundScheduler
 # import logging
 # from config import scheduler
@@ -71,10 +73,10 @@ class UserRegistration(Resource):
         stat = UserReg.if_unique(data.rollno, email, data.mobno)
 
         if stat:
-            try :
+            try:
                 user_1 = UserReg(passwordHash=password_hash, fullName=data.name
                                  , rollNo=data.rollno, emailId=email, mobNo=data.mobno,
-                                 hostelite_or_localite=data.hostel_or_local, hostelName = data.hostelname)
+                                 hostelite_or_localite=data.hostel_or_local, hostelName=data.hostelname)
                 db.session.add(user_1)
                 db.session.commit()
                 recieve = ["sid.siddhant.loya@gmail.com", "murali.prajapati555@gmail.com"]
@@ -96,7 +98,7 @@ class UserRegistration(Resource):
             #     db.session.rollback()
             #     abort(500)
 
-            except Exception as e :
+            except Exception as e:
 
                 try:
                     db.session.delete(user_1)
@@ -232,7 +234,30 @@ class EmailVerification(Resource):
         return response
 
 
+class EventCheck(Resource):
+    def get(self, foo):
+        if foo is "date":
+            get_current_user()
+            json_data = request.get_json()
+            data, errors = forgot_pass.load(json_data)
+            if errors:
+                return jsonify(errors)
+            date = data['date']
+            date1 = conv_time(date) + datetime.timedelta(hours=1)
+            date2 = conv_time(date) - datetime.timedelta(hours=1)
+            eve_list = EventsReg.query.filter(EventsReg.startDateTime > date2, EventsReg.startDateTime < date1  ).all()
+            return jsonify({"message":str(len(eve_list))})
+
+
+        elif foo is "version":
+            version = get_events_version()
+            return jsonify({"message": str(version)})
+            pass
+        else :
+            abort(400)
+
 class EventRegistration(Resource):
+
     def post(self):
         user = get_current_user()
         if user.isVerified is False:
@@ -462,6 +487,7 @@ api.add_resource(Testing1, '/api/test')
 api.add_resource(GCMessaging, '/api/gcm')
 api.add_resource(ForgotPassword, '/api/password')
 api.add_resource(AddRemoveAdmin, '/api/admin')
+api.add_resource(EventCheck, '/api/check/<string:foo>')
 
 if __name__ == "__main__":
     # manager.run()

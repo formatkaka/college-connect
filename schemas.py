@@ -35,8 +35,8 @@ class OrganisedBySchema_Request(Schema):
     club_by_id = fields.Int()
 
 
-class OrganisedForSchema_Request(Schema):
-    clubs_for_id = fields.Int()
+class Date_Request(Schema):
+    sdt = fields.Int()
 
 # EVENT REGISTRATION SCHEMA
 
