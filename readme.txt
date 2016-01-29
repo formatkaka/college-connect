@@ -51,7 +51,8 @@ RESPONSE -
 
 3.EVENT REGISTRATION(POST)
 
-api_url = https://sheltered-fjord-8731.herokuapp.com/api/events/
+api_url = https://sheltered-fjord-8731.herokuapp.com/api/events
+
 REQUEST -
 * Add username and password in auth-headers
 * json = {
@@ -62,15 +63,17 @@ REQUEST -
           "venue":"EVENT VENUE",
           "contacts":[ 
                       {
+                          "contactemail" : "CONTACT EMAIL"
                           "contactname":"CONTACT NAME",
                           "contactnumber":CONTACT NUMBER
                       },
                       {
+                          "contactemail" : "CONTACT EMAIL"
                           "contactname":"CONTACT NAME",
                           "contactnumber":CONTACT NUMBER
                       }
                      ],
-          "seats":SEATS, 
+          "seats":TOTAL SEATS,
           "lastregtime":LAST REGISTRATION TIME(Unixstamp(Float)),
           "image":"IMAGE BASE64"
           }
@@ -82,7 +85,7 @@ RESPONSE -
   
   
 4. EVENTS LIST(GET)
-api_url = https://sheltered-fjord-8731.herokuapp.com/api/events/
+api_url = https://sheltered-fjord-8731.herokuapp.com/api/events
 
 REQUEST -
 * Add username and password in auth-headers
@@ -95,10 +98,12 @@ RESPONSE -
             "about" : "ABOUT_EVENT" , 
             "contacts" : [
                 {
+                    "email":"EMAIL"
                     "mobno": MOB_NO, 
                     "name": "CONTACT_NAME"
                 }, 
                 {
+                    "email":"EMAIL"
                     "mobno": MOB_NO, 
                     "name": "CONTACT_NAME"
                 }
@@ -120,9 +125,50 @@ RESPONSE -
 #1. EVENTS RESPONSE WILL BE ARRAY.
 #2. BEFORE ACCESSING THIS API, VERIFY IF EVENTS HAVE BEEN UPDATED THRU EVENT VERSION API.
 
+
+5. EVENTS UPDATE(PUT)
+
+api_url = https://sheltered-fjord-8731.herokuapp.com/api/events
+REQUEST -
+* Add username and password in auth-headers
+* json = {
+          "name" : "FULL NAME",
+          "about":"ABOUT EVENT",
+          "sdt":EVENT START TIME(Unixstamp(Float)),
+          "edt":EVENT END TIME(Unixstamp(Float)),
+          "venue":"EVENT VENUE",
+          "contacts":[
+                      {
+                          ## if a contact is updated then its id must be sent along with other info.
+
+                          "contactid" : "CONTACT ID"
+                          "contactemail" : "CONTACT EMAIL"
+                          "contactname":"CONTACT NAME",
+                          "contactnumber":CONTACT NUMBER
+                      },
+                      {
+                         ## if a new contact is added at the time of editing , json structure would
+                            remain same.
+
+                          "contactemail" : "CONTACT EMAIL"
+                          "contactname":"CONTACT NAME",
+                          "contactnumber":CONTACT NUMBER
+                      }
+                     ],
+          "seats":SEATS,
+          "lastregtime":LAST REGISTRATION TIME(Unixstamp(Float)),
+          "image":"IMAGE BASE64"
+          }
+RESPONSE -
+  success Acknowledgement.
+
+
+6. EVENT VERSION API
+ ----
+
 5. FOLLOWING/UNFOLLOWING  CLUB/EVENT
 
-api_url = https://sheltered-fjord-8731.herokuapp.com/api/event/event_id/S1
+api_url = https://sheltered-fjord-8731.herokuapp.com/api/event/event_id/<string:S1>
 
 S1 - follow / unfollow
 
