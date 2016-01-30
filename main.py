@@ -253,6 +253,7 @@ class EventCheck(Resource):
             version = get_events_version()
             return jsonify({"message": str(version)})
             pass
+
         else :
             abort(400)
 
@@ -279,11 +280,6 @@ class EventRegistration(Resource):
                                            conv_time(data.edt),
                                            conv_time(data.lastregtime)
                                            )
-            # drive = DriveApi()
-            # flag = drive.upload(data.image, 'qwerty')
-            # event.imageLink = str(flag)
-            # db.session.add(event)
-            # db.session.commit()
             push_notif("A new event has been created.{0}".format(data.name))
             return jsonify({"message": event.id})
 
@@ -324,9 +320,9 @@ class EventRegistration(Resource):
             return jsonify(errors)
 
         eve = EventsReg.query.filter_by(id=data.eventid).first_or_404()
-        eve.eventName = data.name,
+        eve.eventName = data.name
         eve.eventInfo = data.about
-        eve.eventVenue = data.venue,
+        eve.eventVenue = data.venue
         eve.startDateTime = conv_time(data.sdt)
         eve.user = user
         eve.image = data.image
@@ -483,11 +479,11 @@ def reset_password(token):
     user = UserReg.query.filter_by(id=data['id']).first()
     form = Reauthenticate()
     if form.validate_on_submit():
-        user.passwordHash = hashlib.sha1(new_password.data).hexdigest()
+        user.passwordHash = hashlib.sha1(form.new_password.data).hexdigest()
         db.session.add(user)
         db.session.commit()
         flash('Password Changed')
-        return render_template('reset.html', form=None)
+        return render_template('reset.html')
 
     return render_template('reset.html', form=form)
 
