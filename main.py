@@ -249,7 +249,7 @@ class EventCheck(Resource):
 
 
         elif foo is "version":
-            version = get_events_version()
+            version = EventsVersion.get_events_version()
             return jsonify({"message": str(version)})
             pass
 
@@ -345,7 +345,7 @@ class Clubsget(Resource):
         for club in clubs_list:
             admins = get_admin_info(club)
             events = [club.eventsList[i].id for i in range(0, len(club.eventsList))]
-            c = Club_class(club.clubName, club.aboutClub, admins, events)
+            c = Club_class(club.clubName, club.aboutClub, admins, events,club.id)
             clubs.append(c)
         result = club_schema.dump(clubs)
         # if result.error == {}:
@@ -516,10 +516,8 @@ if __name__ == "__main__":
     app.run(host='0.0.0.0', port=port, debug=True)
     # app.run(port=8080, debug=True)
 
-    # TODO - 1. server_id for event and clubs
-    # TODO - 2. clubs event list, user.isAdmin implementation !
-    # TODO - 3. clubname in events api.
-    # TODO - 4. not,None
-    # TODO - 5. mobile number,json string input!
-    # TODO - 6. gcm(events created)
-    # TODO - 7. imports
+
+    # TODO - 1. not,None
+    # TODO - 2. imports
+    # TODO - 3. Events Version
+    # TODO - 4. Flush, No result error(first_or_404)

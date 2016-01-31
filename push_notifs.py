@@ -21,18 +21,22 @@ def push_notif(message):
                       # delay_while_idle=True,
                       )
 
-    # print res.errors[0].code
+
     ## Catching exceptions
-    print abc.data
+
     #1 - GCM Device Unregistered
     for err in res.errors:
         if err.code == "NotRegistered" or err.code == "InvalidRegistration":
             abc.data.remove(err.identifier)
+            # db.session.add(abc)
+            # db.session.commit()
             print abc.data
 
         if err.code == "Unavailable" or err.code == "InvalidTtl":
             ### ADD TO SCHEDULER ###
             pass
+
+    #2 - CANONICAL IDS
 
     for ids in res.canonical_ids:
         abc.data.remove(ids.old_id)

@@ -4,6 +4,9 @@ from opschemas import *
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.ext.mutable import Mutable
 from flask_mail import Message
+from sqlalchemy.orm.exc import NoResultFound
+from gmail_logs import *
+
 ####### Reference table for many-many relationships #######
 
 # 1 ---> CLUBS FOLLOWED BY USERS
@@ -299,9 +302,37 @@ class EventsReg(db.Model):
     def reschedule_gcm(self,new_time):
         pass
 
+class EventsVersion(db.Model):
+    __tablename__ = "orgby"
 
+    __table_args__ = {'extend_existing': True}
 
+    id = db.Column(db.Integer, primary_key=True)
+    version = db.Column(db.Integer)
 
+    @staticmethod
+    def increment_version():
+        try:
+            ver = EventsVersion.query.first()
+            ver.version += 0.01
+            db.session.add(ver)
+            db.sesion.commit()
+        except NoResultFound:
+            ver = EventsVersion()
+            ver.version = 0.01
+            db.session.add(ver)
+            db.session.commit()
+        except Exception as e:
+            abort(500)
+            logging.error(e)
+
+    @staticmethod
+    def get_event_version():
+        try:
+            ver = EventsVersion.query.first()
+            return ver.version
+        except Exception as e:
+            logging.error(e)
             # def __repr__(self):
             # 	return "<Name> {0} <Info> {1} <Seats> {2} <Venue> {3} <Verified> {4} <createdBy> {5} ".format(self.eventName,self.eventInfo,self.seats,self.eventVenue,self.verified,self.createdBy)
 
