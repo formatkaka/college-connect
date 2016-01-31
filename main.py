@@ -2,7 +2,6 @@ from __init__ import *
 from config import *
 from models import *
 import os, flask, scrap
-from flask_mail import Message
 import base64
 from schemas import *
 from opschemas import *

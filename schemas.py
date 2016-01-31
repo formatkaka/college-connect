@@ -89,8 +89,6 @@ class EventRegSchema_class(object):
 class GCM_Schema(Schema):
     gcmid = fields.Str()
 
-
-
 class AdminSchema_Request(Schema):
     rollno = fields.Str()
     club_id = fields.Int()
@@ -102,6 +100,20 @@ class Forgot_Password(Schema):
 
 
 
+#####   NOTICES   #####
+
+class Notice_class(object):
+    def __init__(self,name,about,image=None):
+        self.name = name
+        self.about = about
+        self.image= image
+
+class Notice_Rquest(Schema):
+    name = fields.Str()
+    about = fields.Str()
+    image = fields.Str()
+
+
 contact_schema = ContactSchema_Request(many=True)
 eventreg_schema = EventRegSchema_Request(partial=True)
 club_schema = ClubRegSchema_Request()
@@ -109,10 +121,4 @@ info_schema = UserInfoSchema_Request()
 gcm_schema = GCM_Schema()
 forgot_pass = Forgot_Password()
 admin_schema = AdminSchema_Request()
-# class UserSchema(Schema):
-# name = fields.Str()
-# email = fields.Email()
-# created_at = fields.DateTime()
-# @post_load
-# def make_user(self, data):
-# return User(**data)
+

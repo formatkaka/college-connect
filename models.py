@@ -197,7 +197,7 @@ class EventsReg(db.Model):
     time_created = db.Column(db.DateTime, default=datetime.now())
     clubName = db.Column(db.String)
     imageB64 = db.Column(db.Text)
-    scheduler_ids = db.Column(MutableList.as_mutable(ARRAY(db.String())))
+    eventColorHex = db.Column(db.String)
 
     @staticmethod
     def register_one(name, about, venue, sdt, user, contacts,image, seats=None, edt=None, lastregtime=None):
@@ -338,6 +338,15 @@ class GCMRegIds(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     data = db.Column(MutableList.as_mutable(ARRAY(db.String())))
 
+class NoticeSection(db.Model):
+    """ Notices Section """
+    __tablename__ = "notice"
+    __table_args__ = {'extend_existing': True}
+
+    id = db.Column(db.Integer, primary_key=True)
+    noticeName = db.Column(db.String)
+    aboutNotice = db.Column(db.String)
+    noticeImage = db.Column(db.String)
 
 ####################################
 ######## HELPER FUNCTIONS ##########
