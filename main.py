@@ -575,10 +575,10 @@ api.add_resource(EventCheck, '/api/check/<string:foo>')
 if __name__ == "__main__":
     # thread_cron = Thread(target=cron, args=())
     # thread_cron.start()
-    manager.run()
+    # manager.run()
 	# db.create_all()
-	# port = int(os.environ.get('PORT', 8080))
-	# app.run(host='0.0.0.0', port=port, debug=True)
+	port = int(os.environ.get('PORT', 8080))
+	app.run(host='0.0.0.0', port=port, debug=True)
 	# app.run(port=8080, debug=True)
 # a.verifiedNotifs = [("hello","1454337100.818"),("hello2","1454337300.818")]
 #  a = Scheduler_list()
