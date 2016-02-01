@@ -63,14 +63,17 @@ class EventRegSchema_Request(Schema):
     contacts = fields.Nested(ContactSchema_Request, many=True)
     lastregtime = fields.Float()
     image = fields.Str()
-
+    notifone = fields.Float()
+    notiftwo = fields.Float()
+    notifmessage = fields.Str()
 
     @post_load
     def make_event(self,data):
         return EventRegSchema_class(**data)
 
 class EventRegSchema_class(object):
-    def __init__(self,name,about,sdt,venue,contacts,eventid=None,seats=None,image=None,edt=None,lastregtime=None):
+    def __init__(self,name,about,sdt,venue,contacts,eventid=None,seats=None,image=None,edt=None,
+                 lastregtime=None, notifone=None, notiftwo=None, notifmessage=None):
         self.name = name
         self.about = about
         self.sdt = sdt
@@ -81,7 +84,9 @@ class EventRegSchema_class(object):
         self.lastregtime = lastregtime
         self.image = image
         self.eventid = eventid
-
+        self.notifone = notifone
+        self.notiftwo = notiftwo
+        self.notifmessage = notifmessage
 
 # organised_by = fields.Nested(OrganisedBySchema_Request, many=True)
 # organised_for = fields.Nested(OrganisedForSchema_Request, many=True)

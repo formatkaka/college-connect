@@ -25,9 +25,9 @@ from datetime import datetime
 
 # logging.basicConfig()
 
-checkList = []
-firstNotif = None
-requestedTime = None
+# checkList = []
+# firstNotif = None
+# requestedTime = None
 
 
 def login_required(f):
@@ -284,8 +284,12 @@ class EventRegistration(Resource):
 										   data.image,
 										   data.seats,
 										   conv_time(data.edt),
-										   conv_time(data.lastregtime)
+										   conv_time(data.lastregtime),
+										   conv_time(data.notifone),
+										   conv_time(data.notiftwo),
+										   data.notifmessage,
 										   )
+
 			push_notif("A new event has been created.{0}".format(data.name))
 			return jsonify({"message": event.id})
 
@@ -335,7 +339,7 @@ class EventRegistration(Resource):
 		eve.edit_seats(data.seats)
 		eve.totalSeats = data.seats
 		eve.startDateTime = conv_time(data.sdt)
-		eve.reschedule_gcm(conv_time(data.sdt))
+		# eve.reschedule_gcm(conv_time(data.sdt))
 		eve.lastRegDateTime = conv_time(data.lastregtime)
 		eve.endDateTime = conv_time(data.edt)
 		eve.imageB64 = data.image
@@ -453,22 +457,6 @@ class Testing1(Resource):
 			return jsonify({"Status": "Success"})
 		else:
 			return jsonify({"Status": "Upload Failed."})
-			# @scheduler.interval_schedule(seconds=2)
-			# def tick():
-			#
-			#     msg = Message(subject="Thank You for Registration.Confirmation Link.Click Below.",
-			#                   sender="college.connect01@gmail.com",
-			#                   recipients=["college.connect28@gmail.com"])
-			#
-			#     msg.body = "please click on the link "
-			#     mail.send(msg)
-			#     scheduler.remove_all_jobs()
-			#     return "done"
-
-			# scheduler = BackgroundScheduler()
-			# scheduler.add_job(tick, 'interval', second=10)
-			# scheduler.add_job('1',tick,'interval')
-			# scheduler.start()
 
 
 class Reauthenticate(Form):
@@ -493,49 +481,74 @@ def reset_password(token):
 
 	return render_template('reset.html', form=form)
 
-class NotificationCron(Resource):
+# class NotificationCron(Resource):
+#
+# 	def post(self):
+# 		global checkList
+# 		global firstNotif
+# 		global requestedTime
+# 		json_data = request.get_json()
+# 		message = json_data['message']
+# 		timestamp = json_data['timestamp']
+# 		if not checkList:
+# 			checkList.append((message, timestamp))
+# 			checkList.sort(key=lambda tup: -tup[1])
+# 			firstNotif = checkList[-1]
+# 			requestedTime = firstNotif[1]
+# 			thread_cron = Thread(target=cron, args=())
+# 			thread_cron.start()
+# 		else:
+# 			checkList.append((message, timestamp))
+# 			checkList.sort(key=lambda tup: -tup[1])
+# 			firstNotif = checkList[-1]
+# 			requestedTime = firstNotif[1]
 
-	def post(self):
-		global checkList
-		global firstNotif
-		global requestedTime
-		json_data = request.get_json()
-		message = json_data['message']
-		timestamp = json_data['timestamp']
-		if not checkList:
-			checkList.append((message, timestamp))
-			checkList.sort(key=lambda tup: -tup[1])
-			firstNotif = checkList[-1]
-			requestedTime = firstNotif[1]
-			thread_cron = Thread(target=cron, args=())
-			thread_cron.start()
-		else:
-			checkList.append((message, timestamp))
-			checkList.sort(key=lambda tup: -tup[1])
-			firstNotif = checkList[-1]
-			requestedTime = firstNotif[1]
 
 def cron():
-	global checkList
-	global firstNotif
-	global requestedTime
-	while (True):
-		# print(checkList)
-		if (time.time() >= requestedTime):
-			print(firstNotif[0])        # Execute gcm here.
-			# print(" Done "),
-			# print(datetime.now())
-			checkList.pop()
-			if not checkList:
-				break
-			firstNotif = checkList[-1]
-			requestedTime = firstNotif[1]
-		# print(firstNotif[0]),
-		# print(" "),
-		# print(datetime.now())
-		time.sleep(15)
+    # global checkList
+    # global firstNotif
+    # global requestedTime
 
+    while (True):
+        foo = Scheduler_list.query.first()
+        checkList = foo.verifiedNotifs
+        checkList.sort(key=lambda tup: -float(tup[1]))
+        firstNotif = checkList[-1]
+        notif_message = firstNotif[0]
+        notif_time = float(firstNotif[1])
 
+        if (time.time() >= notif_time):
+            print time.time()
+            print notif_time
+            print notif_message
+            # push_notif(notif_message)
+            foo.verifiedNotifs.remove(firstNotif)
+            db.session.add(foo)
+            db.session.commit()
+            print "committed"
+			# notif_time = None
+            # return jsonify({"message":"hello"})
+            # print(datetime.now())
+
+            # if not checkList:
+            #     break
+            # firstNotif = checkList[-1]
+            # requestedTime = firstNotif[1]
+        # print(firstNotif[0]),
+        # print(" "),
+        # print(datetime.now())
+        time.sleep(15)
+
+# checkList.append(("asd",1454303190.752 ))
+# checkList.append(("asd",1454303210.752 ))
+# checkList.append(("asd",1454303400.752 ))
+# # checkList.append((message, timestamp))
+# checkList.sort(key=lambda tup: -tup[1])
+# firstNotif = checkList[-1]
+# requestedTime = firstNotif[1]
+
+# print firstNotif[1],firstNotif[0]
+# thread_cron.start()
 # if not app.debug:
 #     import logging
 #     from logging.handlers import SMTPHandler
@@ -552,22 +565,26 @@ api.add_resource(Testing, '/')
 api.add_resource(WebScrap, '/api/scrap/<string:source>')
 api.add_resource(User_Follow_message, '/api/<string:s1>/<int:event_or_club_id>/<string:s2>')
 api.add_resource(EmailVerification, '/api/verify/<string:code>')
-api.add_resource(NotificationCron, '/api/test')
+# api.add_resource(NotificationCron, '/api/test')
 api.add_resource(GCMessaging, '/api/gcm')
 api.add_resource(ForgotPassword, '/api/password')
 api.add_resource(AddRemoveAdmin, '/api/admin')
 api.add_resource(EventCheck, '/api/check/<string:foo>')
 
+
 if __name__ == "__main__":
-	# manager.run()
+    # thread_cron = Thread(target=cron, args=())
+    # thread_cron.start()
+    manager.run()
 	# db.create_all()
-	port = int(os.environ.get('PORT', 8080))
-	app.run(host='0.0.0.0', port=port, debug=True)
+	# port = int(os.environ.get('PORT', 8080))
+	# app.run(host='0.0.0.0', port=port, debug=True)
 	# app.run(port=8080, debug=True)
-
-
+# a.verifiedNotifs = [("hello","1454337100.818"),("hello2","1454337300.818")]
+#  a = Scheduler_list()
 	# TODO - 1. not,None
 	# TODO - 2. imports
 	# TODO - 3. Events Version
 	# TODO - 4. Flush, No result error(first_or_404)
 	# TODO - 5. Update Cron with gcm (For now send to all users. Customised notification by ID can be done later by saving ids to database and accessing them in cron)
+	# TODO - 6. Remove OrgBy

@@ -38,6 +38,10 @@ class MutableList(Mutable, list):
         list.append(self, value)
         self.changed()
 
+    def remove(self, value):
+        list.remove(self,value)
+        self.changed()
+
     @classmethod
     def coerce(cls, key, value):
         if not isinstance(value, MutableList):
@@ -201,9 +205,14 @@ class EventsReg(db.Model):
     clubName = db.Column(db.String)
     imageB64 = db.Column(db.Text)
     eventColorHex = db.Column(db.String)
+    schedulerList = db.Column(MutableList.as_mutable(ARRAY(db.String())))
+    notifOne = db.Column(db.DateTime, default=None)
+    notifTwo = db.Column(db.DateTime, default=None)
+    # scheduler_ids = db.Column(MutableList.as_mutable(ARRAY(db.String())))
 
     @staticmethod
-    def register_one(name, about, venue, sdt, user, contacts,image, seats=None, edt=None, lastregtime=None):
+    def register_one(name, about, venue, sdt, user, contacts,image, seats=None, edt=None, lastregtime=None,
+                     notifone=None,notiftwo=None, notifmessage=None):
         # try:
         val,club = user.user_is_admin()
         clubname = club.clubName
@@ -214,26 +223,31 @@ class EventsReg(db.Model):
         else:
             leftseats = seats
             occupiedseats = 0
-        eve = EventsReg(eventName=name,
-                        eventInfo=about,
-                        eventVenue=venue,
-                        startDateTime=sdt,
-                        createdBy=user.id,
-                        totalSeats=seats,
-                        endDateTime=edt,
-                        verified=val,
-                        lastRegDateTime=lastregtime,
-                        activeStatus=True,
-                        leftSeats=leftseats,
-                        occupiedSeats=occupiedseats,
+        eve = EventsReg(eventName = name,
+                        eventInfo = about,
+                        eventVenue = venue,
+                        startDateTime = sdt,
+                        createdBy = user.id,
+                        totalSeats = seats,
+                        endDateTime = edt,
+                        verified = val,
+                        lastRegDateTime = lastregtime,
+                        activeStatus = True,
+                        leftSeats = leftseats,
+                        occupiedSeats = occupiedseats,
                         clubName = clubname,
                         imageB64 = image,
+                        notifOne = notifone,
+                        notifTwo = notiftwo,
+                        notifMessage = notifmessage,
                         )
+
         eve.add_contacts(contacts)
         club.eventsList.append(eve)
         db.session.add(club)
         db.session.commit()
         # send_email(val,user,eve.id)
+        EventsReg.schedule_gcm(val,notifmessage,notifone,notiftwo)
         return eve
         # except:
         #     abort(400,message="some error occured.")
@@ -297,6 +311,23 @@ class EventsReg(db.Model):
     def edit_seats(self, seats):
         if seats < self.occupiedSeats:
             abort(400,message="ERR36")
+
+    @staticmethod
+    def schedule_gcm(val,message,notifone=None,notiftwo=None):
+        foo = Scheduler_list.query.first()
+
+        time1 = conv_time(notifone)
+        time2 = conv_time(notiftwo)
+        if time1:
+            if val : foo.verifiedNotifs.append((message,str(time1)))
+            if not val : foo.notverifiedNotifs.append((message,str(time1)))
+        if time2:
+            if val: foo.verifiedNotifs.append((message,str(time2)))
+            if not val : foo.notverifiedNotifs.append((message,str(time2)))
+
+
+        db.session.add(foo)
+        db.session.commit()
 
 
     def reschedule_gcm(self,new_time):
@@ -378,6 +409,15 @@ class NoticeSection(db.Model):
     noticeName = db.Column(db.String)
     aboutNotice = db.Column(db.String)
     noticeImage = db.Column(db.String)
+
+class Scheduler_list(db.Model):
+    """ Scheduler list for gcm.   """
+    __tablename__ = "schedule"
+    __table_args__ = {'extend_existing': True}
+
+    id = db.Column(db.Integer, primary_key=True)
+    verifiedNotifs = db.Column(MutableList.as_mutable(ARRAY(db.String())))
+    notverifiedNotifs = db.Column(MutableList.as_mutable(ARRAY(db.String())))
 
 ####################################
 ######## HELPER FUNCTIONS ##########
