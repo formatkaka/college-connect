@@ -29,7 +29,6 @@ def push_notif(message):
         if err.code == "NotRegistered" or err.code == "InvalidRegistration":
             abc.data.remove(err.identifier)
             # db.session.add(abc)
-            # db.session.commit()
             print abc.data
 
         if err.code == "Unavailable" or err.code == "InvalidTtl":
@@ -44,6 +43,7 @@ def push_notif(message):
         # db.session.add(abc)
 
     # db.session.commit()
+
 
 if __name__ == "__main__":
     push_notif("hello")
