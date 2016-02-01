@@ -570,3 +570,4 @@ if __name__ == "__main__":
 	# TODO - 2. imports
 	# TODO - 3. Events Version
 	# TODO - 4. Flush, No result error(first_or_404)
+	# TODO - 5. Update Cron with gcm (For now send to all users. Customised notification by ID can be done later by saving ids to database and accessing them in cron)
