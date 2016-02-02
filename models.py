@@ -208,7 +208,9 @@ class EventsReg(db.Model):
     schedulerList = db.Column(MutableList.as_mutable(ARRAY(db.String())))
     notifOne = db.Column(db.DateTime, default=None)
     notifTwo = db.Column(db.DateTime, default=None)
-    # scheduler_ids = db.Column(MutableList.as_mutable(ARRAY(db.String())))
+    eventRegFees = db.Column(db.Integer, default=None)
+    eventPrizeMoney = db.Column(db.Integer, default=None)
+    notifMessage = db.Column(db.String)
 
     @staticmethod
     def register_one(name, about, venue, sdt, user, contacts,image, seats=None, edt=None, lastregtime=None,
@@ -244,10 +246,11 @@ class EventsReg(db.Model):
 
         eve.add_contacts(contacts)
         club.eventsList.append(eve)
+        eve.schedule_gcm(val,notifmessage,notifone,notiftwo)
         db.session.add(club)
         db.session.commit()
         # send_email(val,user,eve.id)
-        EventsReg.schedule_gcm(val,notifmessage,notifone,notiftwo)
+
         return eve
         # except:
         #     abort(400,message="some error occured.")
@@ -312,22 +315,30 @@ class EventsReg(db.Model):
         if seats < self.occupiedSeats:
             abort(400,message="ERR36")
 
-    @staticmethod
-    def schedule_gcm(val,message,notifone=None,notiftwo=None):
-        foo = Scheduler_list.query.first()
+    # @staticmethod
+    def schedule_gcm(self, val,message,notifone=None,notiftwo=None):
+        foo = Scheduler_list.query.filter_by(id=1).first()
 
         time1 = conv_time(notifone)
         time2 = conv_time(notiftwo)
+        self.schedulerList = []
+        foo.verifiedNotifs = []
+        foo.notverifiedNotifs = []
         if time1:
             if val : foo.verifiedNotifs.append((message,str(time1)))
             if not val : foo.notverifiedNotifs.append((message,str(time1)))
+            self.schedulerList.append((message,str(time1)))
         if time2:
             if val: foo.verifiedNotifs.append((message,str(time2)))
             if not val : foo.notverifiedNotifs.append((message,str(time2)))
+            self.schedulerList.append((message,str(time1)))
 
 
         db.session.add(foo)
+
         db.session.commit()
+        global checkList
+        checkList = foo.notverifiedNotifs
 
 
     def reschedule_gcm(self,new_time):
@@ -574,3 +585,7 @@ def error_mail(e):
 
     msg1.body = e
     mail.send(msg1)
+
+def foo_bar():
+    foo = Scheduler_list.query.filter_by(id=1).first()
+    return foo

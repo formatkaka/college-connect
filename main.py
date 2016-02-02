@@ -18,14 +18,15 @@ import datetime
 from threading import Thread
 import time
 from datetime import datetime
-
+import unicodedata
 # from apscheduler.schedulers.background import BackgroundScheduler
 # import logging
 # from config import scheduler
 
 # logging.basicConfig()
 
-# checkList = []
+global checkList
+checkList = Scheduler_list.query.filter_by(id=1).first().notverifiedNotifs
 # firstNotif = None
 # requestedTime = None
 
@@ -445,18 +446,19 @@ class AddRemoveAdmin(Resource):
 
 
 class Testing1(Resource):
-	def get(self):
-
+    def get(self):
+        return jsonify({"message":str(len(checkList))})
 		# user = get_current_user()
 		# if user:
-		json_data = request.get_json()
-		base = json_data['file']
-		drive = DriveApi()
-		flag = drive.upload(base, 'qwerty')
-		if flag:
-			return jsonify({"Status": "Success"})
-		else:
-			return jsonify({"Status": "Upload Failed."})
+		# json_data = request.get_json()
+		# base = json_data['file']
+		# drive = DriveApi()
+		# flag = drive.upload(base, 'qwerty')
+		# if flag:
+		# 	return jsonify({"Status": "Success"})
+		# else:
+		# 	return jsonify({"Status": "Upload Failed."})
+
 
 
 class Reauthenticate(Form):
@@ -481,87 +483,49 @@ def reset_password(token):
 
 	return render_template('reset.html', form=form)
 
-# class NotificationCron(Resource):
-#
-# 	def post(self):
-# 		global checkList
-# 		global firstNotif
-# 		global requestedTime
-# 		json_data = request.get_json()
-# 		message = json_data['message']
-# 		timestamp = json_data['timestamp']
-# 		if not checkList:
-# 			checkList.append((message, timestamp))
-# 			checkList.sort(key=lambda tup: -tup[1])
-# 			firstNotif = checkList[-1]
-# 			requestedTime = firstNotif[1]
-# 			thread_cron = Thread(target=cron, args=())
-# 			thread_cron.start()
-# 		else:
-# 			checkList.append((message, timestamp))
-# 			checkList.sort(key=lambda tup: -tup[1])
-# 			firstNotif = checkList[-1]
-# 			requestedTime = firstNotif[1]
-
-
 def cron():
+
     # global checkList
-    # global firstNotif
-    # global requestedTime
+
 
     while (True):
-        foo = Scheduler_list.query.first()
-        checkList = foo.verifiedNotifs
-        checkList.sort(key=lambda tup: -float(tup[1]))
-        firstNotif = checkList[-1]
-        notif_message = firstNotif[0]
-        notif_time = float(firstNotif[1])
+        foo = foo_bar()
+        # checkList = foo.notverifiedNotifs
+        print "outside"
+        print checkList
+        if not checkList :
+            print "hello1"
+            time.sleep(5)
+			# pass
+        else:
 
-        if (time.time() >= notif_time):
-            print time.time()
-            print notif_time
-            print notif_message
-            # push_notif(notif_message)
-            foo.verifiedNotifs.remove(firstNotif)
-            db.session.add(foo)
-            db.session.commit()
-            print "committed"
-			# notif_time = None
-            # return jsonify({"message":"hello"})
-            # print(datetime.now())
+            # print checkList
+            checkList.sort(key=lambda tup: -float(tup[1]))
+            firstNotif = checkList[-1]
+            notif_message = firstNotif[0]
+            notif_time = float(firstNotif[1])
+            if (time.time() >= notif_time):
 
-            # if not checkList:
-            #     break
-            # firstNotif = checkList[-1]
-            # requestedTime = firstNotif[1]
-        # print(firstNotif[0]),
-        # print(" "),
-        # print(datetime.now())
+                # push_notif(notif_message)
+                print checkList
+                checkList.remove(firstNotif)
+                db.session.add(foo)
+                db.session.commit()
+                print "committed"
+                print checkList
+                notif_time = None
+                foo = foo_bar()
+                # foo = Scheduler_list.query.filter_by(id=1).first()
         time.sleep(15)
 
-# checkList.append(("asd",1454303190.752 ))
-# checkList.append(("asd",1454303210.752 ))
-# checkList.append(("asd",1454303400.752 ))
-# # checkList.append((message, timestamp))
-# checkList.sort(key=lambda tup: -tup[1])
-# firstNotif = checkList[-1]
-# requestedTime = firstNotif[1]
 
-# print firstNotif[1],firstNotif[0]
-# thread_cron.start()
-# if not app.debug:
-#     import logging
-#     from logging.handlers import SMTPHandler
-#
-#     mail_handler.setLevel(logging.ERROR)
-#     app.logger.addHandler(mail_handler)
 
 api.add_resource(UserRegistration, '/api/user/<string:s1>')
 api.add_resource(UserInformation, '/api/user/info')
 api.add_resource(EventRegistration, '/api/events')
 api.add_resource(Clubsget, '/api/clubs/list')
 api.add_resource(UserUnique, '/api/unique/<string:attr>')
-api.add_resource(Testing, '/')
+api.add_resource(Testing1, '/test')
 api.add_resource(WebScrap, '/api/scrap/<string:source>')
 api.add_resource(User_Follow_message, '/api/<string:s1>/<int:event_or_club_id>/<string:s2>')
 api.add_resource(EmailVerification, '/api/verify/<string:code>')
@@ -573,18 +537,19 @@ api.add_resource(EventCheck, '/api/check/<string:foo>')
 
 
 if __name__ == "__main__":
-    # thread_cron = Thread(target=cron, args=())
-    # thread_cron.start()
+    # thread = Thread(target= cron)
+    # thread.start()
     # manager.run()
 	# db.create_all()
 	port = int(os.environ.get('PORT', 8080))
 	app.run(host='0.0.0.0', port=port, debug=True)
-	# app.run(port=8080, debug=True)
-# a.verifiedNotifs = [("hello","1454337100.818"),("hello2","1454337300.818")]
-#  a = Scheduler_list()
+    # app.run(port=8080, debug=True)
+
+
 	# TODO - 1. not,None
 	# TODO - 2. imports
 	# TODO - 3. Events Version
 	# TODO - 4. Flush, No result error(first_or_404)
 	# TODO - 5. Update Cron with gcm (For now send to all users. Customised notification by ID can be done later by saving ids to database and accessing them in cron)
 	# TODO - 6. Remove OrgBy
+    # TODO - 7. filter_by , first
