@@ -62,12 +62,13 @@ class EventRegSchema_Request(Schema):
     venue = fields.Str()
     contacts = fields.Nested(ContactSchema_Request, many=True)
     lastregtime = fields.Float()
-    image = fields.Str()
+    image = fields.String()
     notifone = fields.Float()
     notiftwo = fields.Float()
     notifmessage = fields.Str()
     regfees = fields.Int()
     prizemoney = fields.Int()
+    # colorcode = fields.Str()
 
     @post_load
     def make_event(self,data):
@@ -93,7 +94,7 @@ class EventRegSchema_class(object):
         self.notifmessage = notifmessage
         self.regfees = regfees
         self.prizemoney = prizemoney
-
+        # self.cont
 # organised_by = fields.Nested(OrganisedBySchema_Request, many=True)
 # organised_for = fields.Nested(OrganisedForSchema_Request, many=True)
 
@@ -108,7 +109,8 @@ class Forgot_Password(Schema):
     email = fields.Email()
 
 
-
+class abc(Schema):
+    image = fields.Str()
 
 
 #####   NOTICES   #####
@@ -132,4 +134,4 @@ info_schema = UserInfoSchema_Request()
 gcm_schema = GCM_Schema()
 forgot_pass = Forgot_Password()
 admin_schema = AdminSchema_Request()
-
+abc_sch = abc()

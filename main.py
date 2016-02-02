@@ -447,8 +447,10 @@ class AddRemoveAdmin(Resource):
 
 
 class Testing1(Resource):
-    def get(self):
-        return jsonify({"message":str(len(checkList))})
+    def post(self):
+        json_data = request.get_json()
+        data, errors = abc_sch.load(json_data)
+        return ({"image":data['image']})
 		# user = get_current_user()
 		# if user:
 		# json_data = request.get_json()
