@@ -6,7 +6,7 @@ from sqlalchemy.ext.mutable import Mutable
 from flask_mail import Message
 from sqlalchemy.orm.exc import NoResultFound
 from gmail_logs import *
-import hashlib
+
 ####### Reference table for many-many relationships #######
 
 # 1 ---> CLUBS FOLLOWED BY USERS
@@ -455,7 +455,7 @@ def get_current_user():
             abort(401, message="ERR03")
 
         username_or_token = user.username
-        password = hashlib.sha1(user.password).hexdigest()
+        password = user.password
 
         verified, value = UserReg.verify_auth_token(username_or_token)
 
