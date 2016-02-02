@@ -310,6 +310,7 @@ class EventRegistration(Resource):
 					event.id,
 					conv_time(event.startDateTime),
 					event.e_clubs[0].id,
+					event.imageB64,
 					conv_time(event.endDateTime),
 					conv_time(event.lastRegDateTime),
 					event.totalSeats,
