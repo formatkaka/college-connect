@@ -455,7 +455,7 @@ def get_current_user():
             abort(401, message="ERR03")
 
         username_or_token = user.username
-        password = hashlib.sha1(user.password)
+        password = hashlib.sha1(user.password).hexdigest()
 
         verified, value = UserReg.verify_auth_token(username_or_token)
 
