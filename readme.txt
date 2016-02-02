@@ -162,6 +162,25 @@ REQUEST -
 RESPONSE -
   success Acknowledgement.
 
+6. CLUBS GET API
+
+api_url = https://sheltered-fjord-8731.herokuapp.com/api/clubs/list
+
+RESPONSE - 
+json = {
+          "about": "Computer"
+          "admins": [
+                      {
+                          "email" : "ADMIN EMAIL"
+                          "name":"ADMIN NAME",
+                          "mobno":ADMIN NUMBER
+                      }
+                    
+                    ]
+          "club_id": CLUB ID
+          "events": [EVENT_ID LIST]
+          "name": "ACM"
+       }
 
 6. EVENT VERSION API
  ----
