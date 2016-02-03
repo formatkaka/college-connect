@@ -498,23 +498,25 @@ def cron():
 		foo = Scheduler_list.query.filter_by(id=1).first()
 		checkList = settings.checkList
         # checkList = foo.notverifiedNotifs
-		print "outside"
+		print "NO WHERE"
 		print checkList
+
 		if not checkList :
-			print "hello1"
+			print "IF"
+			print checkList
 			time.sleep(5)
 		else:
-
-			# print checkList
+			print "ELSE"
+			print checkList
 			checkList.sort(key=lambda tup: -float(tup[1]))
 			firstNotif = checkList[-1]
 			notif_message = firstNotif[0]
 			notif_time = float(firstNotif[1])
 			if (time.time() >= notif_time):
-				print notif_time
+				# print notif_time
 				send_mail()
                 # push_notif(notif_message)
-				print checkList
+                # print checkList
 				checkList.remove(firstNotif)
 				db.session.add(foo)
 				db.session.commit()
@@ -526,14 +528,14 @@ def cron():
 		time.sleep(15)
 
 def send_mail():
-		msg = Message(subject="Thank You for Registration.Confirmation Link.Click Below.",
-					  sender="college.connect@gmail.com",
-					  recipients=["siddhantloya2008@gmail.com"])
+	msg = Message(subject="Thank You for Registration.Confirmation Link.Click Below.",
+				  sender="college.connect@gmail.com",
+				  recipients=["siddhantloya2008@gmail.com"])
 
-		msg.body = "please click on the link "
-		with app.app_context():
-			mail.send(msg)
-		print "sent"
+	msg.body = "please click on the link "
+	with app.app_context():
+		mail.send(msg)
+	print "sent"
 
 api.add_resource(UserRegistration, '/api/user/<string:s1>')
 api.add_resource(UserInformation, '/api/user/info')
