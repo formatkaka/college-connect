@@ -97,7 +97,7 @@ class UserRegistration(Resource):
 				link = 'https://sheltered-fjord-8731.herokuapp.com/api/verify/' + base64.b64encode(email)
 
 				msg = Message(subject="Thank You for Registration.Confirmation Link.Click Below.",
-							  sender="college.connect28@gmail.com",
+							  sender="college.connect01@gmail.com",
 							  recipients=recieve)
 
 				msg.body = "please click on the link {0}".format(link)
@@ -529,7 +529,7 @@ def cron():
 
 def send_mail():
 	msg = Message(subject="Thank You for Registration.Confirmation Link.Click Below.",
-				  sender="college.connect@gmail.com",
+				  sender="college.connect01@gmail.com",
 				  recipients=["siddhantloya2008@gmail.com"])
 
 	msg.body = "please click on the link "
