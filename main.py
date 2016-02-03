@@ -506,7 +506,7 @@ def cron():
 		if settings.checkList==[] :
 			print "IF"
 			print settings.checkList
-			time.sleep(10)
+			time.sleep(30)
 		else:
 			print "ELSE"
 			print settings.checkList
@@ -536,7 +536,7 @@ def cron():
 					pass
                 # foo = foo_bar()
                 # foo = Scheduler_list.query.filter_by(id=1).first()
-		time.sleep(15)
+		time.sleep(60)
 
 def send_mail():
 	msg = Message(subject="Thank You for Registration.Confirmation Link.Click Below.",
@@ -566,8 +566,8 @@ api.add_resource(Testing,'/')
 
 if __name__ == "__main__":
 	# try:
-	thread = Thread(target= cron)
-	thread.start()
+	# thread = Thread(target= cron)
+	# thread.start()
 	# manager.run()
 	# db.create_all()
 	port = int(os.environ.get('PORT', 8080))
