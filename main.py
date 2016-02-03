@@ -537,7 +537,7 @@ api.add_resource(GCMessaging, '/api/gcm')
 api.add_resource(ForgotPassword, '/api/password')
 api.add_resource(AddRemoveAdmin, '/api/admin')
 api.add_resource(EventCheck, '/api/check/<string:foo>')
-
+api.add_resource(Testing,'/')
 
 if __name__ == "__main__":
     # thread = Thread(target= cron)
