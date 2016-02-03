@@ -552,13 +552,13 @@ api.add_resource(EventCheck, '/api/check/<string:foo>')
 api.add_resource(Testing,'/')
 
 if __name__ == "__main__":
-    thread = Thread(target= cron)
-    thread.start()
-    # manager.run()
+	thread = Thread(target= cron)
+	thread.start()
+	# manager.run()
 	# db.create_all()
 	port = int(os.environ.get('PORT', 8080))
 	app.run(host='0.0.0.0', port=port, debug=True)
-    # app.run(port=8080, debug=True)
+	# app.run(port=8080, debug=True)
 
 
 	# TODO - 1. not,None
