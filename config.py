@@ -9,7 +9,7 @@ app = Flask(__name__)
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://siddhant:collegeconnect@localhost:5432/db7'
 
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://ivgvlzznskwrmp:mvzdkwCP6UAdedpzuu83A-SoBO@ec2-204-236-226-63.compute-1.amazonaws.com:5432/dat3mrlsck6nk7'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://icogkawnroahpr:c22UCPudryC5xAmpqE9jjNWz37@ec2-204-236-226-63.compute-1.amazonaws.com:5432/dat3mrlsck6nk7'
 db = SQLAlchemy(app)
 api = Api(app)
 mail = Mail(app)
