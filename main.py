@@ -20,6 +20,7 @@ import time
 from datetime import datetime
 import  settings
 settings.init()
+
 import unicodedata
 # from apscheduler.schedulers.background import BackgroundScheduler
 # import logging
@@ -29,7 +30,8 @@ import unicodedata
 
 # global checkList
 
-checkList = Scheduler_list.query.filter_by(id=1).first().notverifiedNotifs
+settings.checkList = Scheduler_list.query.filter_by(id=1).first().notverifiedNotifs
+print Scheduler_list.query.filter_by(id=1).first().notverifiedNotifs
 # firstNotif = None
 # requestedTime = None
 
@@ -496,20 +498,22 @@ def cron():
 
     while (True):
 		foo = Scheduler_list.query.filter_by(id=1).first()
-		checkList = settings.checkList
+		# checkList = settings.checkList
         # checkList = foo.notverifiedNotifs
 		print "NO WHERE"
-		print checkList
+		print settings.checkList
 
-		if not checkList :
+		if settings.checkList==[] :
 			print "IF"
-			print checkList
-			time.sleep(5)
+			print settings.checkList
+			time.sleep(10)
 		else:
 			print "ELSE"
-			print checkList
-			checkList.sort(key=lambda tup: -float(tup[1]))
-			firstNotif = checkList[-1]
+			print settings.checkList
+			print Scheduler_list.query.filter_by(id=1).first().notverifiedNotifs
+
+			settings.checkList.sort(key=lambda tup: -float(tup[1]))
+			firstNotif = settings.checkList[-1]
 			notif_message = firstNotif[0]
 			notif_time = float(firstNotif[1])
 			if (time.time() >= notif_time):
@@ -517,12 +521,19 @@ def cron():
 				send_mail()
                 # push_notif(notif_message)
                 # print checkList
-				checkList.remove(firstNotif)
-				db.session.add(foo)
-				db.session.commit()
-				print "committed"
-				print checkList
-				notif_time = None
+				try:
+					# settings.checkList.remove(firstNotif)
+					foo.notverifiedNotifs.remove(firstNotif)
+
+					db.session.add(foo)
+					db.session.commit()
+					settings.checkList = Scheduler_list.query.filter_by(id=1).first().notverifiedNotifs
+					print "committed"
+					print settings.checkList
+					print Scheduler_list.query.filter_by(id=1).first().notverifiedNotifs
+					notif_time = None
+				except:
+					pass
                 # foo = foo_bar()
                 # foo = Scheduler_list.query.filter_by(id=1).first()
 		time.sleep(15)
@@ -554,14 +565,16 @@ api.add_resource(EventCheck, '/api/check/<string:foo>')
 api.add_resource(Testing,'/')
 
 if __name__ == "__main__":
-	thread = Thread(target= cron)
-	thread.start()
-	# manager.run()
-	# db.create_all()
-	port = int(os.environ.get('PORT', 8080))
-	app.run(host='0.0.0.0', port=port, debug=True)
-	# app.run(port=8080, debug=True)
-
+	try:
+		thread = Thread(target= cron)
+		thread.start()
+		# manager.run()
+		# db.create_all()
+		# port = int(os.environ.get('PORT', 8080))
+		# app.run(host='0.0.0.0', port=port, debug=True)
+		app.run(port=8080, debug=True)
+	except KeyboardInterrupt:
+		raise KeyError('j')
 
 	# TODO - 1. not,None
 	# TODO - 2. imports

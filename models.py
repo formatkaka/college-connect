@@ -322,12 +322,13 @@ class EventsReg(db.Model):
     # @staticmethod
     def schedule_gcm(self, val,message,notifone=None,notiftwo=None):
         foo = Scheduler_list.query.filter_by(id=1).first()
-
+        print foo.notverifiedNotifs
         time1 = conv_time(notifone)
         time2 = conv_time(notiftwo)
         self.schedulerList = []
-        foo.verifiedNotifs = Scheduler_list.query.filter_by(id=1).first().notverifiedNotifs
-        foo.notverifiedNotifs = []
+        # foo.verifiedNotifs = Scheduler_list.query.filter_by(id=1).first().verifiedNotifs
+
+        # if foo.notverifiedNotifs == []
         if time1:
             if val : foo.verifiedNotifs.append((message,str(time1)))
             if not val : foo.notverifiedNotifs.append((message,str(time1)))
@@ -341,10 +342,12 @@ class EventsReg(db.Model):
         db.session.add(foo)
 
         db.session.commit()
+        settings.checkList = Scheduler_list.query.filter_by(id=1).first().notverifiedNotifs
+        print settings.checkList
         # global checkList
         # print "hello"
-        print Scheduler_list.query.filter_by(id=1).first().notverifiedNotifs
-        settings.checkList = Scheduler_list.query.filter_by(id=1).first().notverifiedNotifs
+        # print Scheduler_list.query.filter_by(id=1).first().notverifiedNotifs
+        # settings.checkList = Scheduler_list.query.filter_by(id=1).first().notverifiedNotifs
         # checkList = foo.notverifiedNotifs
         # print checkList
 
