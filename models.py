@@ -7,6 +7,10 @@ from flask_mail import Message
 from sqlalchemy.orm.exc import NoResultFound
 from gmail_logs import *
 
+import settings
+
+
+
 ####### Reference table for many-many relationships #######
 
 # 1 ---> CLUBS FOLLOWED BY USERS
@@ -322,7 +326,7 @@ class EventsReg(db.Model):
         time1 = conv_time(notifone)
         time2 = conv_time(notiftwo)
         self.schedulerList = []
-        foo.verifiedNotifs = []
+        foo.verifiedNotifs = Scheduler_list.query.filter_by(id=1).first().notverifiedNotifs
         foo.notverifiedNotifs = []
         if time1:
             if val : foo.verifiedNotifs.append((message,str(time1)))
@@ -337,9 +341,12 @@ class EventsReg(db.Model):
         db.session.add(foo)
 
         db.session.commit()
-        global checkList
-        checkList = foo.notverifiedNotifs
-
+        # global checkList
+        # print "hello"
+        print Scheduler_list.query.filter_by(id=1).first().notverifiedNotifs
+        settings.checkList = Scheduler_list.query.filter_by(id=1).first().notverifiedNotifs
+        # checkList = foo.notverifiedNotifs
+        # print checkList
 
     def reschedule_gcm(self,new_time):
         pass

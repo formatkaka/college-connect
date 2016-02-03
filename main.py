@@ -18,6 +18,8 @@ import datetime
 from threading import Thread
 import time
 from datetime import datetime
+import  settings
+settings.init()
 import unicodedata
 # from apscheduler.schedulers.background import BackgroundScheduler
 # import logging
@@ -25,7 +27,8 @@ import unicodedata
 
 # logging.basicConfig()
 
-global checkList
+# global checkList
+
 checkList = Scheduler_list.query.filter_by(id=1).first().notverifiedNotifs
 # firstNotif = None
 # requestedTime = None
@@ -492,36 +495,45 @@ def cron():
 
 
     while (True):
-        foo = foo_bar()
+		foo = Scheduler_list.query.filter_by(id=1).first()
+		checkList = settings.checkList
         # checkList = foo.notverifiedNotifs
-        print "outside"
-        print checkList
-        if not checkList :
-            print "hello1"
-            time.sleep(5)
-			# pass
-        else:
+		print "outside"
+		print checkList
+		if not checkList :
+			print "hello1"
+			time.sleep(5)
+		else:
 
-            # print checkList
-            checkList.sort(key=lambda tup: -float(tup[1]))
-            firstNotif = checkList[-1]
-            notif_message = firstNotif[0]
-            notif_time = float(firstNotif[1])
-            if (time.time() >= notif_time):
-
+			# print checkList
+			checkList.sort(key=lambda tup: -float(tup[1]))
+			firstNotif = checkList[-1]
+			notif_message = firstNotif[0]
+			notif_time = float(firstNotif[1])
+			if (time.time() >= notif_time):
+				print notif_time
+				send_mail()
                 # push_notif(notif_message)
-                print checkList
-                checkList.remove(firstNotif)
-                db.session.add(foo)
-                db.session.commit()
-                print "committed"
-                print checkList
-                notif_time = None
-                foo = foo_bar()
+				print checkList
+				checkList.remove(firstNotif)
+				db.session.add(foo)
+				db.session.commit()
+				print "committed"
+				print checkList
+				notif_time = None
+                # foo = foo_bar()
                 # foo = Scheduler_list.query.filter_by(id=1).first()
-        time.sleep(15)
+		time.sleep(15)
 
+def send_mail():
+		msg = Message(subject="Thank You for Registration.Confirmation Link.Click Below.",
+					  sender="college.connect@gmail.com",
+					  recipients=["siddhantloya2008@gmail.com"])
 
+		msg.body = "please click on the link "
+		with app.app_context():
+			mail.send(msg)
+		print "sent"
 
 api.add_resource(UserRegistration, '/api/user/<string:s1>')
 api.add_resource(UserInformation, '/api/user/info')
@@ -540,8 +552,8 @@ api.add_resource(EventCheck, '/api/check/<string:foo>')
 api.add_resource(Testing,'/')
 
 if __name__ == "__main__":
-    # thread = Thread(target= cron)
-    # thread.start()
+    thread = Thread(target= cron)
+    thread.start()
     # manager.run()
 	# db.create_all()
 	port = int(os.environ.get('PORT', 8080))
