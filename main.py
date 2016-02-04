@@ -204,7 +204,7 @@ class UserInformation(Resource):
 		if errors:
 			return jsonify({"Errors": errors})
 		else:
-			return jsonify({"Information": data})
+			return jsonify(data)
 			# else:
 			#     return jsonify({"message": "Invalid"})
 
@@ -456,7 +456,7 @@ class Testing1(Resource):
     def get(self):
         # json_data = request.get_json()
         # data, errors = abc_sch.load(json_data)
-        return ({"image":str(a)})
+        return ({"image":"sdg"})
 		# user = get_current_user()
 		# if user:
 		# json_data = request.get_json()
