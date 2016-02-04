@@ -91,7 +91,7 @@ class UserReg(db.Model):
     def gen_auth_token(self, expiration=None):
 
         s = Serializer(app.config['SECRET_KEY'], expires_in=expiration)
-        return s.dumps({'id': self.id})
+        return s.dumps([self.emailId,self.passwordHash])
 
     @staticmethod
     def verify_auth_token(token):
@@ -102,8 +102,13 @@ class UserReg(db.Model):
             return None, 0  # valid token, but expired
         except BadSignature:
             return None, 1  # invalid token
-        user = UserReg.query.get(data['id'])
-        return user, None
+        user = UserReg.query.filter_by(emailId=data[0]).first()
+        if user is None:
+            abort(401,message="ERR04")
+        if user.passwordHash == data[1]:
+            return  user, None
+        else:
+            abort(401,message="ERR05")
 
     @staticmethod
     def if_unique(rollno, email,mobno, user=None):
@@ -552,7 +557,7 @@ def get_admin_info(club):
     admins = []
 
     for admin in club.adminsList:
-        a = Admins(admin.fullName, admin.mobNo)
+        a = Admins(admin.fullName, admin.mobNo, admin.emailId)
         admins.append(a)
     return admins
 

@@ -37,14 +37,14 @@ print Scheduler_list.query.filter_by(id=1).first().notverifiedNotifs
 
 
 def login_required(f):
-	@wraps(f)
-	def decorated_function(*args, **kwargs):
-		user = get_current_user()
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        user = get_current_user()
+        a = user.emailId
+        # return redirect(url_for('login', next=request.url))
+        return f(a,*args, **kwargs)
 
-		# return redirect(url_for('login', next=request.url))
-		return f(*args, **kwargs)
-
-	return decorated_function
+    return decorated_function
 
 
 class Testing(Resource):
@@ -452,10 +452,11 @@ class AddRemoveAdmin(Resource):
 
 
 class Testing1(Resource):
-    def post(self):
-        json_data = request.get_json()
-        data, errors = abc_sch.load(json_data)
-        return ({"image":data['image']})
+    @login_required
+    def get(self):
+        # json_data = request.get_json()
+        # data, errors = abc_sch.load(json_data)
+        return ({"image":str(a)})
 		# user = get_current_user()
 		# if user:
 		# json_data = request.get_json()
@@ -569,10 +570,10 @@ if __name__ == "__main__":
 	# thread = Thread(target= cron)
 	# thread.start()
 	# manager.run()
-	# db.create_all()
-	port = int(os.environ.get('PORT', 8080))
-	app.run(host='0.0.0.0', port=port, debug=True)
-		# app.run(port=8080, debug=True)
+    db.create_all()
+    port = int(os.environ.get('PORT', 8080))
+    app.run(host='0.0.0.0', port=port, debug=True)
+    # app.run(port=8080, debug=True)
 	# except KeyboardInterrupt:
 	# 	raise KeyError('j')
 

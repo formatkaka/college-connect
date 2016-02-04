@@ -31,18 +31,6 @@ migrate = Migrate(app, db)
 manager = Manager(app)
 manager.add_command('db', MigrateCommand)
 
-# from main import cron
-# from threading import Thread
-
-# class MyThread(object):
-#     def __init__(self, app,tar):
-#
-#         self.app = app
-#         self.__thread = Thread(target=tar, args=())
-#
-#
-#     def start_thread(self):
-#         self.__thread.start()
 
 bootstrap = Bootstrap(app)
 

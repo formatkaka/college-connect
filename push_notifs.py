@@ -1,10 +1,11 @@
 from pushjack import GCMClient
 from models import GCMRegIds
+from config import db
 from gmail_logs import *
 
-arr=[]
-for i in range(0,1005):
-    arr.append("{0}".format(i))
+# arr=[]
+# for i in range(0,1005):
+#     arr.append("{0}".format(i))
 
 
 
@@ -29,7 +30,7 @@ def push_notif(message):
     for err in res.errors:
         if err.code == "NotRegistered" or err.code == "InvalidRegistration":
             abc.data.remove(err.identifier)
-            # db.session.add(abc)
+
             print abc.data
 
         if err.code == "Unavailable" or err.code == "InvalidTtl":
@@ -41,9 +42,9 @@ def push_notif(message):
     for ids in res.canonical_ids:
         abc.data.remove(ids.old_id)
         abc.data.append(ids.new_id)
-        # db.session.add(abc)
+        db.session.add(abc)
 
-    # db.session.commit()
+    db.session.commit()
 
 
 if __name__ == "__main__":
