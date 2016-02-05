@@ -22,30 +22,13 @@ import  settings
 settings.init()
 
 import unicodedata
-# from apscheduler.schedulers.background import BackgroundScheduler
-# import logging
-# from config import scheduler
-
-# logging.basicConfig()
 
 # global checkList
 
-settings.checkList = Scheduler_list.query.filter_by(id=1).first().notverifiedNotifs
-print Scheduler_list.query.filter_by(id=1).first().notverifiedNotifs
+# settings.checkList = Scheduler_list.query.filter_by(id=1).first().notverifiedNotifs
+# print Scheduler_list.query.filter_by(id=1).first().notverifiedNotifs
 # firstNotif = None
 # requestedTime = None
-
-
-def login_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        user = get_current_user()
-        a = user.emailId
-        # return redirect(url_for('login', next=request.url))
-        return f(a,*args, **kwargs)
-
-    return decorated_function
-
 
 class Testing(Resource):
 	"""Test Class for API"""
@@ -62,9 +45,12 @@ class UserRegistration(Resource):
 
 	def post(self, s1):
 		""" Register a user """
+
 		if s1 != "reg":
 			abort(400)
+
 		user = request.authorization
+
 		if not user:
 			abort(401, message="ERR01")
 
@@ -82,43 +68,51 @@ class UserRegistration(Resource):
 		if errors:
 			return jsonify(errors)
 
-		stat = UserReg.if_unique(data.rollno, email, data.mobno)
 
-		if stat:
+		if UserReg.if_unique(data.rollno, email, data.mobno):
 			try:
 				user_1 = UserReg(passwordHash=password_hash, fullName=data.name
 								 , rollNo=data.rollno, emailId=email, mobNo=data.mobno,
-								 hostelite_or_localite=data.hostel_or_local, hostelName=data.hostelname)
+								 hostelName=data.hostelname, svnitOrNot = data.svnit)
 				db.session.add(user_1)
 				db.session.commit()
-				recieve = ["sid.siddhant.loya@gmail.com", "murali.prajapati555@gmail.com"]
-				token = user_1.gen_auth_token(expiration=1200)
-				op = UserReg_class(token)
-				result = userreg_schema.dump(op)
 
-				link = 'https://sheltered-fjord-8731.herokuapp.com/api/verify/' + base64.b64encode(email)
+			except Exception as e:
+				db.session.rollback()
+				logging.error(e)
+				abort(500)
 
-				msg = Message(subject="Thank You for Registration.Confirmation Link.Click Below.",
-							  sender="college.connect01@gmail.com",
-							  recipients=recieve)
+			recieve = ["sid.siddhant.loya@gmail.com", "murali.prajapati555@gmail.com"]
+			token = user_1.gen_auth_token(expiration=1200)
+			op = UserReg_class(token)
+			result = userreg_schema.dump(op)
 
-				msg.body = "please click on the link {0}".format(link)
-				mail.send(msg)
+			s = Serializer(app.config['SECRET_KEY'], expires_in=60*60*24*3)
+			token = s.dumps({'id':user_1.id})
 
-				return result.data
+			link = 'https://sheltered-fjord-8731.herokuapp.com/api/verify/' + token
+
+			msg = Message(subject="Thank You for Registration.Confirmation Link.Click Below.",
+						  sender="college.connect01@gmail.com",
+						  recipients=recieve)
+
+			msg.body = "please click on the link {0}".format(link)
+			# mail.send(msg)
+
+			return result.data
 			# except SQLAlchemyError:
 			#     db.session.rollback()
 			#     abort(500)
 
-			except Exception as e:
+			# except Exception as e:
 
-				try:
-					db.session.delete(user_1)
-					db.session.commit()
-				except:
-					db.session.rollback()
-				logging.error(e)
-				abort(500)
+			# 	try:
+			# 		db.session.delete(user_1)
+			# 		db.session.commit()
+			# 	except:
+			# 		db.session.rollback()
+			# 	logging.error(e)
+			# 	abort(500)
 
 	def get(self, s1):
 		""" Obtain/Generate token for user """
@@ -233,9 +227,19 @@ class EmailVerification(Resource):
 	# def post(self):
 	#     return ({"message": "Invalid Method."})
 
-	def get(self, code):
-		email = base64.b64decode(code)
-		user = UserReg.query.filter_by(emailId=email).first_or_404()
+	def get(self, token):
+		s = Serializer(app.config['SECRET_KEY'])
+		try:
+			data = s.loads(token)
+
+		except SignatureExpired:
+			abort(400)
+
+		except BadSignature:
+			abort(400)
+
+
+		user = UserReg.query.filter_by(id=data['id']).first_or_404()
 		user.isVerified = True
 		db.session.add(user)
 		db.session.commit()
@@ -294,9 +298,11 @@ class EventRegistration(Resource):
 										   conv_time(data.notifone),
 										   conv_time(data.notiftwo),
 										   data.notifmessage,
+										   data.prizemoney,
+										   data.regfees,
+										   data.colorcode
 										   )
 
-			push_notif("A new event has been created.{0}".format(data.name))
 			return jsonify({"message": event.id})
 
 	def get(self):
@@ -452,7 +458,7 @@ class AddRemoveAdmin(Resource):
 
 
 class Testing1(Resource):
-    @login_required
+
     def get(self):
         # json_data = request.get_json()
         # data, errors = abc_sch.load(json_data)
@@ -557,7 +563,7 @@ api.add_resource(UserUnique, '/api/unique/<string:attr>')
 api.add_resource(Testing1, '/test')
 api.add_resource(WebScrap, '/api/scrap/<string:source>')
 api.add_resource(User_Follow_message, '/api/<string:s1>/<int:event_or_club_id>/<string:s2>')
-api.add_resource(EmailVerification, '/api/verify/<string:code>')
+api.add_resource(EmailVerification, '/api/verify/<string:token>')
 # api.add_resource(NotificationCron, '/api/test')
 api.add_resource(GCMessaging, '/api/gcm')
 api.add_resource(ForgotPassword, '/api/password')
@@ -569,11 +575,11 @@ if __name__ == "__main__":
 	# try:
 	# thread = Thread(target= cron)
 	# thread.start()
-	# manager.run()
-    db.create_all()
-    port = int(os.environ.get('PORT', 8080))
-    app.run(host='0.0.0.0', port=port, debug=True)
-    # app.run(port=8080, debug=True)
+	manager.run()
+	db.create_all()
+	port = int(os.environ.get('PORT', 8080))
+	app.run(host='0.0.0.0', port=port, debug=True)
+	# app.run(port=8080, debug=True)
 	# except KeyboardInterrupt:
 	# 	raise KeyError('j')
 
