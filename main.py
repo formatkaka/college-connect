@@ -87,7 +87,7 @@ class UserRegistration(Resource):
 			op = UserReg_class(token)
 			result = userreg_schema.dump(op)
 
-			s = Serializer(app.config['SECRET_KEY'], expiration=60*60*24*3)
+			s = Serializer(app.config['SECRET_KEY'], expires_in=60*60*24*3)
 			token = s.dumps({'id':user_1.id})
 
 			link = 'https://sheltered-fjord-8731.herokuapp.com/api/verify/' + token
