@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DataSourceManagerImpl" format="xml" hash="186194807">
+    <data-source source="LOCAL" name="PostgreSQL - databse@localhost" uuid="ebb61a0a-f1ec-4ce1-9396-34ffeb888f54">
+      <driver-ref>postgresql</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
+      <jdbc-url>jdbc:postgresql://localhost:5432/databse</jdbc-url>
+    </data-source>
+  </component>
+</project>

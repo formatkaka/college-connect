@@ -8,7 +8,7 @@ class UserInfoSchema_Request(Schema):
     name = fields.Str()
     mobno = fields.Int()
     hostelname = fields.Str()
-    svnit = fields.Bool()   #TRUE if Hostelite!!
+    svnit = fields.Str()   #TRUE if Hostelite!!
 
     @post_load
     def make_event(self,data):
@@ -66,9 +66,9 @@ class EventRegSchema_Request(Schema):
     notifone = fields.Float()
     notiftwo = fields.Float()
     notifmessage = fields.Str()
-    regfees = fields.Int()
-    prizemoney = fields.Int()
-    colorcode = fields.Str()
+    fees = fields.Int()
+    money = fields.Int()
+    color = fields.Str()
 
     @post_load
     def make_event(self,data):
@@ -76,8 +76,8 @@ class EventRegSchema_Request(Schema):
 
 class EventRegSchema_class(object):
     def __init__(self,name,about,sdt,venue,contacts,eventid=None,seats=None,image=None,edt=None,
-                 lastregtime=None, notifone=None, notiftwo=None, notifmessage=None,regfees=None,
-                 prizemoney=None,colorcode=None):
+                 lastregtime=None, notifone=None, notiftwo=None, notifmessage=None,fees=None,
+                 prize=None,color=None):
 
         self.name = name
         self.about = about
@@ -92,9 +92,9 @@ class EventRegSchema_class(object):
         self.notifone = notifone
         self.notiftwo = notiftwo
         self.notifmessage = notifmessage
-        self.regfees = regfees
-        self.prizemoney = prizemoney
-        self.colorcode = colorcode
+        self.fees = fees
+        self.prize = prize
+        self.color = color
         # self.cont
 # organised_by = fields.Nested(OrganisedBySchema_Request, many=True)
 # organised_for = fields.Nested(OrganisedForSchema_Request, many=True)

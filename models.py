@@ -273,8 +273,8 @@ class EventsReg(db.Model):
             db.session.rollback()
             abort(500)
 
-        eve.schedule_gcm(val,notifmessage,notifone,notiftwo)
-        push_notif("A new event has been created.{0}".format(name))
+        # eve.schedule_gcm(val,notifmessage,notifone,notiftwo)
+        # push_notif("A new event has been created.{0}".format(name))
 
         # send_email(val,user,eve.id)
 

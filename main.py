@@ -71,9 +71,12 @@ class UserRegistration(Resource):
 
 		if UserReg.if_unique(data.rollno, email, data.mobno):
 			try:
+				if data.svnit == "true": foo = True
+				    
+				else : foo = False
 				user_1 = UserReg(passwordHash=password_hash, fullName=data.name
 								 , rollNo=data.rollno, emailId=email, mobNo=data.mobno,
-								 hostelName=data.hostelname, svnitOrNot = data.svnit)
+								 hostelName=data.hostelname, svnitOrNot = foo)
 				db.session.add(user_1)
 				db.session.commit()
 
@@ -298,9 +301,9 @@ class EventRegistration(Resource):
 										   conv_time(data.notifone),
 										   conv_time(data.notiftwo),
 										   data.notifmessage,
-										   data.prizemoney,
-										   data.regfees,
-										   data.colorcode
+										   data.prize,
+										   data.fees,
+										   data.color,
 										   )
 
 			return jsonify({"message": event.id})
@@ -327,7 +330,9 @@ class EventRegistration(Resource):
 					event.totalSeats,
 					event.leftSeats,
 					event.occupiedSeats,
-
+                    event.eventPrizeMoney,
+                    event.eventRegFees,
+                    event.eventColorHex,
 			)
 			events.append(e)
 
@@ -575,7 +580,7 @@ if __name__ == "__main__":
 	# try:
 	# thread = Thread(target= cron)
 	# thread.start()
-	manager.run()
+	# manager.run()
 	db.create_all()
 	port = int(os.environ.get('PORT', 8080))
 	app.run(host='0.0.0.0', port=port, debug=True)
