@@ -4,6 +4,13 @@ from opschemas import *
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.ext.mutable import Mutable
 from flask_mail import Message
+from sqlalchemy.orm.exc import NoResultFound
+from gmail_logs import *
+
+import settings
+
+
+
 ####### Reference table for many-many relationships #######
 
 # 1 ---> CLUBS FOLLOWED BY USERS
@@ -35,6 +42,10 @@ class MutableList(Mutable, list):
         list.append(self, value)
         self.changed()
 
+    def remove(self, value):
+        list.remove(self,value)
+        self.changed()
+
     @classmethod
     def coerce(cls, key, value):
         if not isinstance(value, MutableList):
@@ -55,23 +66,19 @@ class UserReg(db.Model):
     __table_args__ = {'extend_existing': True}
 
     id = db.Column(db.Integer, primary_key=True)
-    userName = db.Column(db.String, unique=True, nullable=False)
+    emailId = db.Column(db.String, unique=True)
     passwordHash = db.Column(db.String, nullable=False)
-    isadmin = db.Column(db.Boolean, default=False)
+    isAdmin = db.Column(db.Boolean, default=False)
     currentAdmin = db.Column(db.Boolean, default=True)  # Current admin or Previous admin.
     activeStatus = db.Column(db.Boolean, default=True)  # Account active or not.
     isVerified = db.Column(db.Boolean, default=False)  # Verified by Email.
     fullName = db.Column(db.String, nullable=False)
-    rollNo = db.Column(db.String, nullable=False, unique=True)
-    emailId = db.Column(db.String, unique=True)
-    mobNo = db.Column(db.Integer, unique=True)
+    rollNo = db.Column(db.String, unique=True)
+    mobNo = db.Column(db.BigInteger, unique=True)
+    hostelite_or_localite = db.Column(db.Boolean)
+    hostelName = db.Column(db.String)
 
-    @staticmethod
-    def if_username_unique(username):
-        if UserReg.query.filter_by(userName=username).first():
-            return False
-        else:
-            return True
+
 
     def check_password_hash(self, password_hash):
         if password_hash == self.passwordHash:
@@ -79,17 +86,12 @@ class UserReg(db.Model):
         else:
             return False
 
-    @staticmethod
-    def register_user(username, password_hash):
-        user = UserReg(userName=username, passwordHash=password_hash)
-        db.session.add(user)
-        db.session.commit()
-        return user
+
 
     def gen_auth_token(self, expiration=None):
 
         s = Serializer(app.config['SECRET_KEY'], expires_in=expiration)
-        return s.dumps({'id': self.id})
+        return s.dumps([self.emailId,self.passwordHash])
 
     @staticmethod
     def verify_auth_token(token):
@@ -100,43 +102,37 @@ class UserReg(db.Model):
             return None, 0  # valid token, but expired
         except BadSignature:
             return None, 1  # invalid token
-        user = UserReg.query.get(data['id'])
-        return user, None
-
-    def add_club(self, clubname):
-        """ Add a user to list of club followers """
-
-        club = ClubInfo.query.filter_by(clubName=clubname).first()
-        club.followers.append(self)
-        db.session.add(club)
-        db.session.commit()
-
-    def add_event(self, eventname):
-        """ Add a user to list of event followers """
-
-        event = EventsReg.query.filter_by(eventName=eventname).first()
-        event.followers.append(self)
-        db.session.add(event)
-        db, session.commit()
+        user = UserReg.query.filter_by(emailId=data[0]).first()
+        if user is None:
+            abort(401,message="ERR04")
+        if user.passwordHash == data[1]:
+            return  user, None
+        else:
+            abort(401,message="ERR05")
 
     @staticmethod
-    def if_unique(rollno=None, email=None, mobno=None):
+    def if_unique(rollno, email,mobno, user=None):
         a, b, c = 0, 0, 0
-        if UserReg.query.filter_by(rollNo=rollno).first():
-            a = 1
+        if rollno is not None:
+            if UserReg.query.filter_by(rollNo=rollno).first():
+                a = 1
         if UserReg.query.filter_by(emailId=email).first():
             b = 1
         if mobno is not None:
             if UserReg.query.filter_by(mobNo=mobno).first():
                 c = 1
+        if user:
+            return err_stat2(a,b,c,rollno,mobno)
         return err_stat(a, b, c)
 
     def user_is_admin(self):
 
-        if self.isadmin and self.currentAdmin:
-            return True
+        if self.isAdmin and self.currentAdmin:
+            club = self.a_clubs[0]
+            return True,club
         else:
-            return False
+            club = ClubInfo.query.first()
+            return False,club
 
     def is_attending_event(self, event):
         if event in self.events:
@@ -213,43 +209,72 @@ class EventsReg(db.Model):
     followers = db.relationship('UserReg', secondary=user_events,
                                 backref='events')
     activeStatus = db.Column(db.Boolean, default=False)
+    imageLink = db.Column(db.String, default=None)
     time_created = db.Column(db.DateTime, default=datetime.now())
+    clubName = db.Column(db.String)
+    imageB64 = db.Column(db.Text)
+    eventColorHex = db.Column(db.String)
+    schedulerList = db.Column(MutableList.as_mutable(ARRAY(db.String())))
+    notifOne = db.Column(db.DateTime, default=None)
+    notifTwo = db.Column(db.DateTime, default=None)
+    eventRegFees = db.Column(db.Integer, default=None)
+    eventPrizeMoney = db.Column(db.Integer, default=None)
+    notifMessage = db.Column(db.String)
 
     @staticmethod
-    def register_one(name, about, venue, sdt, user, contacts, seats=None, edt=None, lastregtime=None):
-        try:
-            val = user.user_is_admin()
-            if seats is None:
-                leftseats = 9999
-                occupiedseats = 0
-            else:
-                leftseats = seats
-                occupiedseats = 0
-            eve = EventsReg(eventName=name,
-                            eventInfo=about,
-                            eventVenue=venue,
-                            startDateTime=sdt,
-                            createdBy=user.id,
-                            totalSeats=seats,
-                            endDateTime=edt,
-                            verified=val,
-                            lastRegDateTime=lastregtime,
-                            activeStatus=True,
-                            leftSeats=leftseats,
-                            occupiedSeats=occupiedseats
-                            )
-            eve.add_contacts(contacts)
-            db.session.add(eve)
-            db.session.commit()
-            send_email(val,user,eve.id)
-            return eve
-        except:
-            abort(400,message="some error occured.")
+    def register_one(name, about, venue, sdt, user, contacts,image, seats=None, edt=None, lastregtime=None,
+                     notifone=None,notiftwo=None, notifmessage=None):
+        # try:
+        val,club = user.user_is_admin()
+        clubname = club.clubName
+        # club = ClubInfo.query.filter_by(id=club_id).first_or_404()
+        if seats is None:
+            leftseats = None
+            occupiedseats = 0
+        else:
+            leftseats = seats
+            occupiedseats = 0
+        eve = EventsReg(eventName = name,
+                        eventInfo = about,
+                        eventVenue = venue,
+                        startDateTime = sdt,
+                        createdBy = user.id,
+                        totalSeats = seats,
+                        endDateTime = edt,
+                        verified = val,
+                        lastRegDateTime = lastregtime,
+                        activeStatus = True,
+                        leftSeats = leftseats,
+                        occupiedSeats = occupiedseats,
+                        clubName = clubname,
+                        imageB64 = image,
+                        notifOne = notifone,
+                        notifTwo = notiftwo,
+                        notifMessage = notifmessage,
+                        )
+
+        eve.add_contacts(contacts)
+        club.eventsList.append(eve)
+        eve.schedule_gcm(val,notifmessage,notifone,notiftwo)
+        db.session.add(club)
+        db.session.commit()
+        # send_email(val,user,eve.id)
+
+        return eve
+        # except:
+        #     abort(400,message="some error occured.")
 
     def add_contacts(self, contacts):
         for item in contacts:
-            contact = ContactsForEvent(contactName=item['contactname'], contactNumber=item['contactnumber'])
-            self.contacts.append(contact)
+            if not item.contactid:
+                contact = ContactsForEvent(contactName=item.contactname, contactNumber=item.contactnumber
+                                           , contactEmail = item.contactemail)
+                self.contacts.append(contact)
+            if item.contactid:
+                contact = ContactsForEvent.query.filter_by(id=item.contactid).first_or_404()
+                contact.contactName = item.contactname
+                contact.contactNumber = item.contactnumber
+                contact.contactEmail = item.contactemail
 
     def set_active(self):
         self.activeStatus = True
@@ -257,12 +282,19 @@ class EventsReg(db.Model):
         db.session.commit()
 
     def add_follower(self, user):
+
         if user in self.followers:
             abort(409, message="ERR23")
         else:
-            if self.leftSeats > 0:
-                self.leftSeats = self.leftSeats - 1
-                self.occupiedSeats = self.occupiedSeats + 1
+            if self.totalSeats is None:
+                self.occupiedSeats += 1
+                self.followers.append(user)
+                db.session.add(self)
+                db.session.commit()
+
+            elif self.leftSeats > 0:
+                self.leftSeats -=  1
+                self.occupiedSeats +=  1
                 self.followers.append(user)
                 db.session.add(self)
                 db.session.commit()
@@ -275,14 +307,89 @@ class EventsReg(db.Model):
         if user not in self.followers:
             abort(409, message="ERR25")
         else:
-            self.followers.remove(user)
-            self.leftSeats = self.leftSeats + 1
-            self.occupiedSeats = self.occupiedSeats - 1
+            if self.totalSeats is None:
+                self.occupiedSeats -= 1
+                self.followers.remove(user)
+                db.session.add(self)
+                db.session.commit()
+
+            elif self.leftSeats > 0:
+                self.leftSeats +=  1
+                self.occupiedSeats -=  1
+                self.followers.remove(user)
+                db.session.add(self)
+                db.session.commit()
+
+    def edit_seats(self, seats):
+        if seats < self.occupiedSeats:
+            abort(400,message="ERR36")
+
+    # @staticmethod
+    def schedule_gcm(self, val,message,notifone=None,notiftwo=None):
+        foo = Scheduler_list.query.filter_by(id=1).first()
+        print foo.notverifiedNotifs
+        time1 = conv_time(notifone)
+        time2 = conv_time(notiftwo)
+        self.schedulerList = []
+        # foo.verifiedNotifs = Scheduler_list.query.filter_by(id=1).first().verifiedNotifs
+
+        # if foo.notverifiedNotifs == []
+        if time1:
+            if val : foo.verifiedNotifs.append((message,str(time1)))
+            if not val : foo.notverifiedNotifs.append((message,str(time1)))
+            self.schedulerList.append((message,str(time1)))
+        if time2:
+            if val: foo.verifiedNotifs.append((message,str(time2)))
+            if not val : foo.notverifiedNotifs.append((message,str(time2)))
+            self.schedulerList.append((message,str(time1)))
+
+
+        db.session.add(foo)
+
+        db.session.commit()
+        settings.checkList = Scheduler_list.query.filter_by(id=1).first().notverifiedNotifs
+        print settings.checkList
+        # global checkList
+        # print "hello"
+        # print Scheduler_list.query.filter_by(id=1).first().notverifiedNotifs
+        # settings.checkList = Scheduler_list.query.filter_by(id=1).first().notverifiedNotifs
+        # checkList = foo.notverifiedNotifs
+        # print checkList
+
+    def reschedule_gcm(self,new_time):
+        pass
+
+class EventsVersion(db.Model):
+    __tablename__ = "orgby"
+
+    __table_args__ = {'extend_existing': True}
+
+    id = db.Column(db.Integer, primary_key=True)
+    version = db.Column(db.Integer)
+
+    @staticmethod
+    def increment_version():
+        try:
+            ver = EventsVersion.query.first()
+            ver.version += 0.01
+            db.session.add(ver)
+            db.sesion.commit()
+        except NoResultFound:
+            ver = EventsVersion()
+            ver.version = 0.01
+            db.session.add(ver)
             db.session.commit()
+        except Exception as e:
+            abort(500)
+            logging.error(e)
 
-
-
-
+    @staticmethod
+    def get_event_version():
+        try:
+            ver = EventsVersion.query.first()
+            return ver.version
+        except Exception as e:
+            logging.error(e)
             # def __repr__(self):
             # 	return "<Name> {0} <Info> {1} <Seats> {2} <Venue> {3} <Verified> {4} <createdBy> {5} ".format(self.eventName,self.eventInfo,self.seats,self.eventVenue,self.verified,self.createdBy)
 
@@ -298,15 +405,6 @@ class OrgBy(db.Model):
     event_id = db.Column(db.Integer, db.ForeignKey('events.id'))
 
 
-class OrgFor(db.Model):
-    """ Table containing Club ids for which a given event is organised """
-    __tablename__ = "orgfor"
-    __table_args__ = {'extend_existing': True}
-
-    id = db.Column(db.Integer, primary_key=True)
-    orgFor = db.Column(db.Integer, db.ForeignKey('clubs.id'))
-    event_id = db.Column(db.Integer, db.ForeignKey('events.id'))
-
 
 class ContactsForEvent(db.Model):
     """ List of contacts """
@@ -315,7 +413,8 @@ class ContactsForEvent(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     contactName = db.Column(db.String)
-    contactNumber = db.Column(db.Integer)
+    contactNumber = db.Column(db.BigInteger)
+    contactEmail = db.Column(db.String)
     event_id = db.Column(db.Integer, db.ForeignKey('events.id'))
 
 
@@ -325,24 +424,31 @@ class GCMRegIds(db.Model):
     __table_args__ = {'extend_existing': True}
 
     id = db.Column(db.Integer, primary_key=True)
-    data = db.Column(MutableList.as_mutable(ARRAY(db.String(100))))
+    data = db.Column(MutableList.as_mutable(ARRAY(db.String())))
 
+class NoticeSection(db.Model):
+    """ Notices Section """
+    __tablename__ = "notice"
+    __table_args__ = {'extend_existing': True}
+
+    id = db.Column(db.Integer, primary_key=True)
+    noticeName = db.Column(db.String)
+    aboutNotice = db.Column(db.String)
+    noticeImage = db.Column(db.String)
+
+class Scheduler_list(db.Model):
+    """ Scheduler list for gcm.   """
+    __tablename__ = "schedule"
+    __table_args__ = {'extend_existing': True}
+
+    id = db.Column(db.Integer, primary_key=True)
+    verifiedNotifs = db.Column(MutableList.as_mutable(ARRAY(db.String())))
+    notverifiedNotifs = db.Column(MutableList.as_mutable(ARRAY(db.String())))
 
 ####################################
 ######## HELPER FUNCTIONS ##########
 ####################################
 
-def get_user_club(user):
-    """ Returns a list of clubs of which the user is admin
-    """
-
-    admin = Admins.query.filter_by(student_id=user.id).all()
-    clubs = []
-    for i in range(0, len(admin)):
-        club = ClubInfo.query.filter_by(id=admin[i].club_id).first()
-        clubs.append(club)
-
-    return clubs
 
 
 def get_current_user():
@@ -383,7 +489,7 @@ def get_current_user():
                 abort(400)  # SOME UNKNOWN PROBLEM OCCURED
 
         if user.password != "None":
-            user_get = UserReg.query.filter_by(userName=username_or_token).first()
+            user_get = UserReg.query.filter_by(emailId=username_or_token).first()
             if user_get:
                 if user_get.check_password_hash(password):
                     return user_get
@@ -420,6 +526,19 @@ def err_stat(a, b, c):
     if a == 1 and b == 1 and c == 1:
         abort(409, message="ERR21")
 
+def err_stat2(a,b,c,rollno,mobno):
+    user = get_current_user()
+    b=0
+    if a==1 :
+        if  UserReg.query.filter_by(rollNo=rollno).first() is user:
+            a=0
+    # if b==1:
+    #     if  UserReg.query.filter_by(emailId=email).first() is user:
+    #         b=0
+    if c==1:
+        if  UserReg.query.filter_by(mobNo=mobno).first() is user:
+            c=0
+    return err_stat(a,b,c)
 
 def conv_time(unixstamp_or_datetime):
     if unixstamp_or_datetime is None:
@@ -428,7 +547,7 @@ def conv_time(unixstamp_or_datetime):
     if isinstance(unixstamp_or_datetime, datetime):
         return time.mktime(unixstamp_or_datetime.timetuple())
 
-    elif isinstance(unixstamp_or_datetime, float):
+    else:
         return datetime.fromtimestamp(unixstamp_or_datetime)
 
         # return dt
@@ -438,7 +557,7 @@ def get_admin_info(club):
     admins = []
 
     for admin in club.adminsList:
-        a = Admins(admin.fullName, admin.mobNo)
+        a = Admins(admin.fullName, admin.mobNo, admin.emailId)
         admins.append(a)
     return admins
 
@@ -446,7 +565,7 @@ def get_admin_info(club):
 def get_contact_info(event):
     contacts = []
     for contact in event.contacts:
-        a = Admins(contact.contactName, contact.contactNumber)
+        a = Admins(contact.contactName, contact.contactNumber,contact.contactEmail ,contact.id)
         contacts.append(a)
     return contacts
 
@@ -457,7 +576,7 @@ def send_email(val,user,eve_id):
         message = "Your response has been saved . It shall be pusblished after verification."
 
     recieve1 = "college.connect28@gmail.com"
-    recieve2 = user.emailId
+    recieve2 = "college.connect28@gmail.com"
     msg1 = Message(subject="Response Saved",
               sender="college.connect28@gmail.com",
               recipients=[recieve2])
@@ -471,3 +590,17 @@ def send_email(val,user,eve_id):
     msg2.body = "Event recieved from user name:{0} , rollno:{1} , eve_id {2}".format(user.fullName,user.rollNo,
                                                                                   eve_id)
     mail.send(msg2)
+
+def error_mail(e):
+    recieve1 = "college.connect28@gmail.com"
+
+    msg1 = Message(subject="Error occured",
+              sender="college.connect28@gmail.com",
+              recipients=[recieve1])
+
+    msg1.body = e
+    mail.send(msg1)
+
+def foo_bar():
+    foo = Scheduler_list.query.filter_by(id=1).first()
+    return foo
