@@ -62,6 +62,8 @@ class MutableList(Mutable, list):
 
 
 class UserReg(db.Model):
+    """ User Registrations Table """
+
     __tablename__ = "users"
     __table_args__ = {'extend_existing': True}
 
@@ -75,9 +77,9 @@ class UserReg(db.Model):
     fullName = db.Column(db.String, nullable=False)
     rollNo = db.Column(db.String, unique=True)
     mobNo = db.Column(db.BigInteger, unique=True)
-    hostelite_or_localite = db.Column(db.Boolean)
+    # hostelite_or_localite = db.Column(db.Boolean)
     hostelName = db.Column(db.String)
-
+    svnitOrNot = db.Column(db.Boolean, default=False)
 
 
     def check_password_hash(self, password_hash):
@@ -87,11 +89,11 @@ class UserReg(db.Model):
             return False
 
 
-
     def gen_auth_token(self, expiration=None):
 
         s = Serializer(app.config['SECRET_KEY'], expires_in=expiration)
         return s.dumps([self.emailId,self.passwordHash])
+
 
     @staticmethod
     def verify_auth_token(token):
@@ -110,6 +112,7 @@ class UserReg(db.Model):
         else:
             abort(401,message="ERR05")
 
+
     @staticmethod
     def if_unique(rollno, email,mobno, user=None):
         a, b, c = 0, 0, 0
@@ -125,6 +128,7 @@ class UserReg(db.Model):
             return err_stat2(a,b,c,rollno,mobno)
         return err_stat(a, b, c)
 
+
     def user_is_admin(self):
 
         if self.isAdmin and self.currentAdmin:
@@ -133,6 +137,7 @@ class UserReg(db.Model):
         else:
             club = ClubInfo.query.first()
             return False,club
+
 
     def is_attending_event(self, event):
         if event in self.events:
@@ -171,6 +176,8 @@ class ClubInfo(db.Model):
         db.session.add(club)
         db.session.commit()
 
+    ###### NOT BEING USED ######
+
     def add_follower(self, user):
         if user in self.followers:
             abort(409, message="ERR23")
@@ -185,6 +192,7 @@ class ClubInfo(db.Model):
             self.followers.remove(user)
             db.session.commit()
 
+    #############################        
 
 class EventsReg(db.Model):
     """ List of events """
@@ -223,7 +231,7 @@ class EventsReg(db.Model):
 
     @staticmethod
     def register_one(name, about, venue, sdt, user, contacts,image, seats=None, edt=None, lastregtime=None,
-                     notifone=None,notiftwo=None, notifmessage=None):
+                     notifone=None,notiftwo=None, notifmessage=None,prize=None,fees=None, color=None):
         # try:
         val,club = user.user_is_admin()
         clubname = club.clubName
@@ -247,17 +255,27 @@ class EventsReg(db.Model):
                         leftSeats = leftseats,
                         occupiedSeats = occupiedseats,
                         clubName = clubname,
-                        imageB64 = image,
+                        imageLink = image,
                         notifOne = notifone,
                         notifTwo = notiftwo,
                         notifMessage = notifmessage,
+                        eventPrizeMoney = prize,
+                        eventRegFees = fees,
+                        eventColorHex = color,
                         )
 
         eve.add_contacts(contacts)
         club.eventsList.append(eve)
+        try:
+            db.session.add(club)
+            db.session.commit()
+        except:
+            db.session.rollback()
+            abort(500)
+
         eve.schedule_gcm(val,notifmessage,notifone,notiftwo)
-        db.session.add(club)
-        db.session.commit()
+        push_notif("A new event has been created.{0}".format(name))
+
         # send_email(val,user,eve.id)
 
         return eve
@@ -348,7 +366,7 @@ class EventsReg(db.Model):
 
         db.session.commit()
         settings.checkList = Scheduler_list.query.filter_by(id=1).first().notverifiedNotifs
-        print settings.checkList
+        # print settings.checkList
         # global checkList
         # print "hello"
         # print Scheduler_list.query.filter_by(id=1).first().notverifiedNotifs

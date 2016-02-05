@@ -73,7 +73,7 @@ class UserRegistration(Resource):
 			try:
 				user_1 = UserReg(passwordHash=password_hash, fullName=data.name
 								 , rollNo=data.rollno, emailId=email, mobNo=data.mobno,
-								 hostelite_or_localite=data.hostel_or_local, hostelName=data.hostelname)
+								 hostelName=data.hostelname, svnitOrNot = data.svnit)
 				db.session.add(user_1)
 				db.session.commit()
 
@@ -97,7 +97,7 @@ class UserRegistration(Resource):
 						  recipients=recieve)
 
 			msg.body = "please click on the link {0}".format(link)
-			mail.send(msg)
+			# mail.send(msg)
 
 			return result.data
 			# except SQLAlchemyError:
@@ -298,9 +298,11 @@ class EventRegistration(Resource):
 										   conv_time(data.notifone),
 										   conv_time(data.notiftwo),
 										   data.notifmessage,
+										   data.prizemoney,
+										   data.regfees,
+										   data.colorcode
 										   )
 
-			push_notif("A new event has been created.{0}".format(data.name))
 			return jsonify({"message": event.id})
 
 	def get(self):
@@ -573,7 +575,7 @@ if __name__ == "__main__":
 	# try:
 	# thread = Thread(target= cron)
 	# thread.start()
-	# manager.run()
+	manager.run()
 	db.create_all()
 	port = int(os.environ.get('PORT', 8080))
 	app.run(host='0.0.0.0', port=port, debug=True)
