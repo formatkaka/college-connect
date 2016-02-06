@@ -80,7 +80,8 @@ class UserReg(db.Model):
     # hostelite_or_localite = db.Column(db.Boolean)
     hostelName = db.Column(db.String)
     svnitOrNot = db.Column(db.Boolean, default=False)
-
+    createdTime = db.Column(db.DateTime, default=datetime.now())
+    updatedTime = db.Column(db.DateTime, default=datetime.now(), onupdate=datetime.now())
 
     def check_password_hash(self, password_hash):
         if password_hash == self.passwordHash:
@@ -263,7 +264,7 @@ class EventsReg(db.Model):
                         eventRegFees = fees,
                         eventColorHex = color,
                         )
-
+        EventsVersion.increment_version()
         eve.add_contacts(contacts)
         club.eventsList.append(eve)
         try:
@@ -388,15 +389,11 @@ class EventsVersion(db.Model):
     @staticmethod
     def increment_version():
         try:
-            ver = EventsVersion.query.first()
-            ver.version += 0.01
-            db.session.add(ver)
-            db.sesion.commit()
-        except NoResultFound:
-            ver = EventsVersion()
-            ver.version = 0.01
+            ver = EventsVersion.query.filter_by(id=1).first()
+            ver.version += 1
             db.session.add(ver)
             db.session.commit()
+
         except Exception as e:
             abort(500)
             logging.error(e)
@@ -404,7 +401,7 @@ class EventsVersion(db.Model):
     @staticmethod
     def get_event_version():
         try:
-            ver = EventsVersion.query.first()
+            ver = EventsVersion.query.filter_by(id=1).first()
             return ver.version
         except Exception as e:
             logging.error(e)

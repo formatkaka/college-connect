@@ -269,12 +269,13 @@ class EventCheck(Resource):
 
 
 		elif foo is "version":
-			version = EventsVersion.get_events_version()
-			return jsonify({"message": str(version)})
-			pass
+			version = EventsVersion.get_event_version()
+			return jsonify({"message": version})
+
 
 		else :
-			abort(400)
+		    abort(400)
+
 
 class EventRegistration(Resource):
 
@@ -580,12 +581,12 @@ if __name__ == "__main__":
 	# try:
 	# thread = Thread(target= cron)
 	# thread.start()
-	# manager.run()
+	manager.run()
 	db.create_all()
-	port = int(os.environ.get('PORT', 8080))
-	app.run(host='0.0.0.0', port=port, debug=True)
-	# app.run(port=8080, debug=True)
-	# except KeyboardInterrupt:
+	# port = int(os.environ.get('PORT', 8080))
+	# app.run(host='0.0.0.0', port=port, debug=True)
+	app.run(port=8080, debug=True)
+	# except Keyboard   Interrupt:
 	# 	raise KeyError('j')
 
 	# TODO - 1. not,None

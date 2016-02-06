@@ -4,7 +4,7 @@ from flask_mail import Mail
 # from thread_app import MyThread
 app = Flask(__name__)
 
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:1234@localhost:5432/databse'
+
 
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://siddhant:collegeconnect@localhost:5432/db8'
 
@@ -15,6 +15,8 @@ api = Api(app)
 mail = Mail(app)
 app.config['SECRET_KEY'] = 's4df65a4g6aksdh<>?:.[],-.906^&#hcsddsf]!@#%^^^&*d[bjhv]'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:1234@localhost:5432/databse'
+
 app.config['SQLALCHEMY_MAX_OVERFLOW']=0
 app.config['SQLALCHEMY_POOL_SIZE'] = 2
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
