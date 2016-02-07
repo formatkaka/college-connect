@@ -123,8 +123,23 @@ class Events_Response(Schema):
     color = fields.Str()
     # createdby = fields.Str()
 
+class Notice_class(object):
+    def __init__(self,name,time,creator,about=None,image=None):
+        self.name = name
+        self.about = about
+        self.image= image
+        self.time = time
+        self.creator = creator
+
+class Notice_Schema(Schema):
+    name = fields.Str()
+    about = fields.Str()
+    image = fields.Str()
+    time = fields.Float()
+    creator = fields.Str()
 
 userreg_schema = UserReg_Response()
 userinfo_schema = UserInfo_Response()
 club_schema = Club_response(many=True)
 event_schema = Events_Response(many=True)
+notice_schema = Notice_Schema(many=True)

@@ -110,22 +110,22 @@ class Forgot_Password(Schema):
     email = fields.Email()
 
 
-class abc(Schema):
-    image = fields.Str()
-
-
 #####   NOTICES   #####
 
-class Notice_class(object):
-    def __init__(self,name,about,image=None):
+class NoticeReg_class(object):
+    def __init__(self,name,about=None,image=None):
         self.name = name
         self.about = about
         self.image= image
 
-class Notice_Rquest(Schema):
+class NoticeReg_Schema(Schema):
+    image = fields.Str()
     name = fields.Str()
     about = fields.Str()
-    image = fields.Str()
+
+    @post_load
+    def make_event(self,data):
+        return NoticeReg_class(**data)
 
 
 contact_schema = ContactSchema_Request(many=True)
@@ -135,4 +135,5 @@ info_schema = UserInfoSchema_Request()
 gcm_schema = GCM_Schema()
 forgot_pass = Forgot_Password()
 admin_schema = AdminSchema_Request()
-abc_sch = abc()
+noticereg_schema = NoticeReg_Schema()
+

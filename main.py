@@ -463,6 +463,35 @@ class AddRemoveAdmin(Resource):
 				return jsonify({"message": "admin added"})
 
 
+class Notice(Resource):
+
+    def post(self):
+        user = get_current_user()
+        user.is_council_admin()
+        json_data = request.get_json()
+        data, errors = noticereg_schema.load(json_data)
+        notice = NoticeSection(noticeTitle=data.name, aboutNotice=data.about,
+                               noticeImage=data.image,createdBy= user.id)
+        db.session.add(notice)
+        db.session.commit()
+        push_notif("{0}".format(data.name))
+        return jsonify({"message":"success"})
+
+    def put(self):
+        pass
+
+    def get(self):
+        notices_list = NoticeSection.query.all()
+        notices = []
+        for notice in notices_list:
+            user = UserReg.query.filter_by(id=notice.createdBy).first()
+            n = Notice_class(name =notice.noticeTitle,time=conv_time(notice.createdTime),
+                             creator = user.fullName ,about = notice.aboutNotice,
+                             image=notice.noticeImage)
+            notices.append(n)
+        result = notice_schema.dump(notices)
+        return jsonify({"notices":result.data})
+
 class Testing1(Resource):
 
     def get(self):
@@ -575,17 +604,18 @@ api.add_resource(GCMessaging, '/api/gcm')
 api.add_resource(ForgotPassword, '/api/password')
 api.add_resource(AddRemoveAdmin, '/api/admin')
 api.add_resource(EventCheck, '/api/check/<string:foo>')
+api.add_resource(Notice,'/api/notice')
 api.add_resource(Testing,'/')
 
 if __name__ == "__main__":
 	# try:
 	# thread = Thread(target= cron)
 	# thread.start()
-	manager.run()
+	# manager.run()
 	db.create_all()
-	# port = int(os.environ.get('PORT', 8080))
-	# app.run(host='0.0.0.0', port=port, debug=True)
-	app.run(port=8080, debug=True)
+	port = int(os.environ.get('PORT', 8080))
+	app.run(host='0.0.0.0', port=port, debug=True)
+	# app.run(port=8080, debug=True)
 	# except Keyboard   Interrupt:
 	# 	raise KeyError('j')
 

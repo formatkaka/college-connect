@@ -146,6 +146,12 @@ class UserReg(db.Model):
         else:
             return False
 
+    def is_council_admin(self):
+        SC = ClubInfo.query.filter_by(id=2).first()
+        if self in SC.adminsList:
+            return True
+        else:
+            abort(401, message="ERR09")
 
 class ClubInfo(db.Model):
     """ A list of all the clubs ,their admins and its EventsReg """
@@ -155,6 +161,7 @@ class ClubInfo(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     clubName = db.Column(db.String, nullable=False)
     aboutClub = db.Column(db.Text)
+    clubImage = db.Column(db.String)
     adminsList = db.relationship('UserReg', secondary=club_admins,
                                  backref='a_clubs')
     followers = db.relationship('UserReg', secondary=user_clubs,
@@ -447,10 +454,14 @@ class NoticeSection(db.Model):
     __table_args__ = {'extend_existing': True}
 
     id = db.Column(db.Integer, primary_key=True)
-    noticeName = db.Column(db.String)
+    noticeTitle = db.Column(db.String)
     aboutNotice = db.Column(db.String)
     noticeImage = db.Column(db.String)
-
+    createdTime = db.Column(db.DateTime, default=datetime.now())
+    updatedTime = db.Column(db.DateTime, default=datetime.now(), onupdate=datetime.now())
+    createdBy = db.Column(db.Integer, db.ForeignKey('users.id'))
+    # @staticmethod
+    # def add_notice():
 class Scheduler_list(db.Model):
     """ Scheduler list for gcm.   """
     __tablename__ = "schedule"
