@@ -289,7 +289,7 @@ class EventRegistration(Resource):
 			return jsonify(errors)
 		else:
 			# try:
-			event = EventsReg.register_one(data.name,
+			event,val = EventsReg.register_one(data.name,
 										   data.about,
 										   data.venue,
 										   conv_time(data.sdt),
@@ -306,7 +306,7 @@ class EventRegistration(Resource):
 										   data.fees,
 										   data.color,
 										   )
-
+			if val: push_notif(event.id,event.eventName,data.sdt)
 			return jsonify({"message": event.id})
 
 	def get(self):

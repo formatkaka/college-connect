@@ -6,7 +6,7 @@ from sqlalchemy.ext.mutable import Mutable
 from flask_mail import Message
 from sqlalchemy.orm.exc import NoResultFound
 from gmail_logs import *
-from push_notifs import push_notif
+
 import settings
 
 
@@ -277,11 +277,11 @@ class EventsReg(db.Model):
         try:
             db.session.add(club)
             db.session.commit()
+            return eve,val
         except:
             db.session.rollback()
             abort(500)
-        if val:
-            push_notif(eve.id,name,conv_time(sdt))
+
         # eve.schedule_gcm(val,notifmessage,notifone,notiftwo)
         # push_notif("A new event has been created.{0}".format(name))
 
