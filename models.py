@@ -287,7 +287,7 @@ class EventsReg(db.Model):
 
         # send_email(val,user,eve.id)
 
-        return eve
+
         # except:
         #     abort(400,message="some error occured.")
 
