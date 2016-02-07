@@ -264,8 +264,8 @@ class EventCheck(Resource):
 			date = data['date']
 			date1 = conv_time(date) + datetime.timedelta(hours=1)
 			date2 = conv_time(date) - datetime.timedelta(hours=1)
-			eve_list = EventsReg.query.filter(EventsReg.startDateTime > date2, EventsReg.startDateTime < date1).all()
-			return jsonify({"message":str(len(eve_list))})
+			eve_list = [eve.id for eve in EventsReg.query.filter(EventsReg.startDateTime > date2, EventsReg.startDateTime < date1).all()]
+			return jsonify({"message":eve_list })
 
 
 		elif foo is "version":
@@ -325,7 +325,7 @@ class EventRegistration(Resource):
 					event.id,
 					conv_time(event.startDateTime),
 					event.e_clubs[0].id,
-					event.imageB64,
+					event.imageLink,
 					conv_time(event.endDateTime),
 					conv_time(event.lastRegDateTime),
 					event.totalSeats,
