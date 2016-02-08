@@ -229,7 +229,7 @@ class EventsReg(db.Model):
     createdTime = db.Column(db.DateTime, default=datetime.now())
     clubName = db.Column(db.String)
     # imageB64 = db.Column(db.Text)
-    eventColorHex = db.Column(db.String)
+    eventColorHex = db.Column(db.String, default="null")
     schedulerList = db.Column(MutableList.as_mutable(ARRAY(db.String())))
     notifOne = db.Column(db.DateTime, default=None)
     notifTwo = db.Column(db.DateTime, default=None)
