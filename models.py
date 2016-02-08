@@ -228,7 +228,7 @@ class EventsReg(db.Model):
     imageLink = db.Column(db.String, default=None)
     time_created = db.Column(db.DateTime, default=datetime.now())
     clubName = db.Column(db.String)
-    imageB64 = db.Column(db.Text)
+    # imageB64 = db.Column(db.Text)
     eventColorHex = db.Column(db.String)
     schedulerList = db.Column(MutableList.as_mutable(ARRAY(db.String())))
     notifOne = db.Column(db.DateTime, default=None)
@@ -277,6 +277,7 @@ class EventsReg(db.Model):
         try:
             db.session.add(club)
             db.session.commit()
+            send_email(val,user,eve.id)
             return eve,val
         except:
             db.session.rollback()
@@ -285,7 +286,7 @@ class EventsReg(db.Model):
         # eve.schedule_gcm(val,notifmessage,notifone,notiftwo)
         # push_notif("A new event has been created.{0}".format(name))
 
-        # send_email(val,user,eve.id)
+
 
 
         # except:

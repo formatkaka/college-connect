@@ -8,7 +8,10 @@ app = Flask(__name__)
 
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://siddhant:collegeconnect@localhost:5432/db8'
 
+#### TESTING #####
+# app.config['SQLALCHEMY_DATABASE_URI'] = "postgres://phchwjfasfhtqx:hoJUoRhsE1obvdKUfCWsTLkqJy@ec2-54-225-215-233.compute-1.amazonaws.com:5432/ddcgijuuj094as"
 
+#### PRODUCTION #####
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://icogkawnroahpr:c22UCPudryC5xAmpqE9jjNWz37@ec2-204-236-226-63.compute-1.amazonaws.com:5432/dat3mrlsck6nk7'
 db = SQLAlchemy(app)
 api = Api(app)

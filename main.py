@@ -307,6 +307,7 @@ class EventRegistration(Resource):
 										   data.color,
 										   )
 			if val: push_notif(event.id,event.eventName,data.sdt)
+
 			return jsonify({"message": event.id})
 
 	def get(self):
@@ -361,7 +362,6 @@ class EventRegistration(Resource):
 		# eve.reschedule_gcm(conv_time(data.sdt))
 		eve.lastRegDateTime = conv_time(data.lastregtime)
 		eve.endDateTime = conv_time(data.edt)
-		eve.imageB64 = data.image
 		eve.add_contacts(data.contacts)
 		db.session.add(eve)
 		db.session.commit()
@@ -369,7 +369,7 @@ class EventRegistration(Resource):
 
 class Clubsget(Resource):
 	def get(self):
-		clubs_list = ClubInfo.query.all()
+		clubs_list = ClubInfo.query.filter(ClubInfo.id!=1).all()
 
 		clubs = []
 		for club in clubs_list:
@@ -521,8 +521,11 @@ class Reauthenticate(Form):
 @app.route('/api/reset/<string:token>', methods=['GET', 'POST'])
 def reset_password(token):
 	s = Serializer(app.config['SECRET_KEY'])
-	data = s.loads(token)
-	user = UserReg.query.filter_by(id=data['id']).first()
+	try:
+		data = s.loads(token)
+		user = UserReg.query.filter_by(id=data['id']).first_or_404()
+	except:
+		abort(400)
 	form = Reauthenticate()
 	if form.validate_on_submit():
 		user.passwordHash = hashlib.sha1(form.new_password.data).hexdigest()
