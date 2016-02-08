@@ -310,7 +310,7 @@ class EventRegistration(Resource):
 			return jsonify({"message": event.id})
 
 	def get(self):
-		events_list = EventsReg.query.all()
+		events_list = EventsReg.query.filter_by(verified=True).all()
 		events = []
 		for event in events_list:
 			contacts = get_contact_info(event)
@@ -375,7 +375,7 @@ class Clubsget(Resource):
 		for club in clubs_list:
 			admins = get_admin_info(club)
 			events = [club.eventsList[i].id for i in range(0, len(club.eventsList))]
-			c = Club_class(club.clubName, club.aboutClub, admins, events,club.id)
+			c = Club_class(club.clubName, club.aboutClub, admins, events,club.id, club.clubImage)
 			clubs.append(c)
 		result = club_schema.dump(clubs)
 		# if result.error == {}:

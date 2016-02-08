@@ -60,12 +60,13 @@ class Admin_Response(Schema):
     email = fields.Email()
 
 class Club_class():
-    def __init__(self, name, about, admins, events, club_id):
+    def __init__(self, name, about, admins, events, club_id, image):
         self.name = name
         self.about = about
         self.admins = admins
         self.events = events
         self.club_id = club_id
+        self.image = image
 
 class Club_response(Schema):
     name = fields.Str()
@@ -73,7 +74,7 @@ class Club_response(Schema):
     admins = fields.Nested(Admin_Response, many=True)
     events = fields.List(fields.Int)
     club_id = fields.Int()
-
+    image = fields.Str()
 ##### EVENTS INFORMATION ##### 
 
 class Events_class():
