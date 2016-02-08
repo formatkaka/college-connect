@@ -48,7 +48,7 @@ class OrganisedBySchema_Request(Schema):
 
 
 class Date_Request(Schema):
-    date = fields.Int()
+    date = fields.Float()
 
 # EVENT REGISTRATION SCHEMA
 
