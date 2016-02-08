@@ -79,7 +79,7 @@ class Club_response(Schema):
 
 class Events_class():
     def __init__(self, name, about, venue, createdby, verified, contacts,clubname,
-                 event_id,sdt,club_id,image=None,edt=None,lrt=None,total_seats=None,
+                 event_id,sdt,club_id,createdtime,image=None,edt=None,lrt=None,total_seats=None,
                  available_seats=None, occupied_seats=None, prize=None, fees=None, color=None):
         self.name = name
         self.about = about
@@ -100,7 +100,7 @@ class Events_class():
         self.prize = prize
         self.fees = fees
         self.color = color
-
+        self.createdtime = createdtime
 
 class Events_Response(Schema):
     name = fields.Str()
@@ -122,6 +122,7 @@ class Events_Response(Schema):
     prize = fields.Int()
     fees = fields.Int()
     color = fields.Str()
+    createdtime = fields.Float()
     # createdby = fields.Str()
 
 class Notice_class(object):

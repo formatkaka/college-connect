@@ -326,6 +326,7 @@ class EventRegistration(Resource):
 					event.id,
 					conv_time(event.startDateTime),
 					event.e_clubs[0].id,
+                    event.createdTime,
 					event.imageLink,
 					conv_time(event.endDateTime),
 					conv_time(event.lastRegDateTime),

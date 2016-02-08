@@ -226,7 +226,7 @@ class EventsReg(db.Model):
                                 backref='events')
     activeStatus = db.Column(db.Boolean, default=False)
     imageLink = db.Column(db.String, default=None)
-    time_created = db.Column(db.DateTime, default=datetime.now())
+    createdTime = db.Column(db.DateTime, default=datetime.now())
     clubName = db.Column(db.String)
     # imageB64 = db.Column(db.Text)
     eventColorHex = db.Column(db.String)
