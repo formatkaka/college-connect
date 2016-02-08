@@ -419,11 +419,16 @@ class GCMessaging(Resource):
 	def post(self):
 		json_data = request.get_json()
 		data, errors = gcm_schema.load(json_data)
-
+		my_gcm = data['gcmid']
 		gcm_id_arr = GCMRegIds.query.filter_by(id=1).first()
-		gcm_id_arr.data.append(data['gcmid'])
-		db.session.add(gcm_id_arr)
-		db.session.commit()
+		if not my_gcm in gcm_id_arr:
+			gcm_id_arr.data.append(my_gcm)
+			try:
+				db.session.add(gcm_id_arr)
+				db.session.commit()
+			except:
+				db.session.rollback()
+				abort(500)
 		return jsonify({"message": "saved"})
 
 		# except:
