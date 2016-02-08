@@ -48,4 +48,4 @@ def push_notif(eve_id,title,eve_time):
 
 
 if __name__ == "__main__":
-    push_notif("hello")
+    push_notif("hello","hello","hello")

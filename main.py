@@ -194,7 +194,7 @@ class UserInformation(Resource):
 		my_events = [events_created[i].id for i in range(0, len(events_created))]
 		club_admin = [user.a_clubs[i].id for i in range(0, len(user.a_clubs))]
 
-		info = UserInfo_class(user.fullName, user.rollNo, user.emailId,
+		info = UserInfo_class(user.fullName, user.rollNo, user.emailId,str(user.isVerified),
 							  user.mobNo, club_admin, my_events, clubs_following, events_attending)
 
 		data, errors = userinfo_schema.dump(info)

@@ -20,7 +20,7 @@ class UserReg_Response(Schema):
 # 1 - Personal Info
 
 class UserInfo_class(Schema):
-    def __init__(self, name, rollno, email, mobno=None, club_admin=None, my_events=None, clubs_following=None,
+    def __init__(self, name, rollno, email,verified, mobno=None, club_admin=None, my_events=None, clubs_following=None,
                  events_attending=None):
         self.club_admin = club_admin
         self.my_events = my_events
@@ -30,7 +30,7 @@ class UserInfo_class(Schema):
         self.rollno = rollno
         self.email = email
         self.mobno = mobno
-
+        self.verified = verified
 
 class UserInfo_Response(Schema):
     username = fields.Str()
@@ -42,7 +42,7 @@ class UserInfo_Response(Schema):
     clubs_following = fields.List(fields.Int)
     club_admin = fields.List(fields.Int)
     my_events = fields.List(fields.Int)
-
+    verified = fields.Str()
 
 ##### CLUBS INFORMATION #####
 
