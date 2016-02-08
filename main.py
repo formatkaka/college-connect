@@ -421,7 +421,7 @@ class GCMessaging(Resource):
 		data, errors = gcm_schema.load(json_data)
 		my_gcm = data['gcmid']
 		gcm_id_arr = GCMRegIds.query.filter_by(id=1).first()
-		if not my_gcm in gcm_id_arr:
+		if not my_gcm in gcm_id_arr.data:
 			gcm_id_arr.data.append(my_gcm)
 			try:
 				db.session.add(gcm_id_arr)
