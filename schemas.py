@@ -48,7 +48,7 @@ class OrganisedBySchema_Request(Schema):
 
 
 class Date_Request(Schema):
-    sdt = fields.Int()
+    date = fields.Int()
 
 # EVENT REGISTRATION SCHEMA
 
@@ -136,4 +136,4 @@ gcm_schema = GCM_Schema()
 forgot_pass = Forgot_Password()
 admin_schema = AdminSchema_Request()
 noticereg_schema = NoticeReg_Schema()
-
+date_schema = Date_Request()

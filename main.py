@@ -258,7 +258,7 @@ class EventCheck(Resource):
 		if foo is "date":
 			get_current_user()
 			json_data = request.get_json()
-			data, errors = forgot_pass.load(json_data)
+			data, errors = date_schema.load(json_data)
 			if errors:
 				return jsonify(errors)
 			date = data['date']
