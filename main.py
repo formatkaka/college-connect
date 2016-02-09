@@ -102,7 +102,7 @@ class UserRegistration(Resource):
 			msg.body = "please click on the link {0}".format(link)
 			mail.send(msg)
 
-			return result.data
+			return result.data,200,{'WWW-Authenticate':'xBasic realm=""'}
 			# except SQLAlchemyError:
 			#     db.session.rollback()
 			#     abort(500)
@@ -621,7 +621,7 @@ if __name__ == "__main__":
 	# thread = Thread(target= cron)
 	# thread.start()
 	# manager.run()
-	db.create_all()
+	# db.create_all()
 	port = int(os.environ.get('PORT', 8080))
 	app.run(host='0.0.0.0', port=port, debug=True)
 	# app.run(port=8080, debug=True)
