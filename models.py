@@ -522,9 +522,9 @@ def get_current_user():
                 if user_get.check_password_hash(password):
                     return user_get
                 else:
-                    abort(401, message="ERR05")
+                    abort(200, message="ERR05")
             else:
-                abort(401, message="ERR04")
+                abort(200, message="ERR04")
         else:
             return abort(400)  # SOME UNKNOWN PROBLEM OCCURED
 
