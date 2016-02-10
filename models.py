@@ -508,10 +508,10 @@ def get_current_user():
                 return verified
 
             elif not verified and value == 0:
-                abort(401, message="ERR07")
+                abort(409, message="ERR07")
 
             elif not verified and value == 1:
-                abort(401, message="ERR06")
+                abort(409, message="ERR06")
 
             else:
                 abort(400)  # SOME UNKNOWN PROBLEM OCCURED

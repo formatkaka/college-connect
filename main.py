@@ -122,12 +122,13 @@ class UserRegistration(Resource):
 		if s1 != "token":
 			abort(400)
 		user = get_current_user()
-
-		token = user.gen_auth_token(expiration=1200)
-
-		op = UserReg_class(token)
-		result = userreg_schema.dump(op)
-		return result.data
+		try:
+			token = user.gen_auth_token(expiration=1200)
+			op = UserReg_class(token)
+			result = userreg_schema.dump(op)
+			return result.data
+		except AttributeError:
+			return user
 
 	def put(self, s1):
 		if s1 != "edit":
