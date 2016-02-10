@@ -24,6 +24,7 @@ def push_notif(eve_id,title,eve_time):
                       )
     print res.responses
     print res.errors
+    print res.successes
     ## Catching exceptions
 
     #1 - GCM Device Unregistered
