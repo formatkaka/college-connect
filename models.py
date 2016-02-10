@@ -93,6 +93,7 @@ class UserReg(db.Model):
     def gen_auth_token(self, expiration=None):
 
         s = Serializer(app.config['SECRET_KEY'], expires_in=expiration)
+        print s.dumps([self.emailId,self.passwordHash])
         return s.dumps([self.emailId,self.passwordHash])
 
 
@@ -523,9 +524,9 @@ def get_current_user():
                 if user_get.check_password_hash(password):
                     return user_get
                 else:
-                    return jsonify({"message":"ERR05"})
+                    abort(409,message="ERR05")
             else:
-                return jsonify({"message":"ERR04"})
+                abort(409,message="ERR04")
         else:
             return abort(400)  # SOME UNKNOWN PROBLEM OCCURED
 
