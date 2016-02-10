@@ -405,7 +405,7 @@ class EventsVersion(db.Model):
 
         except Exception as e:
             abort(500)
-            logging.error(e)
+            # logging.error(e)
 
     @staticmethod
     def get_event_version():
@@ -413,7 +413,8 @@ class EventsVersion(db.Model):
             ver = EventsVersion.query.filter_by(id=1).first()
             return ver.version
         except Exception as e:
-            logging.error(e)
+            abort(500)
+            # logging.error(e)
             # def __repr__(self):
             # 	return "<Name> {0} <Info> {1} <Seats> {2} <Venue> {3} <Verified> {4} <createdBy> {5} ".format(self.eventName,self.eventInfo,self.seats,self.eventVenue,self.verified,self.createdBy)
 

@@ -82,7 +82,7 @@ class UserRegistration(Resource):
 
 			except Exception as e:
 				db.session.rollback()
-				logging.error(e)
+				# logging.error(e)
 				abort(500)
 
 			recieve = ["sid.siddhant.loya@gmail.com", "murali.prajapati555@gmail.com"]
@@ -148,7 +148,7 @@ class UserRegistration(Resource):
 		#     logging.error(e)
 		#     abort(500)
 		except Exception as e:
-			logging.error(e)
+			# logging.error(e)
 			abort(500)
 
 		return jsonify({"message": "edited"})
