@@ -21,7 +21,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:1234@localhost:5432/databse'
 
 app.config['SQLALCHEMY_MAX_OVERFLOW']= 0
-app.config['SQLALCHEMY_POOL_SIZE'] = 5
+app.config['SQLALCHEMY_POOL_SIZE'] = 1
 app.config['PGBOUNCER_MAX_CLIENT_CONN'] = 5
 app.config['MAIL_SERVER'] = 'smtp.sendgrid.net'
 app.config['MAIL_PORT'] = 465
