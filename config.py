@@ -22,6 +22,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 app.config['SQLALCHEMY_MAX_OVERFLOW']= 0
 app.config['SQLALCHEMY_POOL_SIZE'] = 15
+app.config['PGBOUNCER_MAX_CLIENT_CONN'] = 50
 app.config['MAIL_SERVER'] = 'smtp.sendgrid.net'
 app.config['MAIL_PORT'] = 465
 app.config['MAIL_USE_TLS'] = False
