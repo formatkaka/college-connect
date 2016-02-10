@@ -8,7 +8,7 @@ from opschemas import *
 from flask.ext.restful import abort
 from push_notifs import push_notif
 from sqlalchemy.exc import SQLAlchemyError
-from gmail_logs import *
+# from gmail_logs import *
 from drive_api import DriveApi
 from functools import wraps
 from config import mail
@@ -591,13 +591,13 @@ def cron():
 def send_mail():
 	msg = Message(subject="Thank You for Registration.Confirmation Link.Click Below.",
 				  sender="college.connect01@gmail.com",
-				  recipients=["siddhantloya2008@gmail.com"])
+				  recipients=["siddhantloya28@gmail.com"])
 
 	msg.body = "please click on the link "
 	with app.app_context():
 		mail.send(msg)
 	print "sent"
-
+send_mail()
 api.add_resource(UserRegistration, '/api/user/<string:s1>')
 api.add_resource(UserInformation, '/api/user/info')
 api.add_resource(EventRegistration, '/api/events')
