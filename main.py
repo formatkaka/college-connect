@@ -368,7 +368,7 @@ class EventRegistration(Resource):
 
 class Clubsget(Resource):
 	def get(self):
-		clubs_list = ClubInfo.query.filter(ClubInfo.id!=1).all()
+		clubs_list = ClubInfo.query.all()
 
 		clubs = []
 		for club in clubs_list:
