@@ -294,6 +294,14 @@ class EventsReg(db.Model):
         #     abort(400,message="some error occured.")
 
     def add_contacts(self, contacts):
+        for contact in contacts:
+            con = ContactsForEvent(contactName=contact.contactname, contactNumber = contact.contactNumber,
+                                   contactEmail = contact.contactemail )
+            self.contacts.append(con)
+        db.session.add(self)
+        db.session.commit()
+
+    def edit_contacts(self, contacts):
         dbcontacts = self.contacts
         # print contacts[0].contactname
         for i in range(0,1):
@@ -301,6 +309,7 @@ class EventsReg(db.Model):
             dbcontacts[i].contactNumber = contacts[i].contactnumber
             dbcontacts[i].contactEmail = contacts[i].contactemail
         db.session.commit()
+
 
     def set_active(self):
         self.activeStatus = True

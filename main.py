@@ -361,7 +361,7 @@ class EventRegistration(Resource):
 		# eve.reschedule_gcm(conv_time(data.sdt))
 		eve.lastRegDateTime = conv_time(data.lastregtime)
 		eve.endDateTime = conv_time(data.edt)
-		eve.add_contacts(data.contacts)
+		eve.edit_contacts(data.contacts)
 		db.session.add(eve)
 		db.session.commit()
 		return jsonify({"message":"success"})
