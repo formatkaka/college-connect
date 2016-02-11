@@ -436,7 +436,7 @@ class ContactsForEvent(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     contactName = db.Column(db.String)
-    contactNumber1 = db.Column(db.String)
+    contactNumber = db.Column(db.String)
     contactEmail = db.Column(db.String)
     event_id = db.Column(db.Integer, db.ForeignKey('events.id'))
 
@@ -592,7 +592,7 @@ def get_admin_info(club):
 def get_contact_info(event):
     contacts = []
     for contact in event.contacts:
-        a = Admins(contact.contactName, contact.contactNumber,contact.contactEmail ,contact.id)
+        a = Admins(contact.contactName, contact.contactNumber,contact.contactEmail )
         contacts.append(a)
     return contacts
 
