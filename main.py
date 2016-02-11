@@ -86,7 +86,7 @@ class UserRegistration(Resource):
 				# logging.error(e)
 				abort(500)
 
-			recieve = ["sid.siddhant.loya@gmail.com", "murali.prajapati555@gmail.com"]
+			recieve = [email]
 			token = user_1.gen_auth_token(expiration=60*60*24*15)
 			op = UserReg_class(token)
 			result = userreg_schema.dump(op)
@@ -173,7 +173,7 @@ class ForgotPassword(Resource):
 
 		msg = Message(subject="Reset password",
 					  sender="college.connect01@gmail.com",
-					  recipients=["siddhantloya2008@gmail.com"])
+					  recipients=[data['emailId']])
 
 		msg.body = "please click on the link {0}".format(link)
 		mail.send(msg)

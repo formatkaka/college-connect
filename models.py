@@ -613,16 +613,16 @@ def send_email(val,user,eve_id):
         message = "Your response has been saved . It shall be pusblished after verification."
 
     recieve1 = "college.connect28@gmail.com"
-    recieve2 = "college.connect28@gmail.com"
+    recieve2 = user.emailId
     msg1 = Message(subject="Response Saved",
-              sender="college.connect28@gmail.com",
+              sender="college.connect01@gmail.com",
               recipients=[recieve2])
 
     msg1.body = message
     mail.send(msg1)
 
     msg2 = Message(subject="Response Saved",
-              sender="college.connect28@gmail.com",
+              sender="college.connect01@gmail.com",
               recipients=[recieve1])
     msg2.body = "Event recieved from user name:{0} , rollno:{1} , eve_id {2}".format(user.fullName,user.rollNo,
                                                                                   eve_id)
