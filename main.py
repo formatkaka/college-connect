@@ -631,9 +631,9 @@ if __name__ == "__main__":
 
     signal.signal(signal.SIGINT, exit_gracefully)
     signal.signal(signal.SIGTERM, exit_gracefully)
-    # port = int(os.environ.get('PORT', 8080))
-    # app.run(host='0.0.0.0', port=port)
-    app.run(port=8080, debug=True)
+    port = int(os.environ.get('PORT', 8080))
+    app.run(host='0.0.0.0', port=port)
+    # app.run(port=8080, debug=True)
     # except Keyboard   Interrupt:
     # 	raise KeyError('j')
 
