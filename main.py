@@ -87,7 +87,7 @@ class UserRegistration(Resource):
 				abort(500)
 
 			recieve = ["sid.siddhant.loya@gmail.com", "murali.prajapati555@gmail.com"]
-			token = user_1.gen_auth_token(expiration=1200)
+			token = user_1.gen_auth_token(expiration=60*60*24*15)
 			op = UserReg_class(token)
 			result = userreg_schema.dump(op)
 

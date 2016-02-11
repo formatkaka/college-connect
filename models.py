@@ -4,8 +4,8 @@ from opschemas import *
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.ext.mutable import Mutable
 from flask_mail import Message
-from sqlalchemy.orm.exc import NoResultFound
-from gmail_logs import *
+# from sqlalchemy.orm.exc import NoResultFound
+# from gmail_logs import *
 
 import settings
 
@@ -594,7 +594,7 @@ def get_admin_info(club):
     admins = []
 
     for admin in club.adminsList:
-        a = Admins(admin.fullName, admin.mobNo, admin.emailId)
+        a = Admins(admin.fullName, str(admin.mobNo), admin.emailId)
         admins.append(a)
     return admins
 
