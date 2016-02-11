@@ -82,6 +82,7 @@ class UserReg(db.Model):
     svnitOrNot = db.Column(db.Boolean, default=False)
     createdTime = db.Column(db.DateTime, default=datetime.now())
     updatedTime = db.Column(db.DateTime, default=datetime.now(), onupdate=datetime.now())
+    metaData = db.Column(db.String,default=None)
 
     def check_password_hash(self, password_hash):
         if password_hash == self.passwordHash:
@@ -93,7 +94,6 @@ class UserReg(db.Model):
     def gen_auth_token(self, expiration=None):
 
         s = Serializer(app.config['SECRET_KEY'], expires_in=expiration)
-        print s.dumps([self.emailId,self.passwordHash])
         return s.dumps([self.emailId,self.passwordHash])
 
 
@@ -294,16 +294,13 @@ class EventsReg(db.Model):
         #     abort(400,message="some error occured.")
 
     def add_contacts(self, contacts):
-        for item in contacts:
-            if not item.contactid:
-                contact = ContactsForEvent(contactName=item.contactname, contactNumber=item.contactnumber
-                                           , contactEmail = item.contactemail)
-                self.contacts.append(contact)
-            if item.contactid:
-                contact = ContactsForEvent.query.filter_by(id=item.contactid).first_or_404()
-                contact.contactName = item.contactname
-                contact.contactNumber = item.contactnumber
-                contact.contactEmail = item.contactemail
+        dbcontacts = self.contacts
+        # print contacts[0].contactname
+        for i in range(0,1):
+            dbcontacts[i].contactName = contacts[i].contactname
+            dbcontacts[i].contactNumber = contacts[i].contactnumber
+            dbcontacts[i].contactEmail = contacts[i].contactemail
+        db.session.commit()
 
     def set_active(self):
         self.activeStatus = True
@@ -439,7 +436,7 @@ class ContactsForEvent(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     contactName = db.Column(db.String)
-    contactNumber = db.Column(db.BigInteger)
+    contactNumber1 = db.Column(db.String)
     contactEmail = db.Column(db.String)
     event_id = db.Column(db.Integer, db.ForeignKey('events.id'))
 

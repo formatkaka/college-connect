@@ -6,7 +6,7 @@
 #
 # # below is to test
 # logging.getLogger().addHandler(TitledSMTPHandler(
-#     ('smtp.gmail.com',465),
+#     ('smtp.sendgrid.com',465),
 #     'college.connect01@gmail.com', 'college.connect28@gmail.com',
 #     '%(asctime)s Error: %(message)s',
 #     ('collegeconnect', 'collegeconnect1234'), ()

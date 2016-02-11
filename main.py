@@ -9,7 +9,6 @@ from flask.ext.restful import abort
 from push_notifs import push_notif
 from sqlalchemy.exc import SQLAlchemyError
 # from gmail_logs import *
-from drive_api import DriveApi
 from functools import wraps
 from config import mail
 from flask_mail import Message
@@ -76,7 +75,7 @@ class UserRegistration(Resource):
 				else : foo = False
 				user_1 = UserReg(passwordHash=password_hash, fullName=data.name
 								 , rollNo=data.rollno, emailId=email, mobNo=data.mobno,
-								 hostelName=data.hostelname, svnitOrNot = foo)
+								 hostelName=data.hostelname, svnitOrNot = foo, metaData=data.metadata1)
 				db.session.add(user_1)
 				db.session.commit()
 
@@ -102,7 +101,7 @@ class UserRegistration(Resource):
 			msg.body = "please click on the link {0}".format(link)
 			mail.send(msg)
 
-			return result.data,200,{'WWW-Authenticate':'xBasic realm=""'}
+			return result.data
 			# except SQLAlchemyError:
 			#     db.session.rollback()
 			#     abort(500)
@@ -591,13 +590,13 @@ def cron():
 def send_mail():
 	msg = Message(subject="Thank You for Registration.Confirmation Link.Click Below.",
 				  sender="college.connect01@gmail.com",
-				  recipients=["siddhantloya28@gmail.com"])
+				  recipients=["siddhantloya2008@gmail.com"])
 
 	msg.body = "please click on the link "
 	with app.app_context():
 		mail.send(msg)
 	print "sent"
-send_mail()
+# send_mail()
 api.add_resource(UserRegistration, '/api/user/<string:s1>')
 api.add_resource(UserInformation, '/api/user/info')
 api.add_resource(EventRegistration, '/api/events')

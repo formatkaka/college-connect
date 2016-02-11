@@ -9,19 +9,20 @@ class UserInfoSchema_Request(Schema):
     mobno = fields.Int()
     hostelname = fields.Str()
     svnit = fields.Str()   #TRUE if Hostelite!!
+    metadata1 = fields.Str()
 
     @post_load
     def make_event(self,data):
         return UserInfo_class(**data)
 
 class UserInfo_class(object):
-    def __init__(self,name,svnit=False,hostelname=None,rollno=None,mobno=None):
+    def __init__(self,name,svnit=False,hostelname=None,rollno=None,mobno=None,metadata1=None):
         self.name = name
         self.rollno = rollno
         self.mobno = mobno
         self.hostelname = hostelname
         self.svnit = svnit
-
+        self.metadata1 = metadata1
 class ClubRegSchema_Request(Schema):
     name = fields.Str()
     about = fields.Str()
@@ -36,7 +37,7 @@ class ContactEvent_class(object):
 class ContactSchema_Request(Schema):
     contactid = fields.Int()
     contactname = fields.Str()
-    contactnumber = fields.Int()
+    contactnumber = fields.Str()
     contactemail = fields.Email()
 
     @post_load
