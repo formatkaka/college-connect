@@ -19,8 +19,10 @@ import time
 from datetime import datetime
 import  settings
 settings.init()
+import signal
+import time
+import sys
 
-import unicodedata
 
 # global checkList
 
@@ -540,6 +542,15 @@ def reset_password(token):
 
 	return render_template('reset.html', form=form)
 
+def exit_gracefully(self,signum, frame):
+    kill_now = True
+    print "Outside while"
+    while True:
+        time.sleep(1)
+        print("killlllling")
+        if kill_now:
+            break
+
 def cron():
 
     # global checkList
@@ -615,16 +626,16 @@ api.add_resource(Notice,'/api/notice')
 api.add_resource(Testing,'/')
 
 if __name__ == "__main__":
-	# try:
-	# thread = Thread(target= cron)
-	# thread.start()
-	# manager.run()
-	# db.create_all ()
-	port = int(os.environ.get('PORT', 8080))
-	app.run(host='0.0.0.0', port=port)
-	# app.run(port=8080, debug=True)
-	# except Keyboard   Interrupt:
-	# 	raise KeyError('j')
+    # manager.run()
+    # db.create_all ()
+
+    signal.signal(signal.SIGINT, exit_gracefully)
+    signal.signal(signal.SIGTERM, exit_gracefully)
+    # port = int(os.environ.get('PORT', 8080))
+    # app.run(host='0.0.0.0', port=port)
+    app.run(port=8080, debug=True)
+    # except Keyboard   Interrupt:
+    # 	raise KeyError('j')
 
 	# TODO - 1. not,None
 	# TODO - 2. imports
