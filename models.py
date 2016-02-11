@@ -272,7 +272,7 @@ class EventsReg(db.Model):
                         eventRegFees = fees,
                         eventColorHex = color,
                         )
-        EventsVersion.increment_version()
+        # EventsVersion.increment_version()
         eve.add_contacts(contacts)
         club.eventsList.append(eve)
         try:
@@ -295,7 +295,8 @@ class EventsReg(db.Model):
 
     def add_contacts(self, contacts):
         for contact in contacts:
-            con = ContactsForEvent(contactName=contact.contactname, contactNumber = contact.contactNumber,
+            print contact.contactname
+            con = ContactsForEvent(contactName=contact.contactname, contactNumber = contact.contactnumber,
                                    contactEmail = contact.contactemail )
             self.contacts.append(con)
         db.session.add(self)
