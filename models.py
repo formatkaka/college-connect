@@ -108,11 +108,11 @@ class UserReg(db.Model):
             return None, 1  # invalid token
         user = UserReg.query.filter_by(emailId=data[0]).first()
         if user is None:
-            abort(401,message="ERR04")
+            abort(409,message="ERR04")
         if user.passwordHash == data[1]:
             return  user, None
         else:
-            abort(401,message="ERR05")
+            abort(409,message="ERR05")
 
 
     @staticmethod
