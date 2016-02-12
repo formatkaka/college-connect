@@ -173,7 +173,7 @@ class ForgotPassword(Resource):
 
 		msg = Message(subject="Reset password",
 					  sender="college.connect01@gmail.com",
-					  recipients=[data['emailId']])
+					  recipients=[data['email']])
 
 		msg.body = "please click on the link {0}".format(link)
 		mail.send(msg)
