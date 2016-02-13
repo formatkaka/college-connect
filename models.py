@@ -581,9 +581,12 @@ def conv_time(unixstamp_or_datetime):
     if unixstamp_or_datetime is None:
         return None
 
-    if isinstance(unixstamp_or_datetime, datetime):
-        return time.mktime(unixstamp_or_datetime.timetuple())
 
+    if isinstance(unixstamp_or_datetime, datetime):
+        try:
+            return time.mktime(unixstamp_or_datetime.timetuple())
+        except OverflowError:
+            return None
     else:
         return datetime.fromtimestamp(unixstamp_or_datetime)
 
@@ -594,7 +597,11 @@ def get_admin_info(club):
     admins = []
 
     for admin in club.adminsList:
-        a = Admins(admin.fullName, str(admin.mobNo), admin.emailId)
+        if not admin.mobNo:
+            mob=0
+        else:
+            mob = admin.mobNo
+        a = Admins(admin.fullName, mob, admin.emailId)
         admins.append(a)
     return admins
 

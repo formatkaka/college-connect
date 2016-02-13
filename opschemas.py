@@ -47,7 +47,7 @@ class UserInfo_Response(Schema):
 ##### CLUBS INFORMATION #####
 
 class Admins():
-    def __init__(self, name, mobno="NA",email=None, id=None):
+    def __init__(self, name, mobno,email=None, id=None):
         self.name = name
         self.mobno = mobno
         self.id = id
@@ -55,7 +55,7 @@ class Admins():
 
 class Admin_Response(Schema):
     name = fields.Str()
-    mobno = fields.Str()
+    mobno = fields.Int()
     id = fields.Int()
     email = fields.Email()
 
@@ -76,6 +76,18 @@ class Club_response(Schema):
     club_id = fields.Int()
     image = fields.Str()
 ##### EVENTS INFORMATION ##### 
+class Eve_Con():
+    def __init__(self, name, mobno="NA",email=None, id=None):
+        self.name = name
+        self.mobno = mobno
+        self.id = id
+        self.email = email
+
+class Eve_Contacts(Schema):
+    name = fields.Str()
+    mobno = fields.Str()
+    id = fields.Int()
+    email = fields.Email()
 
 class Events_class():
     def __init__(self, name, about, venue, createdby, verified, contacts,clubname,
@@ -112,7 +124,7 @@ class Events_Response(Schema):
     createdby = fields.Int()
     verified = fields.Str()
     clubname = fields.Str()
-    contacts = fields.Nested(Admin_Response, many=True)
+    contacts = fields.Nested(Eve_Contacts, many=True)
     event_id = fields.Int()
     sdt = fields.Float()
     edt = fields.Float()
@@ -145,3 +157,4 @@ userinfo_schema = UserInfo_Response()
 club_schema = Club_response(many=True)
 event_schema = Events_Response(many=True)
 notice_schema = Notice_Schema(many=True)
+eve = Eve_Contacts(many=True)
