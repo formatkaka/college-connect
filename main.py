@@ -372,7 +372,8 @@ class EventRegistration(Resource):
 class Clubsget(Resource):
     def get(self):
         clubs_list = ClubInfo.query.all()
-
+        indiv = ClubInfo.query.filter_by(id=1).first()
+        clubs_list.remove(indiv)
         clubs = []
         for club in clubs_list:
             admins = get_admin_info(club)
