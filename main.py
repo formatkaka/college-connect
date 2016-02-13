@@ -96,7 +96,7 @@ class UserRegistration(Resource):
             s = Serializer(app.config['SECRET_KEY'], expires_in=60 * 60 * 24 * 3)
             token = s.dumps({'id': user_1.id})
 
-            link = 'https://sheltered-fjord-8731.herokuapp.com/api/verify/' + token
+            link = 'https://sheltered-fjord-8731.herokuapp.com/verify/' + token
 
             msg = Message(subject="Thank You for Registration.Confirmation Link.Click Below.",
                           sender="college.connect01@gmail.com",
@@ -525,7 +525,7 @@ class Reauthenticate(Form):
     submit = SubmitField('Change Password')
 
 
-@app.route('/api/reset/<string:token>', methods=['GET', 'POST'])
+@app.route('/reset/<string:token>', methods=['GET', 'POST'])
 def reset_password(token):
     s = Serializer(app.config['SECRET_KEY'])
     try:
@@ -621,7 +621,7 @@ api.add_resource(UserUnique, '/api/unique/<string:attr>')
 api.add_resource(Testing1, '/test')
 api.add_resource(WebScrap, '/api/scrap/<string:source>')
 api.add_resource(User_Follow_message, '/api/<string:s1>/<int:event_or_club_id>/<string:s2>')
-api.add_resource(EmailVerification, '/api/verify/<string:token>')
+api.add_resource(EmailVerification, '/verify/<string:token>')
 # api.add_resource(NotificationCron, '/api/test')
 api.add_resource(GCMessaging, '/api/gcm')
 api.add_resource(ForgotPassword, '/api/password')
