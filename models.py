@@ -245,24 +245,25 @@ class EventsReg(db.Model):
         val,club = user.user_is_admin()
         clubname = club.clubName
         # club = ClubInfo.query.filter_by(id=club_id).first_or_404()
-        if seats is None:
-            leftseats = None
-            occupiedseats = 0
-        else:
-            leftseats = seats
-            occupiedseats = 0
+        # if seats is None:
+        #     leftseats = None
+        #     occupiedseats = 0
+        # else:
+        #     leftseats = seats
+        #     occupiedseats = 0
+
         eve = EventsReg(eventName = name,
                         eventInfo = about,
                         eventVenue = venue,
                         startDateTime = sdt,
                         createdBy = user.id,
-                        totalSeats = seats,
+                        totalSeats = None,
                         endDateTime = edt,
                         verified = val,
                         lastRegDateTime = lastregtime,
                         activeStatus = True,
-                        leftSeats = leftseats,
-                        occupiedSeats = occupiedseats,
+                        leftSeats = None,
+                        occupiedSeats = 0,
                         clubName = clubname,
                         imageLink = image,
                         notifOne = notifone,
