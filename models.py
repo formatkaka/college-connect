@@ -281,7 +281,8 @@ class EventsReg(db.Model):
             db.session.commit()
             send_email(val,user,eve.id)
             return eve,val
-        except:
+        except Exception as e :
+            print e
             db.session.rollback()
             abort(500)
 
