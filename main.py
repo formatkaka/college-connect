@@ -318,7 +318,8 @@ class EventRegistration(Resource):
 
                 return jsonify({"message": event.id})
         except Exception as e:
-            mail_handler.emit(e)
+            print e
+            # mail_handler.emit(e)
             abort(409)
 
     def get(self):
