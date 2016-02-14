@@ -1,1 +1,3 @@
 *.pyc
+*.csr
+*.pass.key
