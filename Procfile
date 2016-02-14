@@ -1,1 +1,1 @@
-web: bin/start-pgbouncer-stunnel gunicorn main:app --preload --timeout 60 --max-requests 500 --worker-connections 50 --worker-class gevent --log-file -
+web: bin/start-pgbouncer-stunnel gunicorn -w 4 main:app --preload --timeout 60 --max-requests 500 --worker-connections 50 --worker-class gevent --graceful-timeout 60 --keep-alive 2 --keyfile server.key --certfile server.crt --log-file -

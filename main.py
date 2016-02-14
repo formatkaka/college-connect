@@ -545,13 +545,8 @@ def reset_password(token):
 
 
 def exit_gracefully(self, signum, frame):
-    kill_now = True
-    print "Outside while"
-    while True:
-        time.sleep(1)
-        print("killlllling")
-        if kill_now:
-            break
+	print("killlllling")
+	sys.exit(0)
 
 
 def cron():
@@ -634,7 +629,6 @@ if __name__ == "__main__":
     # manager.run()
     # db.create_all ()
 
-    signal.signal(signal.SIGINT, exit_gracefully)
     signal.signal(signal.SIGTERM, exit_gracefully)
     port = int(os.environ.get('PORT', 8080))
     app.run(host='0.0.0.0', port=port)
