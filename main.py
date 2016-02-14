@@ -311,7 +311,9 @@ class EventRegistration(Resource):
 
                 return jsonify({"message": event.id})
         except :
-            print logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+            logging.error(e)
+            logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+            logging.debug('This is a log message.')
             abort(409)
 
     def get(self):
