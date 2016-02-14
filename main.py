@@ -312,7 +312,8 @@ class EventRegistration(Resource):
                 return jsonify({"message": event.id})
         except Exception as e:
             print e
-            
+            abort(409)
+
     def get(self):
         events_list = EventsReg.query.filter_by(verified=True).all()
         events = []
