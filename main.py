@@ -23,7 +23,14 @@ settings.init()
 import signal
 import time
 import sys
-
+import logging
+from logging.handlers import SMTPHandler
+mail_handler = SMTPHandler(('smtp.sendgrid.com',465),
+                           'college.connect01@gmail.com',
+                           ["college.connect28@gmail.com"], 'YourApplication Failed',
+                           credentials=('collegeconnect','collegeconnect1234'))
+mail_handler.setLevel(logging.ERROR)
+app.logger.addHandler(mail_handler)
 
 # global checkList
 
@@ -311,7 +318,7 @@ class EventRegistration(Resource):
 
                 return jsonify({"message": event.id})
         except Exception as e:
-            print e
+            mail_handler.emit(e)
             abort(409)
 
     def get(self):
