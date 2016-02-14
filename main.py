@@ -312,7 +312,8 @@ class EventRegistration(Resource):
                 return jsonify({"message": event.id})
         except :
             logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
-            
+            abort(409)
+
     def get(self):
         events_list = EventsReg.query.filter_by(verified=True).all()
         events = []
