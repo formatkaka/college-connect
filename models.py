@@ -282,7 +282,7 @@ class EventsReg(db.Model):
             send_email(val,user,eve.id)
             return eve,val
         except Exception as e :
-            print e
+            logging.error(e)
             db.session.rollback()
             abort(500)
 

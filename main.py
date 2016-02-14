@@ -602,12 +602,12 @@ def cron():
         time.sleep(60)
 
 
-def send_mail():
+def send_mail(foo):
     msg = Message(subject="Thank You for Registration.Confirmation Link.Click Below.",
                   sender="college.connect01@gmail.com",
                   recipients=["siddhantloya2008@gmail.com"])
 
-    msg.body = "please click on the link "
+    msg.body = str()
     with app.app_context():
         mail.send(msg)
     print "sent"
