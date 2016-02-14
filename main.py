@@ -18,7 +18,7 @@ from threading import Thread
 import time
 from datetime import datetime
 import settings
-
+import logging
 settings.init()
 import signal
 import time
@@ -280,36 +280,39 @@ class EventCheck(Resource):
 
 class EventRegistration(Resource):
     def post(self):
-        user = get_current_user()
-        if user.isVerified is False:
-            abort(401, message="ERR08")
-        json_data = request.get_json()
-        data, errors = eventreg_schema.load(json_data)
-        if errors:
-            return jsonify(errors)
-        else:
-            # try:
-            event, val = EventsReg.register_one(data.name,
-                                                data.about,
-                                                data.venue,
-                                                conv_time(data.sdt),
-                                                user,
-                                                data.contacts,
-                                                data.image,
-                                                data.seats,
-                                                conv_time(data.edt),
-                                                conv_time(data.lastregtime),
-                                                conv_time(data.notifone),
-                                                conv_time(data.notiftwo),
-                                                data.notifmessage,
-                                                data.prize,
-                                                data.fees,
-                                                data.color,
-                                                )
-            if val: push_notif(event.id, event.eventName, data.sdt)
+        try:
+            user = get_current_user()
+            if user.isVerified is False:
+                abort(401, message="ERR08")
+            json_data = request.get_json()
+            data, errors = eventreg_schema.load(json_data)
+            if errors:
+                return jsonify(errors)
+            else:
+                # try:
+                event, val = EventsReg.register_one(data.name,
+                                                    data.about,
+                                                    data.venue,
+                                                    conv_time(data.sdt),
+                                                    user,
+                                                    data.contacts,
+                                                    data.image,
+                                                    data.seats,
+                                                    conv_time(data.edt),
+                                                    conv_time(data.lastregtime),
+                                                    conv_time(data.notifone),
+                                                    conv_time(data.notiftwo),
+                                                    data.notifmessage,
+                                                    data.prize,
+                                                    data.fees,
+                                                    data.color,
+                                                    )
+                if val: push_notif(event.id, event.eventName, data.sdt)
 
-            return jsonify({"message": event.id})
-
+                return jsonify({"message": event.id})
+        except :
+            logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+            
     def get(self):
         events_list = EventsReg.query.filter_by(verified=True).all()
         events = []

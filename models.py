@@ -537,7 +537,7 @@ def get_current_user():
             else:
                 abort(409,message="ERR04")
         else:
-            return abort(400)  # SOME UNKNOWN PROBLEM OCCURED
+            abort(400)  # SOME UNKNOWN PROBLEM OCCURED
 
 
 def err_stat(a, b, c):
