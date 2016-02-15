@@ -49,7 +49,7 @@ class UserInfo_Response(Schema):
 class Admins():
     def __init__(self, name, mobno,email=None, id=None):
         self.name = name
-        self.mobno = mobno
+        self.mobno = int(mobno)
         self.id = id
         self.email = email
 
