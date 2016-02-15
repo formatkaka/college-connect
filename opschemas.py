@@ -49,13 +49,13 @@ class UserInfo_Response(Schema):
 class Admins():
     def __init__(self, name, mobno,email=None, id=None):
         self.name = name
-        self.mobno = int(mobno)
+        self.mobno = str(mobno)
         self.id = id
         self.email = email
 
 class Admin_Response(Schema):
     name = fields.Str()
-    mobno = fields.Int()
+    mobno = fields.Str()
     id = fields.Int()
     email = fields.Email()
 
