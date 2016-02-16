@@ -16,5 +16,5 @@ from flask.ext.migrate import Migrate,MigrateCommand
 from flask import render_template,flash
 from flask_wtf import Form
 from wtforms import  SubmitField, PasswordField
-from wtforms.validators import DataRequired, EqualTo
+from wtforms.validators import DataRequired, EqualTo, Length
 from flask.ext.bootstrap import Bootstrap

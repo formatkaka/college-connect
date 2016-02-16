@@ -525,7 +525,7 @@ class Testing1(Resource):
 
 
 class Reauthenticate(Form):
-    new_password = PasswordField('Enter new password', validators=[DataRequired()])
+    new_password = PasswordField('Enter new password', validators=[DataRequired(),Length(min=6,message='Minimum length 6.')])
     re_password = PasswordField('Re-enter new password', validators=[DataRequired(), EqualTo('new_password',
                                                                                              message=' New Passwords do not match')])
     submit = SubmitField('Change Password')
