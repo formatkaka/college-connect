@@ -599,7 +599,7 @@ def get_admin_info(club):
     admins = []
     if club.id < 150:
         for admin in club.adminsList:
-            a = Admins(admin.fullName+ " " + str(admin.mobNo), None, admin.emailId)
+            a = Admins(str(admin.mobNo), None, admin.emailId)
             admins.append(a)
         return admins
     else:
