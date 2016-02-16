@@ -280,68 +280,74 @@ class EventCheck(Resource):
 
 class EventRegistration(Resource):
     def post(self):
-        user = get_current_user()
-        if user.isVerified is False:
-            abort(401, message="ERR08")
-        json_data = request.get_json()
-        data, errors = eventreg_schema.load(json_data)
-        if errors:
-            return jsonify(errors)
-        else:
-            # try:
-            event, val = EventsReg.register_one(data.name,
-                                                data.about,
-                                                data.venue,
-                                                conv_time(data.sdt),
-                                                user,
-                                                data.contacts,
-                                                data.image,
-                                                data.seats,
-                                                conv_time(data.edt),
-                                                conv_time(data.lastregtime),
-                                                conv_time(data.notifone),
-                                                conv_time(data.notiftwo),
-                                                data.notifmessage,
-                                                data.prize,
-                                                data.fees,
-                                                data.color,
-                                                )
-            if val: push_notif(event.id, event.eventName, data.sdt)
+        try:
+            user = get_current_user()
+            if user.isVerified is False:
+                abort(401, message="ERR08")
+            json_data = request.get_json()
+            data, errors = eventreg_schema.load(json_data)
+            if errors:
+                return jsonify(errors)
+            else:
+                # try:
+                event, val = EventsReg.register_one(data.name,
+                                                    data.about,
+                                                    data.venue,
+                                                    conv_time(data.sdt),
+                                                    user,
+                                                    data.contacts,
+                                                    data.image,
+                                                    data.seats,
+                                                    conv_time(data.edt),
+                                                    conv_time(data.lastregtime),
+                                                    conv_time(data.notifone),
+                                                    conv_time(data.notiftwo),
+                                                    data.notifmessage,
+                                                    data.prize,
+                                                    data.fees,
+                                                    data.color,
+                                                    )
+                if val: push_notif(event.id, event.eventName, data.sdt)
 
-            return jsonify({"message": event.id})
+                return jsonify({"message": event.id})
+        except Exception as e:
+            print e
+            abort(500)
 
     def get(self):
-        events_list = EventsReg.query.filter_by(verified=True).all()
-        events = []
-        for event in events_list:
-            contacts = get_contact_info(event)
-            e = Events_class(
-                event.eventName,
-                event.eventInfo,
-                event.eventVenue,
-                event.createdBy,
-                event.verified,
-                contacts,
-                event.clubName,
-                event.id,
-                conv_time(event.startDateTime),
-                event.e_clubs[0].id,
-                event.createdTime,
-                event.imageLink,
-                conv_time(event.endDateTime),
-                conv_time(event.lastRegDateTime),
-                event.totalSeats,
-                event.leftSeats,
-                event.occupiedSeats,
-                event.eventPrizeMoney,
-                event.eventRegFees,
-                event.eventColorHex,
-            )
-            events.append(e)
+        try:
+            events_list = EventsReg.query.filter_by(verified=True).all()
+            events = []
+            for event in events_list:
+                contacts = get_contact_info(event)
+                e = Events_class(
+                    event.eventName,
+                    event.eventInfo,
+                    event.eventVenue,
+                    event.createdBy,
+                    event.verified,
+                    contacts,
+                    event.clubName,
+                    event.id,
+                    conv_time(event.startDateTime),
+                    event.e_clubs[0].id,
+                    event.createdTime,
+                    event.imageLink,
+                    conv_time(event.endDateTime),
+                    conv_time(event.lastRegDateTime),
+                    event.totalSeats,
+                    event.leftSeats,
+                    event.occupiedSeats,
+                    event.eventPrizeMoney,
+                    event.eventRegFees,
+                    event.eventColorHex,
+                )
+                events.append(e)
 
-        result, errors = event_schema.dump(events)
-        return {"events": result}
-
+            result, errors = event_schema.dump(events)
+            return {"events": result}
+        except Exception as e:
+            print e
     # events = Events.query.all()
     def put(self):
         user = get_current_user()
@@ -629,10 +635,10 @@ if __name__ == "__main__":
     # manager.run()
     # db.create_all ()
 
-    # signal.signal(signal.SIGTERM, exit_gracefully)
-    # port = int(os.environ.get('PORT', 8080))
-    # app.run(host='0.0.0.0', port=port,debug=True)
-    app.run(port=8080, debug=True)
+    signal.signal(signal.SIGTERM, exit_gracefully)
+    port = int(os.environ.get('PORT', 8080))
+    app.run(host='0.0.0.0', port=port,debug=True)
+    # app.run(port=8080, debug=True)
     # except Keyboard   Interrupt:
     # 	raise KeyError('j')
 
