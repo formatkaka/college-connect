@@ -307,7 +307,7 @@ class EventRegistration(Resource):
                                                     data.fees,
                                                     data.color,
                                                     )
-                if val: push_notif(event.id, event.eventName, data.sdt)
+                # if val: push_notif(event.id, event.eventName, data.sdt)
 
                 return jsonify({"message": event.id})
         except Exception as e:
@@ -635,10 +635,10 @@ if __name__ == "__main__":
     # manager.run()
     # db.create_all ()
 
-    # signal.signal(signal.SIGTERM, exit_gracefully)
-    # port = int(os.environ.get('PORT', 8080))
-    # app.run(host='0.0.0.0', port=port,debug=True)
-    app.run(port=8080, debug=True)
+    signal.signal(signal.SIGTERM, exit_gracefully)
+    port = int(os.environ.get('PORT', 8080))
+    app.run(host='0.0.0.0', port=port,debug=True)
+    # app.run(port=8080, debug=True)
     # except Keyboard   Interrupt:
     # 	raise KeyError('j')
 
