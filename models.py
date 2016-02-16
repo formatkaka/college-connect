@@ -597,15 +597,16 @@ def conv_time(unixstamp_or_datetime):
 
 def get_admin_info(club):
     admins = []
-
-    for admin in club.adminsList:
-        if not admin.mobNo:
-            mob=0
-        else:
-            mob = admin.mobNo
-        a = Admins(admin.fullName, mob, admin.emailId)
-        admins.append(a)
-    return admins
+    if club.id < 150:
+        for admin in club.adminsList:
+            a = Admins(admin.fullName+ " " + str(admin.mobNo), None, admin.emailId)
+            admins.append(a)
+        return admins
+    else:
+        for admin in club.adminsList:
+            a = Admins(admin.fullName,admin.mobNo, admin.emailId)
+            admins.append(a)
+        return admins
 
 
 def get_contact_info(event):
