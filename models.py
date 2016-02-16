@@ -137,7 +137,7 @@ class UserReg(db.Model):
             club = self.a_clubs[0]
             return True,club
         else:
-            club = ClubInfo.query.first()
+            club = ClubInfo.query.filter_by(id=1).first()
             return False,club
 
 
@@ -599,7 +599,7 @@ def get_admin_info(club):
     admins = []
     if club.id < 150:
         for admin in club.adminsList:
-            a = Admins(str(admin.mobNo), None, admin.emailId)
+            a = Admins(admin.fullName, None, admin.emailId)
             admins.append(a)
         return admins
     else:
