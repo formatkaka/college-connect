@@ -307,7 +307,7 @@ class EventRegistration(Resource):
                                                     data.fees,
                                                     data.color,
                                                     )
-                if val: push_notif(event.id, event.eventName, data.sdt)
+                # if val: push_notif(event.id, event.eventName, data.sdt)
 
                 return jsonify({"message": event.id})
         except Exception as e:
